@@ -2,8 +2,38 @@
 
 :root {
   color-scheme: dark;
-  background: #05070d;
-  color: #f4f7fb;
+  --command-bg: #05070d;
+  --command-surface: #0c1220;
+  --command-raised: #111a2b;
+  --command-border: #243249;
+  --command-text: #f4f7fb;
+  --command-muted: #a7b0c0;
+  --command-cyan: #4de7ff;
+  --command-success: #a7f36b;
+  --command-warning: #ffb454;
+  --command-danger: #ff7373;
+  --command-violet: #a78bfa;
+  --command-ink: #051014;
+  background: var(--command-bg);
+  color: var(--command-text);
+}
+
+@theme inline {
+  --color-command-bg: var(--command-bg);
+  --color-command-surface: var(--command-surface);
+  --color-command-raised: var(--command-raised);
+  --color-command-border: var(--command-border);
+  --color-command-text: var(--command-text);
+  --color-command-muted: var(--command-muted);
+  --color-command-cyan: var(--command-cyan);
+  --color-command-success: var(--command-success);
+  --color-command-warning: var(--command-warning);
+  --color-command-danger: var(--command-danger);
+  --color-command-violet: var(--command-violet);
+  --color-command-ink: var(--command-ink);
+  --font-display: var(--font-chakra-petch);
+  --font-sans: var(--font-noto-sans-tc);
+  --font-data: var(--font-ibm-plex-mono);
 }
 
 * {
@@ -15,11 +45,18 @@ body {
   min-height: 100%;
 }
 
+html {
+  background: var(--command-bg);
+  scroll-behavior: smooth;
+}
+
 body {
   margin: 0;
-  background: #05070d;
-  color: #f4f7fb;
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--command-bg);
+  color: var(--command-text);
+  font-family: var(--font-noto-sans-tc), sans-serif;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
 }
 
 button,
@@ -28,4 +65,78 @@ input,
 textarea,
 select {
   font: inherit;
+}
+
+button,
+a {
+  -webkit-tap-highlight-color: transparent;
+}
+
+:where(a, button, input, textarea, select, [tabindex]):focus-visible {
+  outline: 2px solid var(--command-cyan);
+  outline-offset: 3px;
+}
+
+::selection {
+  background: color-mix(in srgb, var(--command-cyan) 28%, transparent);
+  color: var(--command-text);
+}
+
+.skip-link {
+  position: fixed;
+  top: 0.75rem;
+  left: 0.75rem;
+  z-index: 100;
+  min-height: 2.75rem;
+  display: flex;
+  align-items: center;
+  padding: 0.5rem 0.875rem;
+  border: 1px solid var(--command-cyan);
+  border-radius: 0.125rem;
+  background: var(--command-raised);
+  color: var(--command-cyan);
+  font-family: var(--font-chakra-petch), sans-serif;
+  font-weight: 600;
+  transform: translateY(calc(-100% - 1.5rem));
+  transition: transform 160ms ease;
+}
+
+.skip-link:focus {
+  transform: translateY(0);
+}
+
+.command-panel {
+  clip-path: polygon(0 0, calc(100% - 0.8rem) 0, 100% 0.8rem, 100% 100%, 0.8rem 100%, 0 calc(100% - 0.8rem));
+}
+
+.command-grid {
+  z-index: 0;
+  opacity: 0.2;
+  background-image:
+    linear-gradient(color-mix(in srgb, var(--command-border) 44%, transparent) 1px, transparent 1px),
+    linear-gradient(90deg, color-mix(in srgb, var(--command-border) 44%, transparent) 1px, transparent 1px);
+  background-size: 48px 48px;
+  mask-image: linear-gradient(to bottom, black 0%, transparent 76%);
+}
+
+.command-glow {
+  z-index: 0;
+  background:
+    radial-gradient(circle at 85% 8%, color-mix(in srgb, var(--command-violet) 13%, transparent), transparent 28rem),
+    radial-gradient(circle at 20% 20%, color-mix(in srgb, var(--command-cyan) 10%, transparent), transparent 25rem);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
 }
