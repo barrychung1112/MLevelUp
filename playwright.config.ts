@@ -24,7 +24,11 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: "npm run start:test",
+    command: "npm run build && npm run start:test",
+    env: {
+      ...process.env,
+      NEXT_PUBLIC_MLEVELUP_DEMO_MODE: "1",
+    },
     url: "http://127.0.0.1:3100",
     reuseExistingServer: false,
     timeout: 120_000,

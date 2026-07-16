@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Chakra_Petch, IBM_Plex_Mono, Noto_Sans_TC } from "next/font/google";
 import type { ReactNode } from "react";
 
+import { AuthGate } from "@/auth/auth-gate";
+import { AuthProvider } from "@/auth/auth-provider";
 import { TrainingProvider } from "@/providers/training-provider";
 
 import "./globals.css";
@@ -36,7 +38,11 @@ export default function RootLayout({ children }: Readonly<{ children: ReactNode 
   return (
     <html lang="zh-Hant">
       <body className={`${displayFont.variable} ${bodyFont.variable} ${dataFont.variable}`}>
-        <TrainingProvider>{children}</TrainingProvider>
+        <AuthProvider>
+          <AuthGate>
+            <TrainingProvider>{children}</TrainingProvider>
+          </AuthGate>
+        </AuthProvider>
       </body>
     </html>
   );

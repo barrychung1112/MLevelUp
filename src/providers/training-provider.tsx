@@ -19,9 +19,12 @@ import type {
   UpdateProfileInput,
 } from "@/application/training/training-repository";
 import type { TrainingState } from "@/domain/training/types";
+import { isDemoMode } from "@/lib/demo-mode";
+import { getBrowserSupabaseClient } from "@/lib/supabase/client";
 import { LocalTrainingStorage } from "@/mocks/training/local-storage";
 import { MockTrainingRepository } from "@/mocks/training/mock-training-repository";
 import { SEED_VERSION } from "@/mocks/training/seed";
+import { SupabaseTrainingRepository } from "@/supabase-training/supabase-training-repository";
 
 export type TrainingLoadStatus = "loading" | "ready" | "error";
 export type TrainingCommandStatus = "idle" | "submitting" | "success" | "error";
@@ -55,6 +58,19 @@ function messageFor(error: unknown): string {
 export function createBrowserTrainingRepository(): DemoTrainingRepository {
   if (typeof window === "undefined") {
     throw new Error("The browser training repository requires a window");
+  }
+
+  const supabase = isDemoMode() ? null : getBrowserSupabaseClient();
+  if (supabase) {
+    return new SupabaseTrainingRepository({
+      client: supabase,
+      clock: { now: () => new Date().toISOString() },
+      ids: {
+        next() {
+          return globalThis.crypto.randomUUID();
+        },
+      },
+    });
   }
 
   return new MockTrainingRepository({
