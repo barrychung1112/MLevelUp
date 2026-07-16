@@ -1,5 +1,5 @@
 import { fireEvent, render, screen } from "@testing-library/react";
-import { describe, expect, test } from "vitest";
+import { describe, expect, test, vi } from "vitest";
 
 import { TrainingArchive } from "./training-archive";
 
@@ -9,6 +9,31 @@ const activities = [
 ];
 
 describe("TrainingArchive", () => {
+  test("uses one controlled event filter for change and clear", () => {
+    const onFiltersChange = vi.fn();
+    const filters = { eventType: "level-up" };
+
+    render(
+      <TrainingArchive
+        activities={activities}
+        eventTypes={["quest", "artifact", "level-up"]}
+        filters={filters}
+        onFiltersChange={onFiltersChange}
+      />,
+    );
+
+    expect(screen.getByLabelText("紀錄類型")).toHaveValue("level-up");
+    expect(screen.getByText("沒有符合目前篩選條件的訓練紀錄")).toBeVisible();
+
+    fireEvent.change(screen.getByLabelText("紀錄類型"), {
+      target: { value: "quest" },
+    });
+    expect(onFiltersChange).toHaveBeenLastCalledWith({ eventType: "quest" });
+
+    fireEvent.click(screen.getByRole("button", { name: "清除紀錄篩選" }));
+    expect(onFiltersChange).toHaveBeenLastCalledWith({ eventType: "all" });
+  });
+
   test("filters the battle timeline and offers a visible recovery", async () => {
     render(<TrainingArchive activities={activities} eventTypes={["quest", "artifact", "level-up"]} />);
 

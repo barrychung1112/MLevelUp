@@ -1,5 +1,5 @@
 import { fireEvent, render, screen, within } from "@testing-library/react";
-import { describe, expect, test } from "vitest";
+import { describe, expect, test, vi } from "vitest";
 
 import { ResourceLibrary } from "./resource-library";
 
@@ -30,6 +30,55 @@ const resources = [
 ];
 
 describe("ResourceLibrary", () => {
+  test("uses one controlled filter object for every change and clear action", () => {
+    const onFiltersChange = vi.fn();
+    const filters = {
+      resourceType: "repo",
+      skill: "Evaluation",
+      minimumRelevance: 80,
+      difficulty: "4",
+      minimumFreshness: 90,
+      minimumCredibility: 80,
+      maximumMinutes: 60,
+    };
+
+    render(
+      <ResourceLibrary
+        resources={resources}
+        filters={filters}
+        onFiltersChange={onFiltersChange}
+      />,
+    );
+
+    expect(screen.getByLabelText("資源類型")).toHaveValue("repo");
+    expect(screen.getByLabelText("能力標籤")).toHaveValue("Evaluation");
+    expect(screen.getByLabelText("最低相關性")).toHaveValue("80");
+    expect(screen.getByLabelText("資源難度")).toHaveValue("4");
+    expect(screen.getByLabelText("最低新鮮度")).toHaveValue("90");
+    expect(screen.getByLabelText("最低可信度")).toHaveValue("80");
+    expect(screen.getByLabelText("最長預估時間")).toHaveValue("60");
+    expect(screen.getByText("沒有符合目前篩選條件的資源")).toBeVisible();
+
+    fireEvent.change(screen.getByLabelText("最低可信度"), {
+      target: { value: "90" },
+    });
+    expect(onFiltersChange).toHaveBeenLastCalledWith({
+      ...filters,
+      minimumCredibility: 90,
+    });
+
+    fireEvent.click(screen.getByRole("button", { name: "清除資源篩選" }));
+    expect(onFiltersChange).toHaveBeenLastCalledWith({
+      resourceType: "all",
+      skill: "all",
+      minimumRelevance: 0,
+      difficulty: "all",
+      minimumFreshness: 0,
+      minimumCredibility: 0,
+      maximumMinutes: 0,
+    });
+  });
+
   test("shows every resource quality field and recovers from an empty filter", async () => {
     render(<ResourceLibrary resources={resources} />);
 

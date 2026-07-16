@@ -1,5 +1,5 @@
 import { fireEvent, render, screen } from "@testing-library/react";
-import { describe, expect, test } from "vitest";
+import { describe, expect, test, vi } from "vitest";
 
 import { PortfolioGallery } from "./portfolio-gallery";
 import type { PortfolioArtifactView } from "../view-models";
@@ -26,6 +26,37 @@ const artifacts = [
 ] satisfies readonly PortfolioArtifactView[];
 
 describe("PortfolioGallery", () => {
+  test("uses one controlled filter object for changes and clear", () => {
+    const onFiltersChange = vi.fn();
+    const filters = { artifactType: "deployed-demo", skill: "Evaluation" };
+
+    render(
+      <PortfolioGallery
+        artifacts={artifacts}
+        filters={filters}
+        onFiltersChange={onFiltersChange}
+      />,
+    );
+
+    expect(screen.getByLabelText("成果類型")).toHaveValue("deployed-demo");
+    expect(screen.getByLabelText("能力標籤")).toHaveValue("Evaluation");
+    expect(screen.getByText("沒有符合目前篩選條件的作品")).toBeVisible();
+
+    fireEvent.change(screen.getByLabelText("能力標籤"), {
+      target: { value: "Engineering" },
+    });
+    expect(onFiltersChange).toHaveBeenLastCalledWith({
+      artifactType: "deployed-demo",
+      skill: "Engineering",
+    });
+
+    fireEvent.click(screen.getByRole("button", { name: "清除作品篩選" }));
+    expect(onFiltersChange).toHaveBeenLastCalledWith({
+      artifactType: "all",
+      skill: "all",
+    });
+  });
+
   test("keeps artifacts private and recovers from an empty filter", async () => {
     render(<PortfolioGallery artifacts={artifacts} />);
 
