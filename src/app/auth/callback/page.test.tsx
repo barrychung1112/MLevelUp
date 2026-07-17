@@ -26,7 +26,10 @@ describe("auth callback page", () => {
   it("exchanges the callback code and returns to the app", async () => {
     const exchangeCodeForSession = vi.fn(async () => ({ data: {}, error: null }));
     mocks.getBrowserSupabaseClient.mockReturnValue({
-      auth: { exchangeCodeForSession },
+      auth: {
+        exchangeCodeForSession,
+        getSession: vi.fn(async () => ({ data: { session: null }, error: null })),
+      },
     });
 
     render(<CallbackPage />);
@@ -34,6 +37,26 @@ describe("auth callback page", () => {
     expect(await screen.findByRole("status")).toHaveTextContent("Signing you in");
     await waitFor(() => expect(exchangeCodeForSession).toHaveBeenCalledWith("abc"));
     expect(mocks.replace).toHaveBeenCalledWith("/");
+  });
+
+  it("returns to the app when Supabase already consumed the callback hash", async () => {
+    window.history.replaceState(null, "", "http://localhost:3000/auth/callback#");
+    const exchangeCodeForSession = vi.fn();
+    mocks.getBrowserSupabaseClient.mockReturnValue({
+      auth: {
+        exchangeCodeForSession,
+        getSession: vi.fn(async () => ({
+          data: { session: { user: { id: "user-1" } } },
+          error: null,
+        })),
+      },
+    });
+
+    render(<CallbackPage />);
+
+    await waitFor(() => expect(mocks.replace).toHaveBeenCalledWith("/"));
+    expect(exchangeCodeForSession).not.toHaveBeenCalled();
+    expect(screen.queryByText("Missing authentication code")).not.toBeInTheDocument();
   });
 
   it("shows a recovery message when Supabase is not configured", async () => {

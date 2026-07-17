@@ -19,6 +19,19 @@ export default function CallbackPage() {
         return;
       }
 
+      const { data: sessionData, error: sessionError } = await client.auth.getSession();
+      if (cancelled) return;
+
+      if (sessionError) {
+        setError(sessionError.message);
+        return;
+      }
+
+      if (sessionData.session) {
+        router.replace("/");
+        return;
+      }
+
       const code = new URL(window.location.href).searchParams.get("code");
       if (!code) {
         setError("Missing authentication code");
