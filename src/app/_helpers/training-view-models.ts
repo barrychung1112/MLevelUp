@@ -69,7 +69,11 @@ export function toPresentationEvidenceType(type: DomainEvidenceType): EvidenceTy
   return "text";
 }
 
-export function mapQuest(assignment: QuestAssignment, quest: Quest): QuestView {
+export function mapQuest(
+  assignment: QuestAssignment,
+  quest: Quest,
+  resources: readonly Resource[] = [],
+): QuestView {
   const primarySkill = SKILL_KEYS.reduce((best, key) =>
     quest.skillWeights[key] > quest.skillWeights[best] ? key : best,
   );
@@ -83,6 +87,13 @@ export function mapQuest(assignment: QuestAssignment, quest: Quest): QuestView {
     primarySkill: SKILL_LABELS[primarySkill],
     acceptanceCriteria: quest.acceptanceCriteria,
     evidenceTypes: [...new Set(quest.evidenceRequirements.map((item) => toPresentationEvidenceType(item.type)))],
+    scope: quest.scope,
+    dueAt: assignment.dueAt ?? null,
+    durationDays: quest.durationDays,
+    executionSteps: quest.executionSteps,
+    successMetrics: quest.successMetrics,
+    outOfScope: quest.outOfScope,
+    resources: resources.filter((resource) => quest.resourceIds.includes(resource.id)).map(mapResource),
   };
 }
 

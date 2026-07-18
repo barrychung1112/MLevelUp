@@ -3,14 +3,12 @@
 import { useRouter } from "next/navigation";
 
 import { DashboardOverview } from "@/components/features/dashboard/dashboard";
-import { dailyBudget, difficultyCeiling } from "@/domain/training/adaptive-selector";
-import { localDateForInstant } from "@/domain/training/calendar";
-import { selectPrimaryAssignment } from "@/domain/training/selectors";
 import { useTraining } from "@/providers/training-provider";
 
 import { TrainingPageShell } from "../_components/training-page-shell";
 import {
   currentLevelXp,
+  formatTimestamp,
   latestBy,
   mapActivity,
   mapAgent,
@@ -24,20 +22,38 @@ export default function DashboardPage() {
   const router = useRouter();
   const training = useTraining();
   const state = training.snapshot;
-  const primary = state
-    ? selectPrimaryAssignment(state, localDateForInstant(new Date().toISOString(), state.profile.timezone))
-    : undefined;
+  const activeAssignments = state
+    ? Object.values(state.assignments).filter((assignment) =>
+        ["assigned", "in_progress", "needs_revision"].includes(assignment.status),
+      )
+    : [];
+  const missionForScope = (scope: "main" | "daily") => {
+    if (!state) return null;
+    const assignment = activeAssignments.find((item) => {
+      const assignmentScope = state.quests[item.questId]?.scope;
+      return assignmentScope === scope || (scope === "main" && assignmentScope === "calibration");
+    });
+    const quest = assignment ? state.quests[assignment.questId] : undefined;
+    return assignment && quest ? mapQuest(assignment, quest, state.resources) : null;
+  };
+  const penalties = state
+    ? activeAssignments.flatMap((assignment) => {
+        const quest = state.quests[assignment.questId];
+        return quest?.scope === "penalty" ? [mapQuest(assignment, quest, state.resources)] : [];
+      })
+    : [];
   const feedback = state
     ? latestBy(Object.values(state.feedback), (item) => item.createdAt)?.summary ?? "完成今日任務後，協調員 Agent 會在這裡整理 Demo 回饋。"
     : "";
   const recentArtifact = state ? latestBy(state.artifacts, (item) => item.createdAt) : null;
   const recentActivity = state ? latestBy(state.activity, (item) => item.occurredAt) : null;
 
-  async function handleOpenPrimaryQuest() {
-    if (!primary) return;
+  async function handleOpenQuest(assignmentId: string) {
+    const assignment = state?.assignments[assignmentId];
+    if (!assignment) return;
     try {
-      await training.startQuest(primary.assignment.id);
-      router.push(`/quests/${primary.assignment.id}`);
+      if (assignment.status === "assigned") await training.startQuest(assignment.id);
+      router.push(`/quests/${assignment.id}`);
     } catch {
       // The provider exposes the command error in the dashboard state.
     }
@@ -52,16 +68,21 @@ export default function DashboardPage() {
         currentXp={state ? currentLevelXp(state) : 0}
         nextLevelXp={500}
         streakDays={state?.progress.currentStreak ?? 0}
-        challengeCeiling={state ? difficultyCeiling(state.progress.skills) : 2}
-        dailyBudgetMinutes={state ? dailyBudget(state.profile.weeklyMinutes) : 30}
-        primaryQuest={primary ? mapQuest(primary.assignment, primary.quest) : null}
+        trainingStatus={state?.profile.trainingStatus ?? "normal"}
+        failureDays={state?.profile.consecutiveFailureDays ?? 0}
+        recoveryDeadline={state?.profile.recoveryDeadline && state ? formatTimestamp(state.profile.recoveryDeadline, state.profile.timezone) : null}
+        mainMission={missionForScope("main")}
+        dailyMission={missionForScope("daily")}
+        penalties={penalties}
         skills={state ? mapSkills(state) : []}
         feedback={feedback}
         resources={state ? state.resources.slice(0, 3).map(mapResource) : []}
         agents={state ? [...state.agents].sort((a, b) => b.lastRunAt.localeCompare(a.lastRunAt)).map((agent) => mapAgent(agent, state.profile.timezone)) : []}
         recentArtifact={recentArtifact ? mapArtifact(recentArtifact) : null}
         recentActivity={recentActivity && state ? mapActivity(recentActivity, state.profile.timezone) : null}
-        onOpenPrimaryQuest={() => { void handleOpenPrimaryQuest(); }}
+        onOpenQuest={(assignmentId) => { void handleOpenQuest(assignmentId); }}
+        onContinueChallenge={() => { void training.continueChallenge(); }}
+        onAbandonChallenge={() => { void training.abandonChallenge().then(() => router.replace("/onboarding")); }}
       />
     </TrainingPageShell>
   );

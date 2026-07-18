@@ -40,10 +40,11 @@ export default function OnboardingPage() {
             targetRole: values.targetRole,
             timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || DEFAULT_TIMEZONE,
           })
-            .then((state) => {
+            .then(async (state) => {
               const assignment = Object.values(state.assignments).find(
                 (item) => item.questId === "quest-courage-challenge",
               );
+              if (assignment?.status === "assigned") await training.startQuest(assignment.id);
               router.replace(assignment ? `/quests/${assignment.id}` : "/dashboard");
             })
             .catch(() => undefined);

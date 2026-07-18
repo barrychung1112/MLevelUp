@@ -36,6 +36,13 @@ export type QuestView = {
   primarySkill: string;
   acceptanceCriteria: readonly string[];
   evidenceTypes: readonly EvidenceType[];
+  scope: "main" | "daily" | "penalty" | "calibration";
+  dueAt: string | null;
+  durationDays: number;
+  executionSteps: readonly string[];
+  successMetrics: readonly string[];
+  outOfScope: readonly string[];
+  resources: readonly ResourceView[];
 };
 
 export type FileMetadataView = {

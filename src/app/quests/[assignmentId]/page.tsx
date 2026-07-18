@@ -124,7 +124,7 @@ export default function QuestAssignmentPage() {
         <section className="space-y-6" aria-labelledby="verified-heading"><header><p className="text-sm uppercase tracking-[0.24em] text-command-success">Quest cleared</p><h1 id="verified-heading" className="text-3xl font-semibold">任務驗證完成</h1></header><Panel><p className="text-command-success">Demo 驗證已通過。</p><p className="mt-2 text-command-muted">品質 {result?.evaluation.qualityScore ?? state?.submissions[latestSubmissionId ?? ""]?.qualityScore ?? 0} / 100 · 獲得 {state && latestSubmissionId ? Object.values(state.feedback).find((item) => item.submissionId === latestSubmissionId)?.xpAwarded ?? 0 : 0} XP</p><p className="mt-3 text-sm text-command-warning">驗證與 AI 回饋為 Phase 1 Demo。</p></Panel></section>
       ) : (
         <QuestDetail
-          quest={assignment && quest ? mapQuest(assignment, quest) : null}
+          quest={assignment && quest ? mapQuest(assignment, quest, state?.resources ?? []) : null}
           status={training.status === "ready" ? "ready" : training.status}
           errorMessage={training.loadError ?? undefined}
           isSubmitting={training.commandStatus === "submitting"}

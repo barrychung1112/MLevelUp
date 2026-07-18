@@ -107,7 +107,29 @@ function QuestDetailForm({
         <h1 id="quest-title" className="mt-2 text-3xl font-semibold text-command-text">{quest.title}</h1>
         <p className="mt-2 max-w-3xl text-command-muted">{quest.summary}</p>
         <p className="mt-3 text-sm text-command-muted">難度 {quest.difficulty} / 5 · {quest.estimatedMinutes} 分鐘 · {quest.primarySkill}</p>
+        {quest.dueAt ? <p className="mt-1 text-sm font-semibold text-command-warning">截止：{quest.dueAt}</p> : null}
       </header>
+
+      <div className="grid gap-4 lg:grid-cols-3">
+        <Panel aria-labelledby="steps-title">
+          <h2 id="steps-title" className="text-lg font-semibold text-command-text">執行步驟</h2>
+          <ol className="mt-3 list-decimal space-y-2 pl-5 text-command-muted">
+            {quest.executionSteps.map((step) => <li key={step}>{step}</li>)}
+          </ol>
+        </Panel>
+        <Panel aria-labelledby="metrics-title">
+          <h2 id="metrics-title" className="text-lg font-semibold text-command-text">成功衡量標準</h2>
+          <ul className="mt-3 list-disc space-y-2 pl-5 text-command-muted">
+            {quest.successMetrics.map((metric) => <li key={metric}>{metric}</li>)}
+          </ul>
+        </Panel>
+        <Panel aria-labelledby="scope-title">
+          <h2 id="scope-title" className="text-lg font-semibold text-command-text">本次不做</h2>
+          <ul className="mt-3 list-disc space-y-2 pl-5 text-command-muted">
+            {quest.outOfScope.map((item) => <li key={item}>{item}</li>)}
+          </ul>
+        </Panel>
+      </div>
 
       <Panel aria-labelledby="acceptance-title">
         <h2 id="acceptance-title" className="text-lg font-semibold text-command-text">驗收條件</h2>
@@ -115,6 +137,20 @@ function QuestDetailForm({
           {quest.acceptanceCriteria.map((criterion) => <li key={criterion}>{criterion}</li>)}
         </ul>
       </Panel>
+
+      {quest.resources.length > 0 ? (
+        <Panel aria-labelledby="quest-resources-title">
+          <h2 id="quest-resources-title" className="text-lg font-semibold text-command-text">任務資源</h2>
+          <ul className="mt-3 space-y-2">
+            {quest.resources.map((resource) => (
+              <li key={resource.id}>
+                <a className="text-command-cyan underline-offset-4 hover:underline" href={resource.url} target="_blank" rel="noreferrer">{resource.title}</a>
+                <span className="ml-2 text-sm text-command-muted">約 {resource.estimatedMinutes} 分鐘</span>
+              </li>
+            ))}
+          </ul>
+        </Panel>
+      ) : null}
 
       <form className="command-panel space-y-5 border border-command-cyan/40 bg-command-surface/95 p-5" noValidate onSubmit={handleSubmit}>
         <h2 className="text-lg font-semibold text-command-text">提交成果證據</h2>
@@ -138,8 +174,8 @@ function QuestDetailForm({
 
         {evidenceType === "url" ? (
           <label className="grid gap-2 text-sm font-medium text-command-text">
-            成果網址
-            <input aria-label="成果網址" className={controlClass} type="url" value={evidenceUrl} aria-invalid={errors.url ? true : undefined} aria-describedby={errors.url ? `${fieldId}-url-error` : undefined} onChange={(event) => { setEvidenceUrl(event.target.value); clearError("url"); }} />
+            成果連結
+            <input aria-label="成果連結" className={controlClass} type="url" value={evidenceUrl} aria-invalid={errors.url ? true : undefined} aria-describedby={errors.url ? `${fieldId}-url-error` : undefined} onChange={(event) => { setEvidenceUrl(event.target.value); clearError("url"); }} />
             {errors.url ? <span id={`${fieldId}-url-error`} role="alert" className="text-command-danger">{errors.url}</span> : null}
           </label>
         ) : null}
