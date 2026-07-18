@@ -21,8 +21,9 @@ function toEvidence(
   submission: EvidenceSubmissionView,
 ): Omit<EvidenceRecord, "id"> {
   const base = { requirementId: requirement.id, type: requirement.type };
-  if (submission.evidenceType === "url") return { ...base, url: submission.evidenceUrl };
-  if (submission.evidenceType === "file") {
+  const evidenceType = toPresentationEvidenceType(requirement.type);
+  if (evidenceType === "url") return { ...base, url: submission.evidenceUrl };
+  if (evidenceType === "file") {
     const metadata = submission.fileMetadata;
     return {
       ...base,
@@ -31,7 +32,7 @@ function toEvidence(
       ...(metadata && metadata.size > 0 ? { byteSize: metadata.size } : {}),
     };
   }
-  if (submission.evidenceType === "metric") {
+  if (evidenceType === "metric") {
     const source = submission.metricResult ?? "";
     const numeric = source.match(/-?\d+(?:\.\d+)?/u)?.[0];
     const name = source.includes(":") ? source.split(":", 1)[0].trim() : "metric";
@@ -80,9 +81,9 @@ export default function QuestAssignmentPage() {
       if (assignment.status === "needs_revision") {
         await training.startQuest(assignment.id);
       }
-      const requirement = quest.evidenceRequirements.find((item) => toPresentationEvidenceType(item.type) === submission.evidenceType);
-      if (!requirement) throw new Error("此任務沒有相符的證據需求。" );
-      const evidenceWithoutIds = [toEvidence(requirement, submission)];
+      const evidenceWithoutIds = quest.evidenceRequirements.map((requirement) =>
+        toEvidence(requirement, submission),
+      );
       const revisionNo = Object.values(state?.submissions ?? {}).filter(
         (item) => item.assignmentId === assignment.id,
       ).length + 1;

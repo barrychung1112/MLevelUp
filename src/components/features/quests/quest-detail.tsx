@@ -56,6 +56,11 @@ function QuestDetailForm({
   const [evidenceText, setEvidenceText] = useState("");
   const [selfReflection, setSelfReflection] = useState("");
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const requiresMultipleEvidence = quest.evidenceTypes.length > 1;
+  const requiresEvidence = (type: EvidenceType) =>
+    requiresMultipleEvidence
+      ? quest.evidenceTypes.includes(type)
+      : evidenceType === type;
 
   function clearError(field: "url" | "file" | "metric" | "text" | "reflection") {
     setErrors((current) => {
@@ -83,10 +88,10 @@ function QuestDetailForm({
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const nextErrors: Record<string, string> = {};
-    if (evidenceType === "url" && !isWebUrl(evidenceUrl)) nextErrors.url = "請輸入以 http:// 或 https:// 開頭的有效網址";
-    if (evidenceType === "file" && !fileMetadata) nextErrors.file = "請選擇成果檔案";
-    if (evidenceType === "metric" && !metricResult.trim()) nextErrors.metric = "請輸入指標結果";
-    if (evidenceType === "text" && !evidenceText.trim()) nextErrors.text = "請輸入成果內容";
+    if (requiresEvidence("url") && !isWebUrl(evidenceUrl)) nextErrors.url = "請輸入以 http:// 或 https:// 開頭的有效網址";
+    if (requiresEvidence("file") && !fileMetadata) nextErrors.file = "請選擇成果檔案";
+    if (requiresEvidence("metric") && !metricResult.trim()) nextErrors.metric = "請輸入指標結果";
+    if (requiresEvidence("text") && !evidenceText.trim()) nextErrors.text = "請輸入成果內容";
     if (!selfReflection.trim()) nextErrors.reflection = "請填寫自我反思";
     setErrors(nextErrors);
     if (Object.keys(nextErrors).length > 0) return;
@@ -172,14 +177,14 @@ function QuestDetailForm({
           </select>
         </label>
 
-        {evidenceType === "url" ? (
+        {requiresEvidence("url") ? (
           <label className="grid gap-2 text-sm font-medium text-command-text">
             成果連結
             <input aria-label="成果連結" className={controlClass} type="url" value={evidenceUrl} aria-invalid={errors.url ? true : undefined} aria-describedby={errors.url ? `${fieldId}-url-error` : undefined} onChange={(event) => { setEvidenceUrl(event.target.value); clearError("url"); }} />
             {errors.url ? <span id={`${fieldId}-url-error`} role="alert" className="text-command-danger">{errors.url}</span> : null}
           </label>
         ) : null}
-        {evidenceType === "file" ? (
+        {requiresEvidence("file") ? (
           <label className="grid gap-2 text-sm font-medium text-command-text">
             成果檔案
             <input aria-label="成果檔案" className="min-h-11 py-2 text-base text-command-text file:mr-3 file:rounded-sm file:border file:border-command-border file:bg-command-raised file:px-3 file:py-2 file:text-command-text" type="file" aria-invalid={errors.file ? true : undefined} aria-describedby={errors.file ? `${fieldId}-file-error` : undefined} onChange={handleFile} />
@@ -187,14 +192,14 @@ function QuestDetailForm({
             {errors.file ? <span id={`${fieldId}-file-error`} role="alert" className="text-command-danger">{errors.file}</span> : null}
           </label>
         ) : null}
-        {evidenceType === "metric" ? (
+        {requiresEvidence("metric") ? (
           <label className="grid gap-2 text-sm font-medium text-command-text">
             指標結果
             <input aria-label="指標結果" className={controlClass} value={metricResult} aria-invalid={errors.metric ? true : undefined} aria-describedby={errors.metric ? `${fieldId}-metric-error` : undefined} onChange={(event) => { setMetricResult(event.target.value); clearError("metric"); }} />
             {errors.metric ? <span id={`${fieldId}-metric-error`} role="alert" className="text-command-danger">{errors.metric}</span> : null}
           </label>
         ) : null}
-        {evidenceType === "text" ? (
+        {requiresEvidence("text") ? (
           <label className="grid gap-2 text-sm font-medium text-command-text">
             成果文字
             <textarea aria-label="成果文字" className={`${textAreaClass} min-h-28`} value={evidenceText} aria-invalid={errors.text ? true : undefined} aria-describedby={errors.text ? `${fieldId}-text-error` : undefined} onChange={(event) => { setEvidenceText(event.target.value); clearError("text"); }} />

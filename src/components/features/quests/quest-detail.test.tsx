@@ -53,7 +53,7 @@ describe("QuestDetail", () => {
 
   test("blocks invalid evidence and submits a valid URL with reflection", () => {
     const onSubmit = vi.fn();
-    render(<QuestDetail quest={quest} onSubmit={onSubmit} />);
+    render(<QuestDetail quest={{ ...quest, evidenceTypes: ["url"] }} onSubmit={onSubmit} />);
 
     fireEvent.change(screen.getByLabelText("成果連結"), { target: { value: "not-a-url" } });
     fireEvent.click(screen.getByRole("button", { name: "提交成果" }));
@@ -72,7 +72,7 @@ describe("QuestDetail", () => {
 
   test("converts a browser file to serializable metadata", () => {
     const onSubmit = vi.fn();
-    render(<QuestDetail quest={quest} onSubmit={onSubmit} />);
+    render(<QuestDetail quest={{ ...quest, evidenceTypes: ["file"] }} onSubmit={onSubmit} />);
     fireEvent.change(screen.getByLabelText("證據類型"), { target: { value: "file" } });
     const file = new File(["metric,score\nauc,0.91"], "report.csv", { type: "text/csv" });
     fireEvent.change(screen.getByLabelText("成果檔案"), { target: { files: [file] } });
@@ -82,6 +82,33 @@ describe("QuestDetail", () => {
     expect(onSubmit).toHaveBeenCalledWith(expect.objectContaining({
       evidenceType: "file",
       fileMetadata: expect.objectContaining({ name: "report.csv", type: "text/csv" }),
+    }));
+  });
+
+  test("requires and submits every field for a multi-evidence quest", () => {
+    const onSubmit = vi.fn();
+    render(
+      <QuestDetail
+        quest={{ ...quest, evidenceTypes: ["url", "metric"] }}
+        onSubmit={onSubmit}
+      />,
+    );
+
+    const url = screen.getByRole("textbox", { name: /成果連結/u });
+    const metric = screen.getByRole("textbox", { name: /指標結果/u });
+    const reflection = screen.getByRole("textbox", { name: /自我反思/u });
+    fireEvent.change(url, { target: { value: "https://github.com/example/commit/abc" } });
+    fireEvent.change(reflection, {
+      target: { value: "I compared the validation result and documented why this baseline is reproducible." },
+    });
+    fireEvent.click(screen.getByRole("button", { name: /提交成果/u }));
+    expect(onSubmit).not.toHaveBeenCalled();
+
+    fireEvent.change(metric, { target: { value: "validation_accuracy: 0.82" } });
+    fireEvent.click(screen.getByRole("button", { name: /提交成果/u }));
+    expect(onSubmit).toHaveBeenCalledWith(expect.objectContaining({
+      evidenceUrl: "https://github.com/example/commit/abc",
+      metricResult: "validation_accuracy: 0.82",
     }));
   });
 });
