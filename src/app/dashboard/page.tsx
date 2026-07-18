@@ -13,6 +13,7 @@ import {
   mapActivity,
   mapAgent,
   mapArtifact,
+  mapFeedback,
   mapQuest,
   mapResource,
   mapSkills,
@@ -42,9 +43,15 @@ export default function DashboardPage() {
         return quest?.scope === "penalty" ? [mapQuest(assignment, quest, state.resources)] : [];
       })
     : [];
-  const feedback = state
-    ? latestBy(Object.values(state.feedback), (item) => item.createdAt)?.summary ?? "完成今日任務後，協調員 Agent 會在這裡整理 Demo 回饋。"
-    : "";
+  const latestFeedback = state
+    ? latestBy(Object.values(state.feedback), (item) => item.createdAt)
+    : null;
+  const feedback = latestFeedback
+    ? mapFeedback(latestFeedback)
+    : {
+        summary: "完成今日任務後，協調員 Agent 會在這裡整理回饋。",
+        provenance: "Demo" as const,
+      };
   const recentArtifact = state ? latestBy(state.artifacts, (item) => item.createdAt) : null;
   const recentActivity = state ? latestBy(state.activity, (item) => item.occurredAt) : null;
 

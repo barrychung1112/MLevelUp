@@ -7,6 +7,7 @@ import { StatusIndicator } from "@/components/ui/status-indicator";
 import type {
   ActivityView,
   AgentRunView,
+  FeedbackView,
   LoadableViewProps,
   PortfolioArtifactView,
   QuestView,
@@ -26,7 +27,7 @@ type DashboardOverviewProps = LoadableViewProps & {
   dailyMission: QuestView | null;
   penalties: readonly QuestView[];
   skills: readonly SkillStatView[];
-  feedback: string;
+  feedback: FeedbackView;
   resources: readonly ResourceView[];
   agents: readonly AgentRunView[];
   recentArtifact: PortfolioArtifactView | null;
@@ -166,7 +167,23 @@ export function DashboardOverview({
         </div>
 
         <aside className="space-y-6">
-          <Panel><div className="flex justify-between"><h2 className="text-lg font-semibold">AI 每日回饋</h2><Badge tone="warning">Demo</Badge></div><p className="mt-3 text-command-muted">{feedback}</p></Panel>
+          <Panel>
+            <div className="flex flex-wrap justify-between gap-2">
+              <h2 className="text-lg font-semibold">AI 每日回饋</h2>
+              <Badge tone={feedback.provenance === "AI" ? "cyan" : feedback.provenance === "Deterministic fallback" ? "warning" : "neutral"}>
+                {feedback.provenance}
+              </Badge>
+            </div>
+            <p className="mt-3 text-command-muted">{feedback.summary}</p>
+            {feedback.adjustmentExplanation ? (
+              <p className="mt-3 border-l border-command-cyan/50 pl-3 text-sm text-command-muted">
+                調整原因：{feedback.adjustmentExplanation}
+              </p>
+            ) : null}
+            {feedback.confidence !== undefined ? (
+              <p className="mt-2 text-xs text-command-muted">AI 信心 {Math.round(feedback.confidence * 100)}%</p>
+            ) : null}
+          </Panel>
           <Panel><h2 className="text-lg font-semibold">Agent 狀態</h2><ul className="mt-3 space-y-3">{agents.map((agent) => <li key={agent.id}><strong>{agent.name}</strong><StatusIndicator className="mt-1" tone={agentTone(agent.status)}>{agent.status} · {agent.summary}</StatusIndicator></li>)}</ul></Panel>
           <Panel><h2 className="text-lg font-semibold">最新作品</h2><p className="mt-2 text-command-muted">{recentArtifact ? `${recentArtifact.title} · Quality ${recentArtifact.qualityScore}` : "尚未建立作品集成果。"}</p></Panel>
           <Panel><h2 className="text-lg font-semibold">最新紀錄</h2><p className="mt-2 text-command-muted">{recentActivity ? `${recentActivity.title} · ${recentActivity.summary}` : "尚無訓練紀錄。"}</p></Panel>

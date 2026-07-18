@@ -38,7 +38,13 @@ const baseProps = {
   nextLevelXp: 500,
   streakDays: 1,
   skills: [{ key: "modeling", label: "Modeling", value: 42 }],
-  feedback: "先完成今日檢查點。",
+  feedback: {
+    summary: "AI feedback is ready.",
+    provenance: "AI" as const,
+    adjustmentExplanation: "Maintain difficulty and split the next checkpoint.",
+    confidence: 0.82,
+    recommendedQuestId: "quest-next",
+  },
   resources: [],
   agents: [],
   recentArtifact: null,
@@ -51,6 +57,23 @@ const baseProps = {
 };
 
 describe("DashboardOverview", () => {
+  test("shows feedback provenance and adjustment explanation", () => {
+    render(
+      <DashboardOverview
+        {...baseProps}
+        trainingStatus="normal"
+        mainMission={mainMission}
+        dailyMission={dailyMission}
+        penalties={[]}
+      />,
+    );
+
+    expect(screen.getByText("AI", { selector: "span" })).toBeVisible();
+    expect(screen.getByText("AI feedback is ready.")).toBeVisible();
+    expect(screen.getByText(/Maintain difficulty/)).toBeVisible();
+    expect(screen.getByText(/82%/)).toBeVisible();
+  });
+
   test("separates the multi-day mainline, 24-hour daily mission, and penalties", () => {
     render(
       <DashboardOverview

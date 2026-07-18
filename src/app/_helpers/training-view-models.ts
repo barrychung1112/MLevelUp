@@ -6,6 +6,7 @@ import type {
   Quest,
   QuestAssignment,
   Resource,
+  SubmissionFeedback,
   SkillKey,
   TrainingContract,
   TrainingState,
@@ -14,6 +15,7 @@ import type {
   ActivityView,
   AgentRunView,
   EvidenceType,
+  FeedbackView,
   GoalOptionView,
   PortfolioArtifactView,
   QuestView,
@@ -143,6 +145,31 @@ export function mapAgent(agent: AgentStatus, timezone: string): AgentRunView {
     status: agent.status === "completed" ? "complete" : agent.status,
     lastRun: formatTimestamp(agent.lastRunAt, timezone),
     summary: agent.summary,
+    provenance: agent.isMock
+      ? "Demo"
+      : agent.fallbackUsed || agent.status === "degraded"
+        ? "Fallback"
+        : "AI",
+    model: agent.model,
+    promptVersion: agent.promptVersion,
+    latencyMs: agent.latencyMs,
+    errorCode: agent.errorCode,
+  };
+}
+
+export function mapFeedback(feedback: SubmissionFeedback): FeedbackView {
+  const provenance = {
+    demo: "Demo",
+    deterministic: "Deterministic",
+    ai: "AI",
+    ai_fallback: "Deterministic fallback",
+  } as const;
+  return {
+    summary: feedback.summary,
+    provenance: provenance[feedback.source],
+    adjustmentExplanation: feedback.adjustmentExplanation,
+    confidence: feedback.aiConfidence,
+    recommendedQuestId: feedback.recommendedQuestId,
   };
 }
 

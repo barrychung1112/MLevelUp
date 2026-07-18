@@ -81,6 +81,19 @@ export type AgentRunView = {
   status: string;
   lastRun: string;
   summary: string;
+  provenance: "Demo" | "AI" | "Fallback";
+  model?: string;
+  promptVersion?: string;
+  latencyMs?: number;
+  errorCode?: string;
+};
+
+export type FeedbackView = {
+  summary: string;
+  provenance: "Demo" | "AI" | "Deterministic" | "Deterministic fallback";
+  adjustmentExplanation?: string;
+  confidence?: number;
+  recommendedQuestId?: string;
 };
 
 export type PortfolioArtifactView = {

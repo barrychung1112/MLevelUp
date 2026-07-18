@@ -7,13 +7,14 @@ import type { SubmissionOutcome } from "@/application/training/training-reposito
 import { QuestDetail } from "@/components/features/quests/quest-detail";
 import type { EvidenceSubmissionView } from "@/components/features/view-models";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { Panel } from "@/components/ui/panel";
 import type { EvidenceRecord, EvidenceRequirement } from "@/domain/training/types";
 import { useTraining } from "@/providers/training-provider";
 
 import { TrainingPageShell } from "../../_components/training-page-shell";
 import { deriveSubmissionIdentity } from "../../_helpers/submission-identity";
-import { mapQuest, toPresentationEvidenceType } from "../../_helpers/training-view-models";
+import { mapFeedback, mapQuest, toPresentationEvidenceType } from "../../_helpers/training-view-models";
 
 function toEvidence(
   requirement: EvidenceRequirement,
@@ -52,6 +53,14 @@ export default function QuestAssignmentPage() {
   const assignment = state?.assignments[params.assignmentId];
   const quest = assignment ? state?.quests[assignment.questId] : undefined;
   const latestSubmissionId = assignment?.latestSubmissionId;
+  const displayedSubmissionId = result?.submission.id ?? latestSubmissionId;
+  const displayedState = result?.state ?? state;
+  const submissionFeedback = displayedState && displayedSubmissionId
+    ? Object.values(displayedState.feedback).find(
+        (item) => item.submissionId === displayedSubmissionId,
+      )
+    : undefined;
+  const feedbackView = submissionFeedback ? mapFeedback(submissionFeedback) : null;
 
   async function handleStart() {
     if (!assignment) return;
@@ -121,7 +130,7 @@ export default function QuestAssignmentPage() {
           </Panel>
         </section>
       ) : result || assignment?.status === "completed" ? (
-        <section className="space-y-6" aria-labelledby="verified-heading"><header><p className="text-sm uppercase tracking-[0.24em] text-command-success">Quest cleared</p><h1 id="verified-heading" className="text-3xl font-semibold">任務驗證完成</h1></header><Panel><p className="text-command-success">Demo 驗證已通過。</p><p className="mt-2 text-command-muted">品質 {result?.evaluation.qualityScore ?? state?.submissions[latestSubmissionId ?? ""]?.qualityScore ?? 0} / 100 · 獲得 {state && latestSubmissionId ? Object.values(state.feedback).find((item) => item.submissionId === latestSubmissionId)?.xpAwarded ?? 0 : 0} XP</p><p className="mt-3 text-sm text-command-warning">驗證與 AI 回饋為 Phase 1 Demo。</p></Panel></section>
+        <section className="space-y-6" aria-labelledby="verified-heading"><header><p className="text-sm uppercase tracking-[0.24em] text-command-success">Quest cleared</p><h1 id="verified-heading" className="text-3xl font-semibold">任務驗證完成</h1></header><Panel><div className="flex flex-wrap items-center justify-between gap-2"><p className="text-command-success">證據驗證已通過。</p><Badge tone={feedbackView?.provenance === "AI" ? "cyan" : feedbackView?.provenance === "Deterministic fallback" ? "warning" : "neutral"}>{feedbackView?.provenance ?? "Deterministic"}</Badge></div><p className="mt-2 text-command-muted">品質 {result?.evaluation.qualityScore ?? state?.submissions[latestSubmissionId ?? ""]?.qualityScore ?? 0} / 100 · 獲得 {submissionFeedback?.xpAwarded ?? 0} XP</p>{feedbackView ? <p className="mt-3 text-sm text-command-muted">{feedbackView.summary}</p> : null}</Panel></section>
       ) : (
         <QuestDetail
           quest={assignment && quest ? mapQuest(assignment, quest, state?.resources ?? []) : null}
