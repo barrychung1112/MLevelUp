@@ -79,6 +79,21 @@ describe("strict domain schemas", () => {
     ).toThrow();
   });
 
+  test("accepts Supabase timestamptz offsets", () => {
+    expect(
+      UserProfileSchema.parse({
+        id: "user-demo",
+        displayName: "Demo Hunter",
+        goal: "Become an ML engineer",
+        contract: "standard",
+        weeklyMinutes: 600,
+        timezone: "America/Los_Angeles",
+        onboardingCompleted: false,
+        challengeAcceptedAt: "2026-07-18T06:30:00+00:00",
+      }).challengeAcceptedAt,
+    ).toBe("2026-07-18T06:30:00+00:00");
+  });
+
   test("accepts bounded resource quality signals", () => {
     expect(
       ResourceSchema.parse({

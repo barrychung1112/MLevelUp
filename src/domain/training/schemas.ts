@@ -4,6 +4,8 @@ import { SKILL_KEYS } from "./constants";
 import { findArtifactEvidence } from "./evaluate-submission";
 import { qualityMultiplier } from "./rewards";
 
+const IsoTimestampSchema = z.iso.datetime({ offset: true });
+
 export const SkillKeySchema = z.enum(SKILL_KEYS);
 export const TrainingContractSchema = z.enum([
   "foundation",
@@ -137,7 +139,7 @@ export const UserProfileSchema = z.strictObject({
   weeklyMinutes: z.number().int().positive(),
   timezone: TimeZoneSchema,
   onboardingCompleted: z.boolean(),
-  challengeAcceptedAt: z.iso.datetime().nullable(),
+  challengeAcceptedAt: IsoTimestampSchema.nullable(),
 });
 
 const MAX_EVIDENCE_URL_LENGTH = 2_048;
@@ -258,10 +260,10 @@ export const QuestAssignmentSchema = z.strictObject({
   assignedDate: z.iso.date(),
   slot: z.enum(["primary", "secondary", "optional"]),
   status: AssignmentStatusSchema,
-  assignedAt: z.iso.datetime(),
-  startedAt: z.iso.datetime().optional(),
-  submittedAt: z.iso.datetime().optional(),
-  completedAt: z.iso.datetime().optional(),
+  assignedAt: IsoTimestampSchema,
+  startedAt: IsoTimestampSchema.optional(),
+  submittedAt: IsoTimestampSchema.optional(),
+  completedAt: IsoTimestampSchema.optional(),
   latestSubmissionId: z.string().min(1).optional(),
 });
 
@@ -282,7 +284,7 @@ export const SubmissionSchema = z.strictObject({
   qualityScore: z.number().min(0).max(100),
   scoreBreakdown: EvaluationScoreBreakdownSchema,
   hardFailures: z.array(z.string()),
-  submittedAt: z.iso.datetime(),
+  submittedAt: IsoTimestampSchema,
 });
 
 export const SubmissionFeedbackSchema = z.strictObject({
@@ -296,7 +298,7 @@ export const SubmissionFeedbackSchema = z.strictObject({
   scoreBreakdown: EvaluationScoreBreakdownSchema.optional(),
   xpAwarded: z.number().int().nonnegative(),
   skillDeltas: SkillScoreDeltasSchema,
-  createdAt: z.iso.datetime(),
+  createdAt: IsoTimestampSchema,
 });
 
 export const UserProgressSchema = z.strictObject({
@@ -330,7 +332,7 @@ export const AgentStatusSchema = z.strictObject({
     "adjuster",
   ]),
   status: z.enum(["idle", "running", "completed", "degraded"]),
-  lastRunAt: z.iso.datetime(),
+  lastRunAt: IsoTimestampSchema,
   summary: z.string().min(1),
   isMock: z.literal(true),
 });
@@ -351,7 +353,7 @@ export const PortfolioArtifactSchema = z.strictObject({
     "verified",
     "rejected",
   ]),
-  createdAt: z.iso.datetime(),
+  createdAt: IsoTimestampSchema,
 });
 
 export const ActivityEventSchema = z.strictObject({
@@ -360,7 +362,7 @@ export const ActivityEventSchema = z.strictObject({
   sourceId: z.string().min(1),
   title: z.string().min(1),
   summary: z.string().min(1),
-  occurredAt: z.iso.datetime(),
+  occurredAt: IsoTimestampSchema,
 });
 
 export const XpEventSchema = z.strictObject({
@@ -371,7 +373,7 @@ export const XpEventSchema = z.strictObject({
   streakMultiplier: z.number().min(1).max(1.1),
   artifactMultiplier: z.number().min(1).max(1.25),
   awardedXp: z.number().int().nonnegative(),
-  createdAt: z.iso.datetime(),
+  createdAt: IsoTimestampSchema,
 });
 
 export const TrainingStateSchema = z.strictObject({
