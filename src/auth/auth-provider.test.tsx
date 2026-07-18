@@ -78,11 +78,11 @@ describe("AuthProvider and AuthGate", () => {
       </AuthGate>,
     );
 
-    expect(await screen.findByRole("heading", { name: "Enter the guild terminal" })).toBeVisible();
+    expect(await screen.findByRole("heading", { name: "進入訓練終端" })).toBeVisible();
     fireEvent.change(screen.getByLabelText("Email"), {
       target: { value: "hunter@example.com" },
     });
-    fireEvent.click(screen.getByRole("button", { name: "Send magic link" }));
+    fireEvent.click(screen.getByRole("button", { name: "寄送登入連結" }));
 
     await waitFor(() => expect(client.auth.signInWithOtp).toHaveBeenCalledOnce());
     expect(client.auth.signInWithOtp).toHaveBeenCalledWith({
@@ -91,7 +91,7 @@ describe("AuthProvider and AuthGate", () => {
         emailRedirectTo: "http://localhost:3000/auth/callback",
       },
     });
-    expect(await screen.findByRole("status")).toHaveTextContent("Magic link sent");
+    expect(await screen.findByRole("status")).toHaveTextContent("登入連結已寄出");
   });
 
   it("renders children when a session already exists", async () => {

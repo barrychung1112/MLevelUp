@@ -54,9 +54,9 @@ export function AuthGate({ children }: { children: ReactNode }) {
     setError(null);
     try {
       await auth.requestMagicLink(email.trim());
-      setMessage("Magic link sent");
+      setMessage("登入連結已寄出，請前往信箱完成登入。");
     } catch (requestError) {
-      setError(requestError instanceof Error ? requestError.message : "Could not send magic link");
+      setError(requestError instanceof Error ? requestError.message : "無法寄送登入連結");
     } finally {
       setSubmitting(false);
     }
@@ -73,9 +73,9 @@ export function AuthGate({ children }: { children: ReactNode }) {
             <LogIn aria-hidden className="size-5" />
           </span>
           <div>
-            <h1 className="font-display text-2xl font-semibold">Enter the guild terminal</h1>
+            <h1 className="font-display text-2xl font-semibold">進入訓練終端</h1>
             <p className="mt-2 text-sm text-command-muted">
-              Use an email magic link to open your personal training dashboard.
+              輸入 Email，我們會寄送一次性登入連結，開啟你的個人訓練進度。
             </p>
           </div>
         </div>
@@ -100,7 +100,7 @@ export function AuthGate({ children }: { children: ReactNode }) {
         ) : null}
 
         <Button className="mt-6 w-full" disabled={submitting} type="submit">
-          {submitting ? "Sending..." : "Send magic link"}
+          {submitting ? "寄送中…" : "寄送登入連結"}
         </Button>
       </form>
     </main>

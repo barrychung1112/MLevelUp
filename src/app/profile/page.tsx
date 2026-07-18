@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 
+import { useAuth } from "@/auth/auth-provider";
 import { ProfileSettings } from "@/components/features/profile/profile-settings";
 import { useTraining } from "@/providers/training-provider";
 
@@ -10,6 +11,7 @@ import { GOALS } from "../_helpers/training-view-models";
 
 export default function ProfilePage() {
   const router = useRouter();
+  const auth = useAuth();
   const training = useTraining();
   const profile = training.snapshot?.profile;
   return (
@@ -32,6 +34,9 @@ export default function ProfilePage() {
             .resetDemo()
             .then(() => router.replace("/onboarding"))
             .catch(() => undefined);
+        }}
+        onSignOut={() => {
+          void auth.signOut().catch(() => undefined);
         }}
       />
     </TrainingPageShell>
