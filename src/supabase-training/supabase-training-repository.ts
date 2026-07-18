@@ -10,7 +10,10 @@ import type {
   SubmitQuestInput,
   UpdateProfileInput,
 } from "@/application/training/training-repository";
-import { executeSubmitQuest } from "@/application/training/submit-quest";
+import {
+  executeSubmitQuest,
+  type PolicyGatedSubmissionAdjudication,
+} from "@/application/training/submit-quest";
 import { selectHardestFeasibleQuest } from "@/domain/training/adaptive-selector";
 import { calibrateSkills } from "@/domain/training/calibration";
 import { localDateForInstant } from "@/domain/training/calendar";
@@ -612,10 +615,18 @@ export class SupabaseTrainingRepository implements DemoTrainingRepository {
     return this.getSnapshot();
   }
 
-  async submitQuest(input: SubmitQuestInput): Promise<SubmissionOutcome> {
+  private async submitQuestInternal(
+    input: SubmitQuestInput,
+    adjudication?: PolicyGatedSubmissionAdjudication,
+    diagnostics: AgentRunDiagnostic[] = [],
+  ): Promise<SubmissionOutcome> {
     const now = this.dependencies.clock.now();
     const current = await this.getSnapshot();
-    const outcome = executeSubmitQuest(current, input, { now, ids: this.dependencies.ids });
+    const outcome = executeSubmitQuest(current, input, {
+      now,
+      ids: this.dependencies.ids,
+      adjudication,
+    });
     const submittedQuest = outcome.state.quests[
       outcome.state.assignments[input.assignmentId].questId
     ];
@@ -650,13 +661,29 @@ export class SupabaseTrainingRepository implements DemoTrainingRepository {
         };
       }
     }
-    await this.persistState(outcome.state);
+    if (diagnostics.length > 0) {
+      await this.persistSubmissionOutcome(outcome, diagnostics);
+    } else {
+      await this.persistState(outcome.state);
+    }
     const state = await this.getSnapshot();
     return {
       ...outcome,
       state,
       submission: state.submissions[outcome.submission.id],
     };
+  }
+
+  async submitQuest(input: SubmitQuestInput): Promise<SubmissionOutcome> {
+    return this.submitQuestInternal(input);
+  }
+
+  async submitQuestWithAdjudication(
+    input: SubmitQuestInput,
+    adjudication: PolicyGatedSubmissionAdjudication,
+    diagnostics: AgentRunDiagnostic[],
+  ): Promise<SubmissionOutcome> {
+    return this.submitQuestInternal(input, adjudication, diagnostics);
   }
 
   async persistSubmissionOutcome(
