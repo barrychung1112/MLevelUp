@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import type { AgentRunDiagnostic } from "@/ai/contracts";
 import { createTrainingSeed } from "@/mocks/training/seed";
@@ -81,6 +81,27 @@ function createClient(rows: Record<string, unknown[]>, singles: Record<string, u
 }
 
 describe("SupabaseTrainingRepository", () => {
+  it("delegates browser submissions to the authenticated server client", async () => {
+    const outcome = { delegated: true };
+    const submit = vi.fn().mockResolvedValue(outcome);
+    const repository = new SupabaseTrainingRepository({
+      client: createClient({}) as never,
+      clock: { now: () => "2026-07-18T18:00:00.000Z" },
+      ids: { next: () => "00000000-0000-4000-8000-000000000001" },
+      submissionClient: { submit } as never,
+    });
+    const input = {
+      idempotencyKey: "delegated-key",
+      assignmentId: "assignment-1",
+      evidence: [],
+      selfReflection: "A reflection",
+    };
+
+    await expect(repository.submitQuest(input)).resolves.toBe(outcome);
+    expect(submit).toHaveBeenCalledOnce();
+    expect(submit).toHaveBeenCalledWith(input);
+  });
+
   it("persists a user-owned outcome with redacted agent diagnostics", async () => {
     const agentUpserts: unknown[] = [];
     const client = createClient({});

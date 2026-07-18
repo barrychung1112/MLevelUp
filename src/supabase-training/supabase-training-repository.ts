@@ -44,6 +44,8 @@ import type {
 } from "@/domain/training/types";
 import { SEED_VERSION } from "@/mocks/training/seed";
 
+import type { ServerSubmissionClient } from "./server-submit-client";
+
 import {
   mapAgentRunRow,
   mapAssignmentRow,
@@ -117,6 +119,7 @@ export interface SupabaseTrainingRepositoryDependencies {
   client: SupabaseClient | SupabaseDatabaseClient;
   clock: Clock;
   ids: IdGenerator;
+  submissionClient?: ServerSubmissionClient;
 }
 
 function defaultProgress(skills: SkillStats): UserProgress {
@@ -675,6 +678,9 @@ export class SupabaseTrainingRepository implements DemoTrainingRepository {
   }
 
   async submitQuest(input: SubmitQuestInput): Promise<SubmissionOutcome> {
+    if (this.dependencies.submissionClient) {
+      return this.dependencies.submissionClient.submit(input);
+    }
     return this.submitQuestInternal(input);
   }
 

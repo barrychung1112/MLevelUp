@@ -307,6 +307,20 @@ export const SubmissionSchema = z.strictObject({
   submittedAt: IsoTimestampSchema,
 });
 
+export const SubmissionEvaluationSchema = z.strictObject({
+  qualityScore: z.number().min(0).max(100),
+  verificationStatus: z.enum([
+    "pending",
+    "needs_revision",
+    "verified",
+    "rejected",
+  ]),
+  verificationMethod: z.enum(["mock", "manual", "automatic"]).nullable(),
+  scoreBreakdown: EvaluationScoreBreakdownSchema,
+  artifactReady: z.boolean(),
+  hardFailures: z.array(z.string()),
+});
+
 export const SubmissionFeedbackSchema = z.strictObject({
   id: z.string().min(1),
   kind: z.enum(["submission", "daily"]),
