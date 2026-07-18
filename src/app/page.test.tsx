@@ -15,6 +15,7 @@ function repository(onboardingCompleted: boolean): DemoTrainingRepository {
   state.profile.onboardingCompleted = onboardingCompleted;
   return {
     getSnapshot: async () => state,
+    acceptChallenge: async () => state,
     completeOnboarding: async () => state,
     updateProfile: async () => state,
     startQuest: async () => state,

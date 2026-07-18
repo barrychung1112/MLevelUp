@@ -39,6 +39,7 @@ export interface SubmissionOutcome {
 
 export interface TrainingRepository {
   getSnapshot(): Promise<TrainingState>;
+  acceptChallenge(): Promise<TrainingState>;
   completeOnboarding(input: CompleteOnboardingInput): Promise<TrainingState>;
   updateProfile(input: UpdateProfileInput): Promise<TrainingState>;
   startQuest(assignmentId: string): Promise<TrainingState>;

@@ -50,9 +50,22 @@ function validEvidence(): EvidenceRecord[] {
   return [
     {
       id: "evidence-valid",
-      requirementId: "commit",
+      requirementId: "artifact",
       type: "githubCommit",
       url: "https://github.com/acme/ml-project/commit/abcdef",
+    },
+    {
+      id: "metric-valid",
+      requirementId: "metric",
+      type: "metricResult",
+      metricName: "f1",
+      metricValue: 0.78,
+    },
+    {
+      id: "reflection-valid",
+      requirementId: "reflection",
+      type: "writtenReflection",
+      text: "我完成 baseline 與 validation，下一步會針對錯誤樣本做切片分析。",
     },
   ];
 }
@@ -79,9 +92,20 @@ async function startPrimary(repository: MockTrainingRepository) {
 }
 
 describe("mock training repository", () => {
-  test("completes onboarding and updates profile through repository commands", async () => {
+  test("records the courage oath exactly once", async () => {
     const { repository } = createRepository();
 
+    const accepted = await repository.acceptChallenge();
+    const repeated = await repository.acceptChallenge();
+
+    expect(accepted.profile.challengeAcceptedAt).toBe(clock.now());
+    expect(repeated.profile.challengeAcceptedAt).toBe(clock.now());
+  });
+
+  test("completes onboarding with only the courage calibration assignment", async () => {
+    const { repository } = createRepository();
+
+    await repository.acceptChallenge();
     await repository.completeOnboarding({
       displayName: "Barry",
       goal: "Ship ML systems",
@@ -89,19 +113,14 @@ describe("mock training repository", () => {
       weeklyMinutes: 240,
       timezone: "America/Los_Angeles",
     });
-    await repository.updateProfile({ displayName: "Barry C." });
     const state = await repository.getSnapshot();
 
     expect(state.profile).toMatchObject({
-      displayName: "Barry C.",
-      contract: "foundation",
+      displayName: "Barry",
       onboardingCompleted: true,
     });
-    expect(
-      Object.values(state.assignments).every(
-        (item) => state.quests[item.questId].trainingContract === "foundation",
-      ),
-    ).toBe(true);
+    expect(Object.values(state.assignments)).toHaveLength(1);
+    expect(Object.values(state.assignments)[0].questId).toBe("quest-courage-challenge");
   });
 
   test("regenerates untouched assignments when the profile timezone changes", async () => {
@@ -270,6 +289,7 @@ describe("mock training repository", () => {
           ...input.evidence[0],
           url: `  ${input.evidence[0].url}  `,
         },
+        ...input.evidence.slice(1),
       ],
       selfReflection: `  \n${input.selfReflection}  `,
     });
@@ -284,14 +304,16 @@ describe("mock training repository", () => {
   test("canonicalizes requirement identity before evaluation, persistence, and replay", async () => {
     const { repository } = createRepository();
     const assignmentId = await startPrimary(repository);
+    const evidence = validEvidence();
     const first = await repository.submitQuest({
       idempotencyKey: "canonical-requirement-key",
       assignmentId,
       evidence: [
         {
-          ...validEvidence()[0],
-          requirementId: "  commit  ",
+          ...evidence[0],
+          requirementId: "  artifact  ",
         },
+        ...evidence.slice(1),
       ],
       selfReflection: reflection,
     });
@@ -299,12 +321,12 @@ describe("mock training repository", () => {
     const replay = await repository.submitQuest({
       idempotencyKey: "canonical-requirement-key",
       assignmentId,
-      evidence: validEvidence(),
+      evidence,
       selfReflection: reflection,
     });
 
     expect(first.submission.verificationStatus).toBe("verified");
-    expect(first.submission.evidence[0].requirementId).toBe("commit");
+    expect(first.submission.evidence[0].requirementId).toBe("artifact");
     expect(replay.submission.id).toBe(first.submission.id);
     expect(replay.evaluation).toEqual(first.evaluation);
   });
@@ -339,11 +361,6 @@ describe("mock training repository", () => {
   test("rejects an idempotency key reused for a different assignment", async () => {
     const { repository, memory } = createRepository();
     const assignmentId = await startPrimary(repository);
-    const before = await repository.getSnapshot();
-    const otherAssignment = Object.values(before.assignments).find(
-      (assignment) => assignment.id !== assignmentId,
-    );
-    if (!otherAssignment) throw new Error("missing secondary assignment");
     await repository.submitQuest({
       idempotencyKey: "assignment-conflict-key",
       assignmentId,
@@ -355,7 +372,7 @@ describe("mock training repository", () => {
     await expect(
       repository.submitQuest({
         idempotencyKey: "assignment-conflict-key",
-        assignmentId: otherAssignment.id,
+        assignmentId: "another-assignment",
         evidence: validEvidence(),
         selfReflection: reflection,
       }),

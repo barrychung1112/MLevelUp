@@ -5,35 +5,28 @@ import { useId, useState, type FormEvent } from "react";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 
-import type {
-  GoalOptionView,
-  LoadableViewProps,
-  TrainingContractView,
-} from "../view-models";
+import type { GoalOptionView, LoadableViewProps } from "../view-models";
 
-type OnboardingValues = {
+export type OnboardingValues = {
   goalId: string;
-  contractId: string;
   weeklyMinutes: number;
 };
 
 type OnboardingFlowProps = LoadableViewProps & {
   goals: readonly GoalOptionView[];
-  contracts: readonly TrainingContractView[];
   onSubmit: (values: OnboardingValues) => void;
   isSubmitting?: boolean;
   submitError?: string;
   successMessage?: string;
 };
 
-type FormErrors = Partial<Record<"goal" | "contract" | "weeklyMinutes", string>>;
+type FormErrors = Partial<Record<"goal" | "weeklyMinutes", string>>;
 
 const controlClass =
   "min-h-11 rounded-sm border border-command-border bg-command-bg/80 px-3 text-base text-command-text outline-none transition-[border-color,box-shadow] hover:border-command-muted/70 focus-visible:border-command-cyan focus-visible:shadow-[0_0_0_3px_rgba(77,231,255,0.12)]";
 
 export function OnboardingFlow({
   goals,
-  contracts,
   onSubmit,
   isSubmitting = false,
   submitError,
@@ -43,14 +36,13 @@ export function OnboardingFlow({
 }: OnboardingFlowProps) {
   const formId = useId();
   const [goalId, setGoalId] = useState("");
-  const [contractId, setContractId] = useState("");
   const [weeklyMinutes, setWeeklyMinutes] = useState("");
   const [errors, setErrors] = useState<FormErrors>({});
 
-  if (status === "loading") return <p role="status" className="text-command-muted">正在載入訓練契約…</p>;
+  if (status === "loading") return <p role="status" className="text-command-muted">正在同步訓練終端…</p>;
   if (status === "error") return <p role="alert" className="text-command-danger">{errorMessage}</p>;
-  if (goals.length === 0 || contracts.length === 0) {
-    return <EmptyState title="目前沒有可用的訓練設定。" description="請稍後再回到訓練終端。" />;
+  if (goals.length === 0) {
+    return <EmptyState title="目前沒有可用的訓練目標。" description="請稍後再回到訓練終端。" />;
   }
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -58,32 +50,27 @@ export function OnboardingFlow({
     const nextErrors: FormErrors = {};
     const minutes = Number(weeklyMinutes);
     if (!goalId) nextErrors.goal = "請選擇訓練目標";
-    if (!contractId) nextErrors.contract = "請選擇訓練契約";
     if (!Number.isFinite(minutes) || minutes <= 0) {
       nextErrors.weeklyMinutes = "每週投入時間必須大於 0 分鐘";
     }
     setErrors(nextErrors);
-    if (Object.keys(nextErrors).length === 0) onSubmit({ goalId, contractId, weeklyMinutes: minutes });
+    if (Object.keys(nextErrors).length === 0) onSubmit({ goalId, weeklyMinutes: minutes });
   }
 
   const goalErrorId = `${formId}-goal-error`;
-  const contractErrorId = `${formId}-contract-error`;
   const weeklyErrorId = `${formId}-weekly-error`;
 
   return (
-    <section aria-labelledby="onboarding-title" className="mx-auto max-w-4xl space-y-8">
-      <header className="space-y-2">
-        <p className="text-sm uppercase tracking-[0.24em] text-command-cyan">Training contract</p>
-        <h1 id="onboarding-title" className="text-3xl font-semibold text-command-text">建立你的訓練契約</h1>
-        <p className="max-w-2xl text-command-muted">選擇目標、節奏與每週投入時間。你之後仍可在個人設定中調整。</p>
+    <section aria-labelledby="onboarding-title" className="mx-auto max-w-3xl space-y-8">
+      <header className="space-y-3 border-l-2 border-command-cyan pl-5">
+        <p className="font-data text-xs uppercase tracking-[0.24em] text-command-cyan">Adaptive training protocol</p>
+        <h1 id="onboarding-title" className="font-display text-3xl font-semibold text-command-text">設定你的訓練座標</h1>
+        <p className="max-w-2xl leading-7 text-command-muted">
+          系統會依照你的成果與時間，自動派發目前可承受範圍內最難的任務。你不需要選擇難度。
+        </p>
       </header>
 
-      <form className="space-y-8" noValidate onSubmit={handleSubmit}>
-        {Object.keys(errors).length > 0 ? (
-          <p role="alert" className="border border-command-danger/50 bg-command-danger/10 p-4 text-command-danger">
-            請修正標示的訓練設定。
-          </p>
-        ) : null}
+      <form className="command-panel space-y-7 border border-command-border bg-command-surface/90 p-6" noValidate onSubmit={handleSubmit}>
         {submitError ? <p role="alert" className="text-sm text-command-danger">{submitError}</p> : null}
         {successMessage ? <p role="status" className="text-sm text-command-success">{successMessage}</p> : null}
 
@@ -106,42 +93,11 @@ export function OnboardingFlow({
           {errors.goal ? <span id={goalErrorId} className="text-xs font-medium text-command-danger">{errors.goal}</span> : null}
         </label>
 
-        <fieldset
-          className="space-y-3"
-          aria-invalid={errors.contract ? true : undefined}
-          aria-describedby={errors.contract ? contractErrorId : undefined}
-        >
-          <legend className="text-sm font-medium text-command-text">訓練契約</legend>
-          <div className="grid gap-3 md:grid-cols-3">
-            {contracts.map((contract) => (
-              <label key={contract.id} className="cursor-pointer rounded-sm border border-command-border bg-command-surface/92 p-4 transition-colors focus-within:border-command-cyan">
-                <input
-                  className="mr-2 size-4 accent-command-cyan"
-                  type="radio"
-                  aria-label={contract.label}
-                  aria-describedby={errors.contract ? contractErrorId : undefined}
-                  name="training-contract"
-                  value={contract.id}
-                  checked={contractId === contract.id}
-                  onChange={(event) => {
-                    setContractId(event.target.value);
-                    setErrors((current) => ({ ...current, contract: undefined }));
-                  }}
-                />
-                <span className="font-semibold text-command-text">{contract.label}</span>
-                <span className="mt-3 block text-sm text-command-cyan">{contract.timeCommitment}</span>
-                <span className="mt-1 block text-sm text-command-muted">{contract.description}</span>
-              </label>
-            ))}
-          </div>
-          {errors.contract ? <p id={contractErrorId} className="text-xs font-medium text-command-danger">{errors.contract}</p> : null}
-        </fieldset>
-
         <label className="grid gap-2 text-sm font-medium text-command-text">
-          每週投入分鐘數
+          每週可投入分鐘
           <input
             className={controlClass}
-            aria-label="每週投入分鐘數"
+            aria-label="每週可投入分鐘"
             type="number"
             min="1"
             inputMode="numeric"
@@ -153,11 +109,12 @@ export function OnboardingFlow({
               setErrors((current) => ({ ...current, weeklyMinutes: undefined }));
             }}
           />
+          <span className="text-xs font-normal text-command-muted">每日預算以每週五個訓練日計算，範圍為 30–180 分鐘。</span>
           {errors.weeklyMinutes ? <span id={weeklyErrorId} className="text-xs font-medium text-command-danger">{errors.weeklyMinutes}</span> : null}
         </label>
 
         <Button type="submit" loading={isSubmitting} disabled={isSubmitting}>
-          建立訓練契約
+          開始第一項挑戰
         </Button>
       </form>
     </section>

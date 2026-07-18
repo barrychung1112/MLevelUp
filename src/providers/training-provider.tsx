@@ -36,6 +36,7 @@ export type TrainingContextValue = {
   commandStatus: TrainingCommandStatus;
   commandError: string | null;
   commandSuccess: string | null;
+  acceptChallenge(): Promise<TrainingState>;
   completeOnboarding(input: CompleteOnboardingInput): Promise<TrainingState>;
   updateProfile(input: UpdateProfileInput): Promise<TrainingState>;
   startQuest(assignmentId: string): Promise<TrainingState>;
@@ -203,6 +204,16 @@ export function TrainingProvider({
     [enqueue],
   );
 
+  const acceptChallenge = useCallback(
+    () =>
+      enqueue(
+        (repository) => repository.acceptChallenge(),
+        (nextSnapshot) => nextSnapshot,
+        "挑戰誓約已確認。",
+      ),
+    [enqueue],
+  );
+
   const updateProfile = useCallback(
     (input: UpdateProfileInput) =>
       enqueue(
@@ -257,6 +268,7 @@ export function TrainingProvider({
       commandStatus,
       commandError,
       commandSuccess,
+      acceptChallenge,
       completeOnboarding,
       updateProfile,
       startQuest,
@@ -271,6 +283,7 @@ export function TrainingProvider({
       commandStatus,
       commandError,
       commandSuccess,
+      acceptChallenge,
       completeOnboarding,
       updateProfile,
       startQuest,

@@ -68,13 +68,46 @@ function createClient(rows: Record<string, unknown[]>, singles: Record<string, u
           return builder;
         },
         update: () => ({ eq: async () => ({ data: null, error: null }) }),
-        upsert: async () => ({ data: null, error: null }),
+        upsert: async (value?: unknown) => {
+          void value;
+          return { data: null, error: null };
+        },
       };
     },
   };
 }
 
 describe("SupabaseTrainingRepository", () => {
+  it("persists the courage oath timestamp", async () => {
+    const profileUpserts: unknown[] = [];
+    const client = createClient({
+      quests: [questRow], resources: [resourceRow], skill_stats: [], quest_assignments: [],
+      submissions: [], feedback: [], portfolio_artifacts: [], agent_runs: [],
+    });
+    const originalFrom = client.from;
+    client.from = (table: string) => {
+      const tableClient = originalFrom(table);
+      return {
+        ...tableClient,
+        upsert: async (value: unknown) => {
+          if (table === "profiles") profileUpserts.push(value);
+          return { data: null, error: null };
+        },
+      };
+    };
+    const repository = new SupabaseTrainingRepository({
+      client: client as never,
+      clock: { now: () => "2026-07-17T05:00:00.000Z" },
+      ids: { next: () => "00000000-0000-4000-8000-000000000001" },
+    });
+
+    await repository.acceptChallenge();
+
+    expect(profileUpserts).toContainEqual(
+      expect.objectContaining({ challenge_accepted_at: "2026-07-17T05:00:00.000Z" }),
+    );
+  });
+
   it("maps an empty user account into a usable training snapshot", async () => {
     const repository = new SupabaseTrainingRepository({
       client: createClient({

@@ -257,6 +257,25 @@ export function createAssignmentsForContract(
   );
 }
 
+export function createCourageAssignment(
+  now: string,
+  timezone = DEFAULT_TIMEZONE,
+): Record<string, QuestAssignment> {
+  const assignedDate = localDateForInstant(now, timezone);
+  const questId = "quest-courage-challenge";
+  const id = `assignment-${questId}-${assignedDate}`;
+  return {
+    [id]: {
+      id,
+      questId,
+      assignedDate,
+      slot: "primary",
+      status: "assigned",
+      assignedAt: now,
+    },
+  };
+}
+
 export function createTrainingSeed(
   now: string,
   timezone = DEFAULT_TIMEZONE,

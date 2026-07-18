@@ -21,7 +21,11 @@ import { transitionAssignment } from "@/domain/training/state-machine";
 import type { TrainingState } from "@/domain/training/types";
 
 import { LocalTrainingStorage } from "./local-storage";
-import { createAssignmentsForContract, createTrainingSeed } from "./seed";
+import {
+  createAssignmentsForContract,
+  createCourageAssignment,
+  createTrainingSeed,
+} from "./seed";
 
 interface SubmissionRequestPayload {
   assignmentId: string;
@@ -93,6 +97,13 @@ export class MockTrainingRepository implements DemoTrainingRepository {
     return this.readState();
   }
 
+  async acceptChallenge(): Promise<TrainingState> {
+    const now = this.dependencies.clock.now();
+    const next = this.readState();
+    next.profile.challengeAcceptedAt ??= now;
+    return this.commit(next, now);
+  }
+
   async completeOnboarding(
     input: CompleteOnboardingInput,
   ): Promise<TrainingState> {
@@ -104,11 +115,7 @@ export class MockTrainingRepository implements DemoTrainingRepository {
       ...parsedInput,
       onboardingCompleted: true,
     });
-    next.assignments = createAssignmentsForContract(
-      parsedInput.contract,
-      now,
-      parsedInput.timezone,
-    );
+    next.assignments = createCourageAssignment(now, parsedInput.timezone);
     return this.commit(next, now);
   }
 

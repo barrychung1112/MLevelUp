@@ -325,7 +325,9 @@ export class SupabaseTrainingRepository implements DemoTrainingRepository {
   private assignmentsFor(contract: UserProfile["contract"], quests: Record<string, Quest>, now: string, timezone: string): QuestAssignment[] {
     const assignedDate = localDateForInstant(now, timezone);
     return Object.values(quests)
-      .filter((quest) => quest.trainingContract === contract)
+      .filter(
+        (quest) => quest.purpose === "training" && quest.trainingContract === contract,
+      )
       .map((quest, index) => ({
         id: this.dependencies.ids.next("assignment"),
         questId: quest.id,
@@ -468,12 +470,23 @@ export class SupabaseTrainingRepository implements DemoTrainingRepository {
         onboardingCompleted: true,
       }),
     });
-    next.assignments = Object.fromEntries(
-      this.assignmentsFor(parsedInput.contract, next.quests, now, parsedInput.timezone).map((assignment) => [
-        assignment.id,
-        assignment,
-      ]),
-    );
+    const courageAssignment: QuestAssignment = {
+      id: this.dependencies.ids.next("assignment"),
+      questId: "quest-courage-challenge",
+      assignedDate: localDateForInstant(now, parsedInput.timezone),
+      slot: "primary",
+      status: "assigned",
+      assignedAt: now,
+    };
+    next.assignments = { [courageAssignment.id]: courageAssignment };
+    await this.persistState(next);
+    return this.getSnapshot();
+  }
+
+  async acceptChallenge(): Promise<TrainingState> {
+    const next = await this.getSnapshot();
+    if (next.profile.challengeAcceptedAt) return next;
+    next.profile.challengeAcceptedAt = this.dependencies.clock.now();
     await this.persistState(next);
     return this.getSnapshot();
   }
