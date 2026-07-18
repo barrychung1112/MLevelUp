@@ -318,6 +318,12 @@ export const SubmissionFeedbackSchema = z.strictObject({
   scoreBreakdown: EvaluationScoreBreakdownSchema.optional(),
   xpAwarded: z.number().int().nonnegative(),
   skillDeltas: SkillScoreDeltasSchema,
+  source: z.enum(["demo", "deterministic", "ai", "ai_fallback"]).default("demo"),
+  model: z.string().min(1).max(120).optional(),
+  promptVersion: z.string().min(1).max(80).optional(),
+  aiConfidence: z.number().min(0).max(1).optional(),
+  adjustmentExplanation: z.string().min(1).max(800).optional(),
+  recommendedQuestId: z.string().min(1).max(120).optional(),
   createdAt: IsoTimestampSchema,
 });
 
@@ -360,7 +366,15 @@ export const AgentStatusSchema = z.strictObject({
   status: z.enum(["idle", "running", "completed", "degraded"]),
   lastRunAt: IsoTimestampSchema,
   summary: z.string().min(1),
-  isMock: z.literal(true),
+  isMock: z.boolean(),
+  model: z.string().min(1).max(120).optional(),
+  promptVersion: z.string().min(1).max(80).optional(),
+  latencyMs: z.number().int().nonnegative().optional(),
+  inputTokens: z.number().int().nonnegative().optional(),
+  outputTokens: z.number().int().nonnegative().optional(),
+  errorCode: z.string().min(1).max(80).optional(),
+  fallbackUsed: z.boolean().optional(),
+  traceId: z.string().min(1).max(120).optional(),
 });
 
 export const PortfolioArtifactSchema = z.strictObject({

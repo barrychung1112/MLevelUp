@@ -253,6 +253,7 @@ export function mapFeedbackRow(row: FeedbackRow): SubmissionFeedback {
     scoreBreakdown: row.score_breakdown ?? undefined,
     xpAwarded: row.xp_awarded,
     skillDeltas: row.skill_deltas,
+    source: "demo",
     createdAt: row.created_at,
   };
 
@@ -281,6 +282,6 @@ export function mapAgentRunRow(row: AgentRunRow): AgentStatus {
     status: row.status,
     lastRunAt: row.completed_at ?? row.started_at ?? row.created_at,
     summary: row.summary,
-    isMock: true,
+    isMock: row.is_mock,
   };
 }

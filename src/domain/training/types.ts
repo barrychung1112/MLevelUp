@@ -201,6 +201,12 @@ export interface SubmissionFeedback {
   scoreBreakdown?: EvaluationScoreBreakdown;
   xpAwarded: number;
   skillDeltas: SkillScoreDeltas;
+  source: "demo" | "deterministic" | "ai" | "ai_fallback";
+  model?: string;
+  promptVersion?: string;
+  aiConfidence?: number;
+  adjustmentExplanation?: string;
+  recommendedQuestId?: string;
   createdAt: string;
 }
 
@@ -240,7 +246,15 @@ export interface AgentStatus {
   status: "idle" | "running" | "completed" | "degraded";
   lastRunAt: string;
   summary: string;
-  isMock: true;
+  isMock: boolean;
+  model?: string;
+  promptVersion?: string;
+  latencyMs?: number;
+  inputTokens?: number;
+  outputTokens?: number;
+  errorCode?: string;
+  fallbackUsed?: boolean;
+  traceId?: string;
 }
 
 export interface PortfolioArtifact {

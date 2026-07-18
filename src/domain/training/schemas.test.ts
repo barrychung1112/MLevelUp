@@ -3,15 +3,27 @@ import { describe, expect, test } from "vitest";
 import { createTrainingSeed } from "@/mocks/training/seed";
 
 import {
+  AgentStatusSchema,
   CompleteOnboardingInputSchema,
   PortfolioArtifactSchema,
   QuestSchema,
   ResourceSchema,
+  SubmissionFeedbackSchema,
   SubmitQuestInputSchema,
   TrainingStateSchema,
   UpdateProfileInputSchema,
   UserProfileSchema,
 } from "./schemas";
+
+const zeroDeltas = {
+  dataHandling: 0,
+  modeling: 0,
+  evaluation: 0,
+  engineering: 0,
+  researchSense: 0,
+  productThinking: 0,
+  communication: 0,
+};
 
 const validQuest = {
   id: "quest-baseline",
@@ -363,5 +375,71 @@ describe("strict domain schemas", () => {
         createdAt: "2026-07-16T16:00:00.000Z",
       }),
     ).toThrow(/https/i);
+  });
+});
+
+describe("Phase 3 feedback schemas", () => {
+  test("keeps Phase 2 feedback valid while accepting AI provenance", () => {
+    const base = {
+      id: "feedback-1",
+      kind: "submission" as const,
+      submissionId: "submission-1",
+      summary: "Submission reviewed.",
+      strengths: [],
+      improvements: [],
+      nextActions: [],
+      xpAwarded: 0,
+      skillDeltas: zeroDeltas,
+      createdAt: "2026-07-18T18:00:00.000Z",
+    };
+
+    expect(SubmissionFeedbackSchema.parse(base).source).toBe("demo");
+    expect(
+      SubmissionFeedbackSchema.parse({
+        ...base,
+        source: "ai",
+        model: "gpt-5.6-terra",
+        promptVersion: "phase3-v1",
+        aiConfidence: 0.82,
+        adjustmentExplanation: "Maintain difficulty and split the checkpoint.",
+        recommendedQuestId: "quest-next",
+      }).source,
+    ).toBe("ai");
+  });
+
+  test("rejects invalid feedback provenance", () => {
+    expect(() =>
+      SubmissionFeedbackSchema.parse({
+        id: "feedback-1",
+        kind: "submission",
+        summary: "Submission reviewed.",
+        strengths: [],
+        improvements: [],
+        nextActions: [],
+        xpAwarded: 0,
+        skillDeltas: zeroDeltas,
+        source: "untrusted",
+        createdAt: "2026-07-18T18:00:00.000Z",
+      }),
+    ).toThrow();
+  });
+
+  test("accepts real agent diagnostics without breaking mock statuses", () => {
+    expect(
+      AgentStatusSchema.parse({
+        agentType: "coordinator",
+        status: "completed",
+        lastRunAt: "2026-07-18T18:00:00.000Z",
+        summary: "Feedback generated.",
+        isMock: false,
+        model: "gpt-5.6-terra",
+        promptVersion: "phase3-v1",
+        latencyMs: 450,
+        inputTokens: 200,
+        outputTokens: 80,
+        fallbackUsed: false,
+        traceId: "trace-1",
+      }).isMock,
+    ).toBe(false);
   });
 });
