@@ -62,6 +62,9 @@ export interface EvidenceRequirement {
 }
 
 export type SkillWeights = Record<SkillKey, number>;
+export type TargetRole = "machine-learning-engineer";
+export type TrainingStatus = "normal" | "failure_review" | "recovery";
+export type QuestScope = "main" | "daily" | "penalty" | "calibration";
 
 export interface Quest {
   id: string;
@@ -81,6 +84,11 @@ export interface Quest {
   skillWeights: SkillWeights;
   expectedArtifactType?: ArtifactType;
   resourceIds: string[];
+  scope: QuestScope;
+  durationDays: number;
+  executionSteps: string[];
+  successMetrics: string[];
+  outOfScope: string[];
 }
 
 export interface UserProfile {
@@ -92,6 +100,12 @@ export interface UserProfile {
   timezone: string;
   onboardingCompleted: boolean;
   challengeAcceptedAt: string | null;
+  targetRole: TargetRole;
+  dailyMinutes: 300;
+  consecutiveFailureDays: number;
+  trainingStatus: TrainingStatus;
+  recoveryStartedAt: string | null;
+  recoveryDeadline: string | null;
 }
 
 export type VerificationStatus =
@@ -154,6 +168,11 @@ export interface QuestAssignment {
   submittedAt?: string;
   completedAt?: string;
   latestSubmissionId?: string;
+  parentAssignmentId?: string;
+  checkpointIndex?: number;
+  dueAt?: string;
+  expiredAt?: string;
+  penaltySourceAssignmentId?: string;
 }
 
 export interface Submission {
@@ -206,6 +225,12 @@ export interface Resource {
   relevance: number;
   freshness: number;
   credibility: number;
+  prerequisites: string[];
+  requiredTools: string[];
+  costTier: "free" | "paid";
+  availabilityStatus: "available" | "unavailable" | "unchecked";
+  lastCheckedAt: string | null;
+  fallbackResourceId?: string;
 }
 
 export type AgentType = "coordinator" | "learningStrategist" | "resourceCollector" | "adjuster";
@@ -234,7 +259,7 @@ export interface PortfolioArtifact {
 
 export interface ActivityEvent {
   id: string;
-  type: "questCompleted" | "submissionNeedsRevision" | "artifactCreated";
+  type: "questCompleted" | "submissionNeedsRevision" | "artifactCreated" | "trainingReset";
   sourceId: string;
   title: string;
   summary: string;

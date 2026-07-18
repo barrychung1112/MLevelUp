@@ -34,6 +34,11 @@ export type QuestRow = {
   skill_weights: Quest["skillWeights"];
   expected_artifact_type: Quest["expectedArtifactType"] | null;
   resource_ids: string[];
+  scope?: Quest["scope"];
+  duration_days?: number;
+  execution_steps?: string[];
+  success_metrics?: string[];
+  out_of_scope?: string[];
 };
 
 export type ResourceRow = {
@@ -48,6 +53,12 @@ export type ResourceRow = {
   relevance: number;
   freshness: number;
   credibility: number;
+  prerequisites?: string[];
+  required_tools?: string[];
+  cost_tier?: Resource["costTier"];
+  availability_status?: Resource["availabilityStatus"];
+  last_checked_at?: string | null;
+  fallback_resource_id?: string | null;
 };
 
 export type SkillStatRow = {
@@ -68,6 +79,11 @@ export type AssignmentRow = {
   submitted_at?: string | null;
   completed_at?: string | null;
   latest_submission_id?: string | null;
+  parent_assignment_id?: string | null;
+  checkpoint_index?: number | null;
+  due_at?: string | null;
+  expired_at?: string | null;
+  penalty_source_assignment_id?: string | null;
 };
 
 export type SubmissionRow = {
@@ -142,6 +158,11 @@ export function mapQuestRow(row: QuestRow): Quest {
     skillWeights: row.skill_weights,
     expectedArtifactType: row.expected_artifact_type ?? undefined,
     resourceIds: row.resource_ids,
+    scope: row.scope ?? (row.purpose === "calibration" ? "calibration" : "daily"),
+    durationDays: row.duration_days ?? 1,
+    executionSteps: row.execution_steps ?? [row.instructions],
+    successMetrics: row.success_metrics ?? row.acceptance_criteria,
+    outOfScope: row.out_of_scope ?? [],
   });
 }
 
@@ -158,6 +179,12 @@ export function mapResourceRow(row: ResourceRow): Resource {
     relevance: row.relevance,
     freshness: row.freshness,
     credibility: row.credibility,
+    prerequisites: row.prerequisites ?? [],
+    requiredTools: row.required_tools ?? [],
+    costTier: row.cost_tier ?? "free",
+    availabilityStatus: row.availability_status ?? "available",
+    lastCheckedAt: row.last_checked_at ?? null,
+    fallbackResourceId: row.fallback_resource_id ?? undefined,
   });
 }
 
@@ -189,6 +216,11 @@ export function mapAssignmentRow(row: AssignmentRow): QuestAssignment {
     submittedAt: row.submitted_at ?? undefined,
     completedAt: row.completed_at ?? undefined,
     latestSubmissionId: row.latest_submission_id ?? undefined,
+    parentAssignmentId: row.parent_assignment_id ?? undefined,
+    checkpointIndex: row.checkpoint_index ?? undefined,
+    dueAt: row.due_at ?? undefined,
+    expiredAt: row.expired_at ?? undefined,
+    penaltySourceAssignmentId: row.penalty_source_assignment_id ?? undefined,
   };
 }
 

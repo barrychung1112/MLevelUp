@@ -114,6 +114,11 @@ export const QuestSchema = z.strictObject({
   skillWeights: SkillWeightsSchema,
   expectedArtifactType: ArtifactTypeSchema.optional(),
   resourceIds: z.array(z.string().min(1)),
+  scope: z.enum(["main", "daily", "penalty", "calibration"]),
+  durationDays: z.number().int().positive(),
+  executionSteps: z.array(z.string().min(1)).min(1),
+  successMetrics: z.array(z.string().min(1)).min(1),
+  outOfScope: z.array(z.string().min(1)),
 });
 
 function isValidTimeZone(value: string): boolean {
@@ -140,6 +145,12 @@ export const UserProfileSchema = z.strictObject({
   timezone: TimeZoneSchema,
   onboardingCompleted: z.boolean(),
   challengeAcceptedAt: IsoTimestampSchema.nullable(),
+  targetRole: z.literal("machine-learning-engineer"),
+  dailyMinutes: z.literal(300),
+  consecutiveFailureDays: z.number().int().nonnegative(),
+  trainingStatus: z.enum(["normal", "failure_review", "recovery"]),
+  recoveryStartedAt: IsoTimestampSchema.nullable(),
+  recoveryDeadline: IsoTimestampSchema.nullable(),
 });
 
 const MAX_EVIDENCE_URL_LENGTH = 2_048;
@@ -265,6 +276,11 @@ export const QuestAssignmentSchema = z.strictObject({
   submittedAt: IsoTimestampSchema.optional(),
   completedAt: IsoTimestampSchema.optional(),
   latestSubmissionId: z.string().min(1).optional(),
+  parentAssignmentId: z.string().min(1).optional(),
+  checkpointIndex: z.number().int().nonnegative().optional(),
+  dueAt: IsoTimestampSchema.optional(),
+  expiredAt: IsoTimestampSchema.optional(),
+  penaltySourceAssignmentId: z.string().min(1).optional(),
 });
 
 export const SubmissionSchema = z.strictObject({
@@ -322,6 +338,12 @@ export const ResourceSchema = z.strictObject({
   relevance: z.number().min(0).max(100),
   freshness: z.number().min(0).max(100),
   credibility: z.number().min(0).max(100),
+  prerequisites: z.array(z.string().min(1)),
+  requiredTools: z.array(z.string().min(1)),
+  costTier: z.enum(["free", "paid"]),
+  availabilityStatus: z.enum(["available", "unavailable", "unchecked"]),
+  lastCheckedAt: IsoTimestampSchema.nullable(),
+  fallbackResourceId: z.string().min(1).optional(),
 });
 
 export const AgentStatusSchema = z.strictObject({
@@ -358,7 +380,7 @@ export const PortfolioArtifactSchema = z.strictObject({
 
 export const ActivityEventSchema = z.strictObject({
   id: z.string().min(1),
-  type: z.enum(["questCompleted", "submissionNeedsRevision", "artifactCreated"]),
+  type: z.enum(["questCompleted", "submissionNeedsRevision", "artifactCreated", "trainingReset"]),
   sourceId: z.string().min(1),
   title: z.string().min(1),
   summary: z.string().min(1),

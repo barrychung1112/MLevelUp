@@ -17,6 +17,11 @@ const validQuest = {
   id: "quest-baseline",
   trainingContract: "standard",
   purpose: "training",
+  scope: "daily",
+  durationDays: 1,
+  executionSteps: ["Run the evaluation exercise"],
+  successMetrics: ["Report one validation metric"],
+  outOfScope: [],
   title: "Build a baseline model",
   summary: "Train and evaluate a reproducible baseline.",
   instructions: "Create a baseline and document the validation strategy.",
@@ -90,8 +95,46 @@ describe("strict domain schemas", () => {
         timezone: "America/Los_Angeles",
         onboardingCompleted: false,
         challengeAcceptedAt: "2026-07-18T06:30:00+00:00",
+        targetRole: "machine-learning-engineer",
+        dailyMinutes: 300,
+        consecutiveFailureDays: 0,
+        trainingStatus: "normal",
+        recoveryStartedAt: null,
+        recoveryDeadline: null,
       }).challengeAcceptedAt,
     ).toBe("2026-07-18T06:30:00+00:00");
+  });
+
+  test("accepts fixed ML engineer training and mission lifecycle fields", () => {
+    const state = createTrainingSeed("2026-07-18T08:00:00.000Z");
+    expect(UserProfileSchema.parse({
+      ...state.profile,
+      targetRole: "machine-learning-engineer",
+      dailyMinutes: 300,
+      consecutiveFailureDays: 0,
+      trainingStatus: "normal",
+      recoveryStartedAt: null,
+      recoveryDeadline: null,
+    })).toMatchObject({ dailyMinutes: 300, trainingStatus: "normal" });
+
+    expect(QuestSchema.parse({
+      ...validQuest,
+      scope: "main",
+      durationDays: 5,
+      executionSteps: ["Inspect schema", "Run EDA", "Document findings"],
+      successMetrics: ["At least three data-quality findings"],
+      outOfScope: ["Production deployment"],
+    })).toMatchObject({ scope: "main", durationDays: 5 });
+
+    expect(ResourceSchema.parse({
+      ...state.resources[0],
+      prerequisites: ["Python basics"],
+      requiredTools: ["Python"],
+      costTier: "free",
+      availabilityStatus: "available",
+      lastCheckedAt: "2026-07-18T08:00:00.000Z",
+      fallbackResourceId: state.resources[1].id,
+    })).toMatchObject({ availabilityStatus: "available" });
   });
 
   test("accepts bounded resource quality signals", () => {
@@ -108,6 +151,11 @@ describe("strict domain schemas", () => {
         relevance: 92,
         freshness: 81,
         credibility: 88,
+        prerequisites: ["Python basics"],
+        requiredTools: ["Python"],
+        costTier: "free",
+        availabilityStatus: "available",
+        lastCheckedAt: "2026-07-18T08:00:00.000Z",
       }),
     ).toMatchObject({ relevance: 92, freshness: 81, credibility: 88 });
   });

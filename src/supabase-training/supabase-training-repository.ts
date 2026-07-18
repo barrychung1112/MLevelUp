@@ -88,6 +88,12 @@ type ProfileRow = {
   timezone: string;
   onboarding_completed: boolean;
   challenge_accepted_at: string | null;
+  target_role?: UserProfile["targetRole"];
+  daily_minutes?: number;
+  consecutive_failure_days?: number;
+  training_status?: UserProfile["trainingStatus"];
+  recovery_started_at?: string | null;
+  recovery_deadline?: string | null;
 };
 
 type ProgressRow = {
@@ -125,6 +131,12 @@ function defaultProfile(userId: string): UserProfile {
     timezone: "America/Los_Angeles",
     onboardingCompleted: false,
     challengeAcceptedAt: null,
+    targetRole: "machine-learning-engineer",
+    dailyMinutes: 300,
+    consecutiveFailureDays: 0,
+    trainingStatus: "normal",
+    recoveryStartedAt: null,
+    recoveryDeadline: null,
   };
 }
 
@@ -278,6 +290,12 @@ export class SupabaseTrainingRepository implements DemoTrainingRepository {
           timezone: profileRow.timezone,
           onboardingCompleted: profileRow.onboarding_completed,
           challengeAcceptedAt: profileRow.challenge_accepted_at,
+          targetRole: profileRow.target_role ?? "machine-learning-engineer",
+          dailyMinutes: profileRow.daily_minutes ?? 300,
+          consecutiveFailureDays: profileRow.consecutive_failure_days ?? 0,
+          trainingStatus: profileRow.training_status ?? "normal",
+          recoveryStartedAt: profileRow.recovery_started_at ?? null,
+          recoveryDeadline: profileRow.recovery_deadline ?? null,
         })
       : defaultProfile(userId);
 
