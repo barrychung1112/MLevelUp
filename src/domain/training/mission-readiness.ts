@@ -1,4 +1,5 @@
 import type { Quest, Resource } from "./types";
+import { isMissionEligibleResource } from "../resources/resource-quality";
 
 export type MissionReadinessFailure =
   | "steps_required"
@@ -16,10 +17,7 @@ export interface MissionReadinessResult {
 function isSuitableResource(resource: Resource | undefined): resource is Resource {
   return Boolean(
     resource &&
-      resource.relevance >= 60 &&
-      resource.credibility >= 60 &&
-      resource.costTier === "free" &&
-      resource.availabilityStatus === "available",
+      isMissionEligibleResource(resource, new Date().toISOString()),
   );
 }
 

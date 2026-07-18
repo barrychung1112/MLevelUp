@@ -365,9 +365,19 @@ export const ResourceSchema = z.strictObject({
   prerequisites: z.array(z.string().min(1)),
   requiredTools: z.array(z.string().min(1)),
   costTier: z.enum(["free", "paid"]),
-  availabilityStatus: z.enum(["available", "unavailable", "unchecked"]),
+  availabilityStatus: z.enum(["available", "unavailable", "unchecked", "stale", "manual_review"]),
   lastCheckedAt: IsoTimestampSchema.nullable(),
   fallbackResourceId: z.string().min(1).optional(),
+  source: z.enum(["github", "arxiv", "official", "manual"]).optional(),
+  externalId: z.string().min(1).max(240).optional(),
+  canonicalUrl: z.url().optional(),
+  contentFingerprint: z.string().regex(/^[a-f0-9]{64}$/u).optional(),
+  qualityScore: z.number().int().min(0).max(100).optional(),
+  taskFit: z.number().int().min(0).max(100).optional(),
+  publishedAt: IsoTimestampSchema.optional(),
+  updatedAt: IsoTimestampSchema.optional(),
+  ingestedAt: IsoTimestampSchema.optional(),
+  metadataVersion: z.string().min(1).max(80).optional(),
 });
 
 export const AgentStatusSchema = z.strictObject({
