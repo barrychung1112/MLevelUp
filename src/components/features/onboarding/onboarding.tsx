@@ -1,44 +1,57 @@
 "use client";
 
-import { useId, useState, type FormEvent } from "react";
+import { type FormEvent } from "react";
+
 import { Button } from "@/components/ui/button";
-import { EmptyState } from "@/components/ui/empty-state";
-import type { GoalOptionView, LoadableViewProps } from "../view-models";
+import type { LoadableViewProps } from "../view-models";
 
-export type OnboardingValues = { goalId: string; weeklyMinutes: number };
-type Props = LoadableViewProps & { goals: readonly GoalOptionView[]; onSubmit: (values: OnboardingValues) => void; isSubmitting?: boolean; submitError?: string; successMessage?: string };
-type FormErrors = Partial<Record<"goal" | "weeklyMinutes", string>>;
-const controlClass = "min-h-11 rounded-sm border border-command-border bg-command-bg/80 px-3 text-base text-command-text outline-none transition-[border-color,box-shadow] hover:border-command-muted/70 focus-visible:border-command-cyan focus-visible:shadow-[0_0_0_3px_rgba(77,231,255,0.12)]";
+export type OnboardingValues = { targetRole: "machine-learning-engineer" };
 
-export function OnboardingFlow({ goals, onSubmit, isSubmitting = false, submitError, successMessage, status = "ready", errorMessage = "無法載入訓練設定。" }: Props) {
-  const formId = useId();
-  const [goalId, setGoalId] = useState("");
-  const [weeklyMinutes, setWeeklyMinutes] = useState("");
-  const [errors, setErrors] = useState<FormErrors>({});
-  if (status === "loading") return <p role="status" className="text-command-muted">正在載入訓練設定…</p>;
-  if (status === "error") return <p role="alert" className="text-command-danger">{errorMessage}</p>;
-  if (goals.length === 0) return <EmptyState title="目前沒有可選目標" description="請稍後再開啟訓練設定。" />;
+type Props = LoadableViewProps & {
+  onSubmit: (values: OnboardingValues) => void;
+  isSubmitting?: boolean;
+  submitError?: string;
+  successMessage?: string;
+};
+
+export function OnboardingFlow({
+  onSubmit,
+  isSubmitting = false,
+  submitError,
+  successMessage,
+  status = "ready",
+  errorMessage = "無法載入訓練設定。",
+}: Props) {
+  if (status === "loading") return <p role="status">正在載入訓練設定…</p>;
+  if (status === "error") return <p role="alert">{errorMessage}</p>;
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    const nextErrors: FormErrors = {};
-    const minutes = Number(weeklyMinutes);
-    if (!goalId) nextErrors.goal = "請選擇訓練目標";
-    if (!Number.isFinite(minutes) || minutes <= 0) nextErrors.weeklyMinutes = "每週投入時間必須大於 0 分鐘";
-    setErrors(nextErrors);
-    if (Object.keys(nextErrors).length === 0) onSubmit({ goalId, weeklyMinutes: minutes });
+    onSubmit({ targetRole: "machine-learning-engineer" });
   }
 
-  const goalErrorId = `${formId}-goal-error`;
-  const weeklyErrorId = `${formId}-weekly-error`;
   return (
     <section aria-labelledby="onboarding-title" className="mx-auto max-w-3xl space-y-8">
-      <header className="space-y-3 border-l-2 border-command-cyan pl-5"><p className="font-data text-xs uppercase tracking-[0.24em] text-command-cyan">Adaptive training protocol</p><h1 id="onboarding-title" className="font-display text-3xl font-semibold text-command-text">設定你的訓練方向</h1><p className="max-w-2xl leading-7 text-command-muted">系統會先用「挑戰的勇氣」校準你的能力，再依照成果與可投入時間，自動選出最難但仍有機會完成的任務。</p></header>
-      <form className="command-panel space-y-7 border border-command-border bg-command-surface/90 p-6" noValidate onSubmit={handleSubmit}>
-        {submitError ? <p role="alert" className="text-sm text-command-danger">{submitError}</p> : null}{successMessage ? <p role="status" className="text-sm text-command-success">{successMessage}</p> : null}
-        <label className="grid gap-2 text-sm font-medium text-command-text">訓練目標<select className={controlClass} aria-label="訓練目標" value={goalId} aria-invalid={errors.goal ? true : undefined} aria-describedby={errors.goal ? goalErrorId : undefined} onChange={(event) => { setGoalId(event.target.value); setErrors((current) => ({ ...current, goal: undefined })); }}><option value="">選擇目標</option>{goals.map((goal) => <option key={goal.id} value={goal.id}>{goal.label}</option>)}</select>{errors.goal ? <span id={goalErrorId} className="text-xs font-medium text-command-danger">{errors.goal}</span> : null}</label>
-        <label className="grid gap-2 text-sm font-medium text-command-text">每週可投入分鐘<input className={controlClass} aria-label="每週可投入分鐘" type="number" min="1" inputMode="numeric" value={weeklyMinutes} aria-invalid={errors.weeklyMinutes ? true : undefined} aria-describedby={errors.weeklyMinutes ? weeklyErrorId : undefined} onChange={(event) => { setWeeklyMinutes(event.target.value); setErrors((current) => ({ ...current, weeklyMinutes: undefined })); }} /><span className="text-xs font-normal text-command-muted">系統會將時間換算成每日任務預算（30–180 分鐘）。</span>{errors.weeklyMinutes ? <span id={weeklyErrorId} className="text-xs font-medium text-command-danger">{errors.weeklyMinutes}</span> : null}</label>
-        <Button type="submit" loading={isSubmitting} disabled={isSubmitting}>開始第一項挑戰</Button>
+      <header className="space-y-3 border-l-2 border-command-cyan pl-5">
+        <p className="font-data text-xs uppercase tracking-[0.24em] text-command-cyan">
+          Training destination
+        </p>
+        <h1 id="onboarding-title" className="font-display text-3xl font-semibold text-command-text">
+          你想要成為什麼？
+        </h1>
+        <p className="text-command-muted">系統會依成果持續調整難度，不提供舒適模式。</p>
+      </header>
+      <form className="command-panel space-y-6 border border-command-border p-6" onSubmit={handleSubmit}>
+        {submitError ? <p role="alert" className="text-command-danger">{submitError}</p> : null}
+        {successMessage ? <p role="status" className="text-command-success">{successMessage}</p> : null}
+        <div className="border border-command-cyan/50 bg-command-cyan/5 p-5">
+          <p className="font-display text-xl font-semibold text-command-text">機器學習工程師</p>
+          <p className="mt-2 text-sm text-command-muted">每日固定 5 小時</p>
+          <p className="mt-3 text-sm leading-6 text-command-muted">
+            以真實實驗、工程成果、技術報告與作品集證據完成訓練。
+          </p>
+        </div>
+        <Button type="submit" loading={isSubmitting} disabled={isSubmitting}>開始訓練</Button>
       </form>
     </section>
   );

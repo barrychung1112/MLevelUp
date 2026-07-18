@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 
 import { useAuth } from "@/auth/auth-provider";
 import { CourageOathDialog } from "@/components/features/onboarding/courage-oath-dialog";
@@ -9,7 +10,6 @@ import { DEFAULT_TIMEZONE } from "@/mocks/training/seed";
 import { useTraining } from "@/providers/training-provider";
 
 import { TrainingPageShell } from "../_components/training-page-shell";
-import { GOALS } from "../_helpers/training-view-models";
 
 export default function OnboardingPage() {
   const router = useRouter();
@@ -20,19 +20,24 @@ export default function OnboardingPage() {
     training.snapshot !== null &&
     training.snapshot.profile.challengeAcceptedAt === null;
 
+  useEffect(() => {
+    if (training.status === "ready" && training.snapshot?.profile.onboardingCompleted) {
+      router.replace("/dashboard");
+    }
+  }, [router, training.snapshot?.profile.onboardingCompleted, training.status]);
+
   return (
     <TrainingPageShell>
       <OnboardingFlow
-        goals={GOALS}
         status={training.status === "ready" ? "ready" : training.status}
         errorMessage={training.loadError ?? undefined}
         isSubmitting={training.commandStatus === "submitting"}
         submitError={training.commandError ?? undefined}
         successMessage={training.commandSuccess ?? undefined}
-        onSubmit={() => {
+        onSubmit={(values) => {
           void training.completeOnboarding({
             displayName: "Demo Hunter",
-            targetRole: "machine-learning-engineer",
+            targetRole: values.targetRole,
             timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || DEFAULT_TIMEZONE,
           })
             .then((state) => {

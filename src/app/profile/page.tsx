@@ -7,7 +7,6 @@ import { ProfileSettings } from "@/components/features/profile/profile-settings"
 import { useTraining } from "@/providers/training-provider";
 
 import { TrainingPageShell } from "../_components/training-page-shell";
-import { GOALS } from "../_helpers/training-view-models";
 
 export default function ProfilePage() {
   const router = useRouter();
@@ -17,18 +16,12 @@ export default function ProfilePage() {
   return (
     <TrainingPageShell>
       <ProfileSettings
-        profile={profile ? { goalId: profile.goal, weeklyMinutes: profile.weeklyMinutes } : null}
-        goals={GOALS}
+        profile={profile ? { targetRoleLabel: "機器學習工程師", dailyMinutes: profile.dailyMinutes } : null}
         status={training.status === "ready" ? "ready" : training.status}
         errorMessage={training.loadError ?? undefined}
         isSubmitting={training.commandStatus === "submitting"}
         submitError={training.commandError ?? undefined}
         successMessage={training.commandSuccess ?? undefined}
-        onSave={(values) => {
-          void training
-            .updateProfile({ goal: values.goalId, weeklyMinutes: values.weeklyMinutes })
-            .catch(() => undefined);
-        }}
         onReset={() => {
           void training
             .resetDemo()

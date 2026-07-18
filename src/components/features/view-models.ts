@@ -96,8 +96,8 @@ export type ActivityView = {
 };
 
 export type ProfilePreferencesView = {
-  goalId: string;
-  weeklyMinutes: number;
+  targetRoleLabel: string;
+  dailyMinutes: number;
 };
 
 export type TrendPointView = {

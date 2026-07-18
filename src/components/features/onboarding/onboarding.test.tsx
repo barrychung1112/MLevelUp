@@ -3,35 +3,18 @@ import { describe, expect, test, vi } from "vitest";
 
 import { OnboardingFlow } from "./onboarding";
 
-const goals = [
-  { id: "job-ready", label: "成為能獨立工作的 ML Engineer" },
-  { id: "competition", label: "提升 Kaggle 實戰能力" },
-];
-
 describe("OnboardingFlow", () => {
-  test("collects a goal and weekly time without exposing difficulty choices", () => {
+  test("shows one fixed ML engineer target and no time or difficulty controls", () => {
     const onSubmit = vi.fn();
-    render(<OnboardingFlow goals={goals} onSubmit={onSubmit} />);
+    render(<OnboardingFlow onSubmit={onSubmit} />);
 
-    expect(screen.queryByText("簡單模式")).not.toBeInTheDocument();
-    expect(screen.queryByText("普通人模式")).not.toBeInTheDocument();
-    expect(screen.queryByText("超級戰士模式")).not.toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "你想要成為什麼？" })).toBeVisible();
+    expect(screen.getByText("機器學習工程師")).toBeVisible();
+    expect(screen.getByText("每日固定 5 小時")).toBeVisible();
+    expect(screen.queryByRole("combobox")).not.toBeInTheDocument();
+    expect(screen.queryByRole("spinbutton")).not.toBeInTheDocument();
 
-    fireEvent.change(screen.getByLabelText("訓練目標"), { target: { value: "job-ready" } });
-    fireEvent.change(screen.getByLabelText("每週可投入分鐘"), { target: { value: "600" } });
-    fireEvent.click(screen.getByRole("button", { name: "開始第一項挑戰" }));
-
-    expect(onSubmit).toHaveBeenCalledWith({ goalId: "job-ready", weeklyMinutes: 600 });
-  });
-
-  test("blocks missing goal and invalid weekly time", () => {
-    const onSubmit = vi.fn();
-    render(<OnboardingFlow goals={goals} onSubmit={onSubmit} />);
-
-    fireEvent.click(screen.getByRole("button", { name: "開始第一項挑戰" }));
-
-    expect(screen.getByText("請選擇訓練目標")).toBeVisible();
-    expect(screen.getByText("每週投入時間必須大於 0 分鐘")).toBeVisible();
-    expect(onSubmit).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByRole("button", { name: "開始訓練" }));
+    expect(onSubmit).toHaveBeenCalledWith({ targetRole: "machine-learning-engineer" });
   });
 });
