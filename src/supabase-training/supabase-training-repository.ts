@@ -22,7 +22,11 @@ import {
   UserProfileSchema,
 } from "@/domain/training/schemas";
 import { transitionAssignment } from "@/domain/training/state-machine";
-import { abandonTraining, beginRecovery } from "@/domain/training/reconcile-training";
+import {
+  abandonTraining,
+  beginRecovery,
+  reconcileTrainingState,
+} from "@/domain/training/reconcile-training";
 import type {
   ActivityEvent,
   AgentStatus,
@@ -339,8 +343,18 @@ export class SupabaseTrainingRepository implements DemoTrainingRepository {
       xpEvents: noXpEvents(),
     };
     state.activity = activityFromState(state);
-
-    return TrainingStateSchema.parse(state);
+    const reconciled = reconcileTrainingState(
+      state,
+      this.dependencies.clock.now(),
+      this.dependencies.ids,
+    );
+    if (JSON.stringify(reconciled.state) !== JSON.stringify(state)) {
+      if (reconciled.effects.some((effect) => effect.type === "training_reset_required")) {
+        await this.clearProgressRows(userId);
+      }
+      await this.persistState(reconciled.state);
+    }
+    return TrainingStateSchema.parse(reconciled.state);
   }
 
   private assignmentsFor(contract: UserProfile["contract"], quests: Record<string, Quest>, now: string, timezone: string): QuestAssignment[] {
@@ -374,6 +388,14 @@ export class SupabaseTrainingRepository implements DemoTrainingRepository {
     if (error) throw new Error(error.message);
   }
 
+  private async clearProgressRows(userId: string): Promise<void> {
+    await this.deleteOwn("feedback", userId);
+    await this.deleteOwn("submissions", userId);
+    await this.deleteOwn("quest_assignments", userId);
+    await this.deleteOwn("skill_stats", userId);
+    await this.deleteOwn("user_progress", userId);
+  }
+
   private async persistState(state: TrainingState): Promise<void> {
     const userId = state.profile.id;
     await this.upsert("profiles", {
@@ -385,6 +407,12 @@ export class SupabaseTrainingRepository implements DemoTrainingRepository {
       timezone: state.profile.timezone,
       onboarding_completed: state.profile.onboardingCompleted,
       challenge_accepted_at: state.profile.challengeAcceptedAt,
+      target_role: state.profile.targetRole,
+      daily_minutes: state.profile.dailyMinutes,
+      consecutive_failure_days: state.profile.consecutiveFailureDays,
+      training_status: state.profile.trainingStatus,
+      recovery_started_at: state.profile.recoveryStartedAt,
+      recovery_deadline: state.profile.recoveryDeadline,
       updated_at: this.dependencies.clock.now(),
     });
     await this.upsert("user_progress", {
@@ -421,6 +449,11 @@ export class SupabaseTrainingRepository implements DemoTrainingRepository {
         submitted_at: assignment.submittedAt ?? null,
         completed_at: assignment.completedAt ?? null,
         latest_submission_id: assignment.latestSubmissionId ?? null,
+        parent_assignment_id: assignment.parentAssignmentId ?? null,
+        checkpoint_index: assignment.checkpointIndex ?? null,
+        due_at: assignment.dueAt ?? null,
+        expired_at: assignment.expiredAt ?? null,
+        penalty_source_assignment_id: assignment.penaltySourceAssignmentId ?? null,
         updated_at: this.dependencies.clock.now(),
       })),
     );
@@ -528,6 +561,7 @@ export class SupabaseTrainingRepository implements DemoTrainingRepository {
   async abandonChallenge(): Promise<TrainingState> {
     const now = this.dependencies.clock.now();
     const next = abandonTraining(await this.getSnapshot(), now);
+    await this.clearProgressRows(next.profile.id);
     await this.persistState(next);
     return this.getSnapshot();
   }

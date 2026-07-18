@@ -120,7 +120,13 @@ describe("SupabaseTrainingRepository", () => {
     await repository.acceptChallenge();
 
     expect(profileUpserts).toContainEqual(
-      expect.objectContaining({ challenge_accepted_at: "2026-07-17T05:00:00.000Z" }),
+      expect.objectContaining({
+        challenge_accepted_at: "2026-07-17T05:00:00.000Z",
+        target_role: "machine-learning-engineer",
+        daily_minutes: 300,
+        consecutive_failure_days: 0,
+        training_status: "normal",
+      }),
     );
   });
 
@@ -156,10 +162,21 @@ describe("SupabaseTrainingRepository", () => {
     const repository = new SupabaseTrainingRepository({
       client: createClient(
         {
-          quests: [questRow],
+          quests: [
+            questRow,
+            { ...questRow, id: "quest-penalty-daily", scope: "penalty", base_xp: 0 },
+          ],
           resources: [resourceRow],
           skill_stats: [],
-          quest_assignments: [],
+          quest_assignments: [{
+            id: "assignment-penalty",
+            quest_id: "quest-penalty-daily",
+            assigned_date: "2026-07-17",
+            slot: "secondary",
+            status: "assigned",
+            assigned_at: "2026-07-17T05:00:00.000Z",
+            penalty_source_assignment_id: "assignment-source",
+          }],
           submissions: [],
           feedback: [],
           portfolio_artifacts: [],
@@ -175,6 +192,12 @@ describe("SupabaseTrainingRepository", () => {
             timezone: "America/Los_Angeles",
             onboarding_completed: true,
             challenge_accepted_at: "2026-07-17T05:00:00.000Z",
+            target_role: "machine-learning-engineer",
+            daily_minutes: 300,
+            consecutive_failure_days: 4,
+            training_status: "recovery",
+            recovery_started_at: "2026-07-17T05:00:00.000Z",
+            recovery_deadline: "2026-07-20T05:00:00.000Z",
           },
         },
       ) as never,
@@ -185,5 +208,10 @@ describe("SupabaseTrainingRepository", () => {
     const snapshot = await repository.getSnapshot();
 
     expect(snapshot.profile.challengeAcceptedAt).toBe("2026-07-17T05:00:00.000Z");
+    expect(snapshot.profile).toMatchObject({
+      consecutiveFailureDays: 4,
+      trainingStatus: "recovery",
+      recoveryDeadline: "2026-07-20T05:00:00.000Z",
+    });
   });
 });

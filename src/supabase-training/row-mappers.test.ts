@@ -39,6 +39,11 @@ describe("Supabase row mappers", () => {
         },
         expected_artifact_type: "githubRepository",
         resource_ids: ["resource-baseline"],
+        scope: "main",
+        duration_days: 5,
+        execution_steps: ["Run baseline"],
+        success_metrics: ["Metric recorded"],
+        out_of_scope: ["Deployment"],
       }),
     ).toMatchObject({
       id: "quest",
@@ -46,6 +51,8 @@ describe("Supabase row mappers", () => {
       purpose: "calibration",
       estimatedMinutes: 70,
       expectedArtifactType: "githubRepository",
+      scope: "main",
+      durationDays: 5,
     });
   });
 
@@ -71,8 +78,19 @@ describe("Supabase row mappers", () => {
         submitted_at: "2026-07-16T11:00:00.000Z",
         completed_at: "2026-07-16T11:01:00.000Z",
         latest_submission_id: "submission-id",
+        parent_assignment_id: "assignment-parent",
+        checkpoint_index: 2,
+        due_at: "2026-07-17T10:00:00.000Z",
+        expired_at: null,
+        penalty_source_assignment_id: "assignment-source",
       }),
-    ).toMatchObject({ id: "assignment-id", latestSubmissionId: "submission-id" });
+    ).toMatchObject({
+      id: "assignment-id",
+      latestSubmissionId: "submission-id",
+      parentAssignmentId: "assignment-parent",
+      checkpointIndex: 2,
+      penaltySourceAssignmentId: "assignment-source",
+    });
 
     expect(
       mapSubmissionRow({
@@ -133,8 +151,19 @@ describe("Supabase row mappers", () => {
         relevance: 96,
         freshness: 86,
         credibility: 89,
+        prerequisites: ["Python"],
+        required_tools: ["Git"],
+        cost_tier: "free",
+        availability_status: "available",
+        last_checked_at: "2026-07-18T08:00:00.000Z",
+        fallback_resource_id: "resource-fallback",
       }),
-    ).toMatchObject({ id: "resource", resourceType: "repository" });
+    ).toMatchObject({
+      id: "resource",
+      resourceType: "repository",
+      requiredTools: ["Git"],
+      fallbackResourceId: "resource-fallback",
+    });
 
     expect(
       mapPortfolioArtifactRow({

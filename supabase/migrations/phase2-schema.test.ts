@@ -9,6 +9,12 @@ const adaptiveMigrationPath = join(
   "migrations",
   "202607170001_adaptive_courage_path.sql",
 );
+const missionMigrationPath = join(
+  process.cwd(),
+  "supabase",
+  "migrations",
+  "202607180001_mainline_daily_missions.sql",
+);
 
 describe("phase 2 Supabase schema migration", () => {
   it("defines the compact training schema, RLS, and public-safe app credentials", () => {
@@ -43,6 +49,31 @@ describe("phase 2 Supabase schema migration", () => {
     const appCode = readFileSync(join(process.cwd(), "src", "lib", "supabase", "config.ts"), "utf8").toLowerCase();
     expect(appCode).not.toContain("service_role");
     expect(appCode).not.toContain("secret");
+  });
+});
+
+describe("mainline and daily mission migration", () => {
+  it("adds fixed training, lifecycle, resource, and relationship fields idempotently", () => {
+    expect(existsSync(missionMigrationPath)).toBe(true);
+    const sql = readFileSync(missionMigrationPath, "utf8").toLowerCase();
+
+    for (const column of [
+      "target_role", "daily_minutes", "consecutive_failure_days", "training_status",
+      "recovery_started_at", "recovery_deadline", "scope", "duration_days",
+      "execution_steps", "success_metrics", "out_of_scope", "parent_assignment_id",
+      "checkpoint_index", "due_at", "expired_at", "penalty_source_assignment_id",
+      "prerequisites", "required_tools", "cost_tier", "availability_status",
+      "last_checked_at", "fallback_resource_id",
+    ]) expect(sql).toContain(column);
+
+    expect(sql).toContain("daily_minutes = 300");
+    expect(sql).toContain("'main', 'daily', 'penalty', 'calibration'");
+    expect(sql).toContain("references public.quest_assignments(id)");
+    expect(sql).toContain("create index if not exists quest_assignments_user_due_idx");
+    expect(sql).toContain("create index if not exists quest_assignments_penalty_source_idx");
+    expect(sql).toContain("on conflict (id) do update");
+    expect(sql).toContain("quest-penalty-main");
+    expect(sql).toContain("quest-penalty-daily");
   });
 });
 
