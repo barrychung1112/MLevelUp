@@ -3,7 +3,7 @@ import { describe, expect, test } from "vitest";
 import { TRAINING_CONTRACTS } from "@/domain/training/constants";
 import type { TrainingContract } from "@/domain/training/types";
 
-import { createTrainingSeed, SEED_VERSION } from "./seed";
+import { createAssignmentsForContract, createTrainingSeed, SEED_VERSION } from "./seed";
 
 const now = "2026-07-16T16:00:00.000Z";
 
@@ -19,8 +19,8 @@ describe("deterministic mock seed", () => {
     ["intensive", 195],
   ] as const)("keeps the %s plan within its time contract", (contract, total) => {
     const state = createTrainingSeed(now);
-    const minutes = Object.values(state.quests)
-      .filter((quest) => quest.trainingContract === contract && quest.purpose === "training")
+    const minutes = Object.values(createAssignmentsForContract(contract, now))
+      .map((assignment) => state.quests[assignment.questId])
       .reduce((sum, quest) => sum + quest.estimatedMinutes, 0);
     const limits = TRAINING_CONTRACTS[contract as TrainingContract].dailyMinutes;
 

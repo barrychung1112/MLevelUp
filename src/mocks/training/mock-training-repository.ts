@@ -21,6 +21,11 @@ import {
   UserProfileSchema,
 } from "@/domain/training/schemas";
 import { transitionAssignment } from "@/domain/training/state-machine";
+import {
+  abandonTraining,
+  beginRecovery,
+  reconcileTrainingState,
+} from "@/domain/training/reconcile-training";
 import type { TrainingState } from "@/domain/training/types";
 
 import { LocalTrainingStorage } from "./local-storage";
@@ -97,7 +102,12 @@ export class MockTrainingRepository implements DemoTrainingRepository {
   }
 
   async getSnapshot(): Promise<TrainingState> {
-    return this.readState();
+    const current = this.readState();
+    const now = this.dependencies.clock.now();
+    const reconciled = reconcileTrainingState(current, now, this.dependencies.ids).state;
+    return JSON.stringify(reconciled) === JSON.stringify(current)
+      ? current
+      : this.commit(reconciled, now);
   }
 
   async acceptChallenge(): Promise<TrainingState> {
@@ -115,11 +125,27 @@ export class MockTrainingRepository implements DemoTrainingRepository {
     const next = this.readState();
     next.profile = UserProfileSchema.parse({
       ...next.profile,
-      ...parsedInput,
+      displayName: parsedInput.displayName,
+      targetRole: parsedInput.targetRole,
+      timezone: parsedInput.timezone,
+      goal: "Become a machine learning engineer",
+      contract: "standard",
+      weeklyMinutes: 2_100,
+      dailyMinutes: 300,
       onboardingCompleted: true,
     });
     next.assignments = createCourageAssignment(now, parsedInput.timezone);
     return this.commit(next, now);
+  }
+
+  async continueChallenge(): Promise<TrainingState> {
+    const now = this.dependencies.clock.now();
+    return this.commit(beginRecovery(this.readState(), now), now);
+  }
+
+  async abandonChallenge(): Promise<TrainingState> {
+    const now = this.dependencies.clock.now();
+    return this.commit(abandonTraining(this.readState(), now), now);
   }
 
   async updateProfile(input: UpdateProfileInput): Promise<TrainingState> {
@@ -208,30 +234,38 @@ export class MockTrainingRepository implements DemoTrainingRepository {
       const hasTrainingAssignment = Object.values(outcome.state.assignments).some(
         (assignment) => outcome.state.quests[assignment.questId].purpose === "training",
       );
-      const selected = hasTrainingAssignment ? undefined : selectHardestFeasibleQuest({
-        quests: Object.values(outcome.state.quests).filter(
-          (quest) => quest.purpose === "training",
-        ),
-        skills: outcome.state.progress.skills,
-        weeklyMinutes: outcome.state.profile.weeklyMinutes,
-        resources: outcome.state.resources,
-        excludedQuestIds: Object.values(outcome.state.assignments).map(
-          (assignment) => assignment.questId,
-        ),
-      });
-      if (selected) {
+      const selected = hasTrainingAssignment
+        ? []
+        : (["main", "daily"] as const).flatMap((scope) => {
+            const quest = selectHardestFeasibleQuest({
+              quests: Object.values(outcome.state.quests).filter(
+                (candidate) => candidate.purpose === "training" && candidate.scope === scope,
+              ),
+              skills: outcome.state.progress.skills,
+              weeklyMinutes: outcome.state.profile.weeklyMinutes,
+              resources: outcome.state.resources,
+              excludedQuestIds: Object.values(outcome.state.assignments).map(
+                (assignment) => assignment.questId,
+              ),
+            });
+            return quest ? [quest] : [];
+          });
+      for (const [index, quest] of selected.entries()) {
         const assignmentId = this.dependencies.ids.next("assignment");
         outcome.state.assignments[assignmentId] = {
           id: assignmentId,
-          questId: selected.id,
+          questId: quest.id,
           assignedDate: localDateForInstant(now, outcome.state.profile.timezone),
-          slot: "primary",
+          slot: quest.scope === "main" ? "primary" : "secondary",
           status: "assigned",
           assignedAt: now,
+          dueAt: new Date(new Date(now).getTime() + 24 * 60 * 60 * 1_000).toISOString(),
+          checkpointIndex: quest.scope === "main" ? index : undefined,
         };
       }
     }
-    const committed = this.commit(outcome.state, now);
+    const reconciled = reconcileTrainingState(outcome.state, now, this.dependencies.ids).state;
+    const committed = this.commit(reconciled, now);
     return {
       ...outcome,
       state: committed,

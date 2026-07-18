@@ -106,7 +106,7 @@ export const QuestSchema = z.strictObject({
   ]),
   difficulty: DifficultySchema,
   estimatedMinutes: z.number().int().positive(),
-  baseXp: z.number().int().positive(),
+  baseXp: z.number().int().nonnegative(),
   optional: z.boolean(),
   acceptanceCriteria: z.array(z.string().min(1)).min(1),
   evidenceRequirements: EvidenceRequirementsSchema,
@@ -209,13 +209,17 @@ const EvidenceRecordInputSchema = z.strictObject({
 
 export const CompleteOnboardingInputSchema = z.strictObject({
   displayName: z.string().trim().min(1),
-  goal: z.string().trim().min(1),
-  contract: TrainingContractSchema,
-  weeklyMinutes: z.number().int().positive(),
+  targetRole: z.literal("machine-learning-engineer"),
   timezone: TimeZoneSchema,
 });
 
-export const UpdateProfileInputSchema = CompleteOnboardingInputSchema.partial().refine(
+export const UpdateProfileInputSchema = z.strictObject({
+  displayName: z.string().trim().min(1).optional(),
+  goal: z.string().trim().min(1).optional(),
+  contract: TrainingContractSchema.optional(),
+  weeklyMinutes: z.number().int().positive().optional(),
+  timezone: TimeZoneSchema.optional(),
+}).refine(
   (input) => Object.keys(input).length > 0,
   { message: "At least one profile field is required" },
 );

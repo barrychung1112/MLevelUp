@@ -29,12 +29,10 @@ export default function OnboardingPage() {
         isSubmitting={training.commandStatus === "submitting"}
         submitError={training.commandError ?? undefined}
         successMessage={training.commandSuccess ?? undefined}
-        onSubmit={(values) => {
+        onSubmit={() => {
           void training.completeOnboarding({
             displayName: "Demo Hunter",
-            goal: values.goalId,
-            contract: "standard",
-            weeklyMinutes: values.weeklyMinutes,
+            targetRole: "machine-learning-engineer",
             timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || DEFAULT_TIMEZONE,
           })
             .then((state) => {

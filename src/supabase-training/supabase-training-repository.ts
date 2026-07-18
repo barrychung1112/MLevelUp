@@ -22,6 +22,7 @@ import {
   UserProfileSchema,
 } from "@/domain/training/schemas";
 import { transitionAssignment } from "@/domain/training/state-machine";
+import { abandonTraining, beginRecovery } from "@/domain/training/reconcile-training";
 import type {
   ActivityEvent,
   AgentStatus,
@@ -486,7 +487,13 @@ export class SupabaseTrainingRepository implements DemoTrainingRepository {
       ...current,
       profile: UserProfileSchema.parse({
         ...current.profile,
-        ...parsedInput,
+        displayName: parsedInput.displayName,
+        targetRole: parsedInput.targetRole,
+        timezone: parsedInput.timezone,
+        goal: "Become a machine learning engineer",
+        contract: "standard",
+        weeklyMinutes: 2_100,
+        dailyMinutes: 300,
         onboardingCompleted: true,
       }),
     });
@@ -507,6 +514,20 @@ export class SupabaseTrainingRepository implements DemoTrainingRepository {
     const next = await this.getSnapshot();
     if (next.profile.challengeAcceptedAt) return next;
     next.profile.challengeAcceptedAt = this.dependencies.clock.now();
+    await this.persistState(next);
+    return this.getSnapshot();
+  }
+
+  async continueChallenge(): Promise<TrainingState> {
+    const now = this.dependencies.clock.now();
+    const next = beginRecovery(await this.getSnapshot(), now);
+    await this.persistState(next);
+    return this.getSnapshot();
+  }
+
+  async abandonChallenge(): Promise<TrainingState> {
+    const now = this.dependencies.clock.now();
+    const next = abandonTraining(await this.getSnapshot(), now);
     await this.persistState(next);
     return this.getSnapshot();
   }

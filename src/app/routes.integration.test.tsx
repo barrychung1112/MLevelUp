@@ -15,7 +15,7 @@ vi.mock("next/navigation", () => ({ usePathname: () => navigation.pathname, useP
 class TestStorage implements StorageLike { private readonly values = new Map<string, string>(); getItem(key: string) { return this.values.get(key) ?? null; } setItem(key: string, value: string) { this.values.set(key, value); } removeItem(key: string) { this.values.delete(key); } }
 function createRepository() { let sequence = 0; const now = new Date().toISOString(); return new MockTrainingRepository({ storage: new LocalTrainingStorage(new TestStorage(), SEED_VERSION), clock: { now: () => now }, ids: { next: (prefix) => `${prefix}-route-${++sequence}` } }); }
 function renderRoute(ui: React.ReactNode, repository: MockTrainingRepository) { return render(<AuthProvider><TrainingProvider createRepository={() => repository}>{ui}</TrainingProvider></AuthProvider>); }
-async function completeOnboarding(repository: MockTrainingRepository) { await repository.acceptChallenge(); return repository.completeOnboarding({ displayName: "Demo Hunter", goal: "job-ready", contract: "standard", weeklyMinutes: 600, timezone: DEFAULT_TIMEZONE }); }
+async function completeOnboarding(repository: MockTrainingRepository) { await repository.acceptChallenge(); return repository.completeOnboarding({ displayName: "Demo Hunter", targetRole: "machine-learning-engineer", timezone: DEFAULT_TIMEZONE }); }
 
 beforeEach(() => { navigation.pathname = "/"; navigation.push.mockReset(); navigation.replace.mockReset(); });
 

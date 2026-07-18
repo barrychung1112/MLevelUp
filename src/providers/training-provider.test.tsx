@@ -29,6 +29,12 @@ function resolvedRepository(initial = createTrainingSeed(now)): DemoTrainingRepo
       state.profile.challengeAcceptedAt ??= now;
       return cloneState(state);
     },
+    async continueChallenge() {
+      return cloneState(state);
+    },
+    async abandonChallenge() {
+      return cloneState(state);
+    },
     async completeOnboarding(input: CompleteOnboardingInput) {
       state = cloneState(state);
       state.profile = { ...state.profile, ...input, onboardingCompleted: true };

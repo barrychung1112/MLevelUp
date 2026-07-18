@@ -16,13 +16,17 @@ export interface IdGenerator {
 
 export interface CompleteOnboardingInput {
   displayName: string;
-  goal: string;
-  contract: TrainingContract;
-  weeklyMinutes: number;
+  targetRole: "machine-learning-engineer";
   timezone: string;
 }
 
-export type UpdateProfileInput = Partial<CompleteOnboardingInput>;
+export interface UpdateProfileInput {
+  displayName?: string;
+  goal?: string;
+  contract?: TrainingContract;
+  weeklyMinutes?: number;
+  timezone?: string;
+}
 
 export interface SubmitQuestInput {
   idempotencyKey: string;
@@ -40,6 +44,8 @@ export interface SubmissionOutcome {
 export interface TrainingRepository {
   getSnapshot(): Promise<TrainingState>;
   acceptChallenge(): Promise<TrainingState>;
+  continueChallenge(): Promise<TrainingState>;
+  abandonChallenge(): Promise<TrainingState>;
   completeOnboarding(input: CompleteOnboardingInput): Promise<TrainingState>;
   updateProfile(input: UpdateProfileInput): Promise<TrainingState>;
   startQuest(assignmentId: string): Promise<TrainingState>;

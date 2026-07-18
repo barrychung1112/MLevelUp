@@ -257,6 +257,49 @@ const quests: Quest[] = [
   },
 ];
 
+const standardMain = quests.find((quest) => quest.id === "quest-standard-baseline")!;
+const standardDaily = quests.find((quest) => quest.id === "quest-standard-report")!;
+
+quests.push(
+  ...[
+    [2, "Audit data quality", "Document three measurable data-quality risks"],
+    [3, "Design validation", "Justify one validation strategy and leakage control"],
+    [4, "Run error analysis", "Document two error slices and the next experiment"],
+    [5, "Publish project retrospective", "Publish results, limitations, and next steps"],
+  ].map(([index, title, metric]) => ({
+    ...standardMain,
+    id: `quest-standard-main-${index}`,
+    title: String(title),
+    executionSteps: [String(title), "Record evidence", "Commit the checkpoint result"],
+    successMetrics: [String(metric)],
+  } satisfies Quest)),
+  {
+    ...standardDaily,
+    id: "quest-standard-daily-communication",
+    title: "Explain one model decision",
+    executionSteps: ["Choose one model decision", "Write the tradeoff", "Publish the note"],
+    successMetrics: ["The note states one decision, tradeoff, and consequence"],
+  },
+  {
+    ...standardDaily,
+    id: "quest-penalty-main",
+    scope: "penalty",
+    title: "Repair the missed mainline checkpoint",
+    estimatedMinutes: 45,
+    baseXp: 0,
+    optional: false,
+  },
+  {
+    ...standardDaily,
+    id: "quest-penalty-daily",
+    scope: "penalty",
+    title: "Recover the missed daily mission",
+    estimatedMinutes: 30,
+    baseXp: 0,
+    optional: false,
+  },
+);
+
 function initialSkills(): SkillStats {
   return Object.fromEntries(
     SKILL_KEYS.map((key) => [key, { score: 20, skillXp: 0, lastDelta: 0 }]),
@@ -270,8 +313,11 @@ export function createAssignmentsForContract(
 ): Record<string, QuestAssignment> {
   const assignedDate = localDateForInstant(now, timezone);
   const plan = quests.filter(
-    (quest) => quest.purpose === "training" && quest.trainingContract === contract,
-  );
+    (quest) =>
+      quest.purpose === "training" &&
+      quest.trainingContract === contract &&
+      quest.scope !== "penalty",
+  ).slice(0, 2);
 
   return Object.fromEntries(
     plan.map((quest, index) => {

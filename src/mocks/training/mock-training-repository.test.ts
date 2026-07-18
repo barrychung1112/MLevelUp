@@ -38,11 +38,11 @@ function createIds() {
   return { next: (prefix: string) => `${prefix}-test-${++current}` };
 }
 
-function createRepository(memory = new MemoryStorage()) {
+function createRepository(memory = new MemoryStorage(), activeClock = clock) {
   const storage = new LocalTrainingStorage(memory, SEED_VERSION);
   return {
     memory,
-    repository: new MockTrainingRepository({ storage, clock, ids: createIds() }),
+    repository: new MockTrainingRepository({ storage, clock: activeClock, ids: createIds() }),
   };
 }
 
@@ -77,9 +77,7 @@ const reflection = "我先建立可以重現的基準模型，確認 validation 
 async function startPrimary(repository: MockTrainingRepository) {
   await repository.completeOnboarding({
     displayName: "Demo Hunter",
-    goal: "Become an ML engineer",
-    contract: "standard",
-    weeklyMinutes: 600,
+    targetRole: "machine-learning-engineer",
     timezone: "America/Los_Angeles",
   });
   const state = await repository.getSnapshot();
@@ -108,9 +106,7 @@ describe("mock training repository", () => {
     await repository.acceptChallenge();
     await repository.completeOnboarding({
       displayName: "Barry",
-      goal: "Ship ML systems",
-      contract: "foundation",
-      weeklyMinutes: 240,
+      targetRole: "machine-learning-engineer",
       timezone: "America/Los_Angeles",
     });
     const state = await repository.getSnapshot();
@@ -118,6 +114,8 @@ describe("mock training repository", () => {
     expect(state.profile).toMatchObject({
       displayName: "Barry",
       onboardingCompleted: true,
+      targetRole: "machine-learning-engineer",
+      dailyMinutes: 300,
     });
     expect(Object.values(state.assignments)).toHaveLength(1);
     expect(Object.values(state.assignments)[0].questId).toBe("quest-courage-challenge");
@@ -127,9 +125,7 @@ describe("mock training repository", () => {
     const { repository } = createRepository();
     await repository.completeOnboarding({
       displayName: "Barry",
-      goal: "Ship ML systems",
-      contract: "standard",
-      weeklyMinutes: 600,
+      targetRole: "machine-learning-engineer",
       timezone: "America/Los_Angeles",
     });
 
@@ -165,7 +161,7 @@ describe("mock training repository", () => {
     ).toBe(true);
     expect(
       Object.values(outcome.state.assignments).some(
-        (assignment) => assignment.questId === "quest-standard-report",
+        (assignment) => outcome.state.quests[assignment.questId].scope === "daily",
       ),
     ).toBe(true);
   });
@@ -194,6 +190,38 @@ describe("mock training repository", () => {
       true,
     );
     expect(outcome.state.progress.skills.modeling.skillXp).toBeGreaterThan(0);
+    const activeScopes = Object.values(outcome.state.assignments)
+      .filter((assignment) => ["assigned", "in_progress"].includes(assignment.status))
+      .map((assignment) => outcome.state.quests[assignment.questId].scope)
+      .sort();
+    expect(activeScopes).toEqual(["daily", "main"]);
+    expect(
+      Object.values(outcome.state.assignments).find(
+        (assignment) => outcome.state.quests[assignment.questId].scope === "daily",
+      )?.dueAt,
+    ).toBe("2026-07-17T16:00:00.000Z");
+  });
+
+  test("reconciles expired mainline and daily work when the snapshot reloads", async () => {
+    let now = clock.now();
+    const activeClock = { now: () => now };
+    const { repository } = createRepository(new MemoryStorage(), activeClock);
+    const assignmentId = await startPrimary(repository);
+    await repository.submitQuest({
+      idempotencyKey: "ready-for-deadline",
+      assignmentId,
+      evidence: validEvidence(),
+      selfReflection: reflection,
+    });
+
+    now = "2026-07-17T16:00:00.000Z";
+    const state = await repository.getSnapshot();
+    const penalties = Object.values(state.assignments).filter(
+      (assignment) => state.quests[assignment.questId].scope === "penalty",
+    );
+
+    expect(penalties).toHaveLength(2);
+    expect(state.profile.consecutiveFailureDays).toBe(1);
   });
 
   test("creates revision two and never awards duplicate XP", async () => {
@@ -269,9 +297,7 @@ describe("mock training repository", () => {
     const { repository } = createRepository();
     await repository.completeOnboarding({
       displayName: "Barry",
-      goal: "Ship ML systems",
-      contract: "foundation",
-      weeklyMinutes: 240,
+      targetRole: "machine-learning-engineer",
       timezone: "America/Los_Angeles",
     });
 

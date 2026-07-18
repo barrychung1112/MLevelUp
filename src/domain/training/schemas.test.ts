@@ -182,9 +182,7 @@ describe("strict domain schemas", () => {
     expect(() =>
       CompleteOnboardingInputSchema.parse({
         displayName: "Barry",
-        goal: "Ship ML systems",
-        contract: "standard",
-        weeklyMinutes: 600,
+        targetRole: "machine-learning-engineer",
         timezone: "not/a-timezone",
       }),
     ).toThrow(/timezone/i);
@@ -200,9 +198,7 @@ describe("strict domain schemas", () => {
     expect(() =>
       CompleteOnboardingInputSchema.parse({
         displayName: "Barry",
-        goal: "Ship ML systems",
-        contract: "standard",
-        weeklyMinutes: 600,
+        targetRole: "machine-learning-engineer",
         timezone: "America/Los_Angeles",
         unexpected: true,
       }),

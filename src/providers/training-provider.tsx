@@ -37,6 +37,8 @@ export type TrainingContextValue = {
   commandError: string | null;
   commandSuccess: string | null;
   acceptChallenge(): Promise<TrainingState>;
+  continueChallenge(): Promise<TrainingState>;
+  abandonChallenge(): Promise<TrainingState>;
   completeOnboarding(input: CompleteOnboardingInput): Promise<TrainingState>;
   updateProfile(input: UpdateProfileInput): Promise<TrainingState>;
   startQuest(assignmentId: string): Promise<TrainingState>;
@@ -214,6 +216,16 @@ export function TrainingProvider({
     [enqueue],
   );
 
+  const continueChallenge = useCallback(
+    () => enqueue((repository) => repository.continueChallenge(), (state) => state, "Recovery started."),
+    [enqueue],
+  );
+
+  const abandonChallenge = useCallback(
+    () => enqueue((repository) => repository.abandonChallenge(), (state) => state, "Training reset."),
+    [enqueue],
+  );
+
   const updateProfile = useCallback(
     (input: UpdateProfileInput) =>
       enqueue(
@@ -269,6 +281,8 @@ export function TrainingProvider({
       commandError,
       commandSuccess,
       acceptChallenge,
+      continueChallenge,
+      abandonChallenge,
       completeOnboarding,
       updateProfile,
       startQuest,
@@ -284,6 +298,8 @@ export function TrainingProvider({
       commandError,
       commandSuccess,
       acceptChallenge,
+      continueChallenge,
+      abandonChallenge,
       completeOnboarding,
       updateProfile,
       startQuest,
