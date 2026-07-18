@@ -8,6 +8,9 @@ import type {
   UpdateProfileInput,
 } from "@/application/training/training-repository";
 import { executeSubmitQuest } from "@/application/training/submit-quest";
+import { localDateForInstant } from "@/domain/training/calendar";
+import { selectHardestFeasibleQuest } from "@/domain/training/adaptive-selector";
+import { calibrateSkills } from "@/domain/training/calibration";
 import { evaluateSubmission } from "@/domain/training/evaluate-submission";
 import {
   AssignmentIdInputSchema,
@@ -194,6 +197,39 @@ export class MockTrainingRepository implements DemoTrainingRepository {
       now,
       ids: this.dependencies.ids,
     });
+    const submittedQuest = outcome.state.quests[
+      outcome.state.assignments[parsedInput.assignmentId].questId
+    ];
+    if (submittedQuest.purpose === "calibration") {
+      outcome.state.progress.skills = calibrateSkills(
+        outcome.state.progress.skills,
+        outcome.evaluation,
+      );
+      const hasTrainingAssignment = Object.values(outcome.state.assignments).some(
+        (assignment) => outcome.state.quests[assignment.questId].purpose === "training",
+      );
+      const selected = hasTrainingAssignment ? undefined : selectHardestFeasibleQuest({
+        quests: Object.values(outcome.state.quests).filter(
+          (quest) => quest.purpose === "training",
+        ),
+        skills: outcome.state.progress.skills,
+        weeklyMinutes: outcome.state.profile.weeklyMinutes,
+        excludedQuestIds: Object.values(outcome.state.assignments).map(
+          (assignment) => assignment.questId,
+        ),
+      });
+      if (selected) {
+        const assignmentId = this.dependencies.ids.next("assignment");
+        outcome.state.assignments[assignmentId] = {
+          id: assignmentId,
+          questId: selected.id,
+          assignedDate: localDateForInstant(now, outcome.state.profile.timezone),
+          slot: "primary",
+          status: "assigned",
+          assignedAt: now,
+        };
+      }
+    }
     const committed = this.commit(outcome.state, now);
     return {
       ...outcome,

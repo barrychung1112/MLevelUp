@@ -156,6 +156,18 @@ describe("mock training repository", () => {
     expect(outcome.state.assignments[assignmentId].status).toBe("needs_revision");
     expect(outcome.state.progress.totalXp).toBe(0);
     expect(outcome.state.xpEvents).toHaveLength(0);
+    expect(outcome.state.progress.skills.modeling.score).toBeGreaterThan(20);
+    expect(outcome.state.progress.skills.modeling.score).toBeLessThan(30);
+    expect(
+      Object.values(outcome.state.feedback).some(
+        (feedback) => feedback.submissionId === outcome.submission.id,
+      ),
+    ).toBe(true);
+    expect(
+      Object.values(outcome.state.assignments).some(
+        (assignment) => assignment.questId === "quest-standard-report",
+      ),
+    ).toBe(true);
   });
 
   test("atomically adds XP, skills, feedback, artifact, and activity", async () => {

@@ -10,6 +10,8 @@ import type {
   UpdateProfileInput,
 } from "@/application/training/training-repository";
 import { executeSubmitQuest } from "@/application/training/submit-quest";
+import { selectHardestFeasibleQuest } from "@/domain/training/adaptive-selector";
+import { calibrateSkills } from "@/domain/training/calibration";
 import { localDateForInstant } from "@/domain/training/calendar";
 import { SKILL_KEYS } from "@/domain/training/constants";
 import {
@@ -534,6 +536,39 @@ export class SupabaseTrainingRepository implements DemoTrainingRepository {
     const now = this.dependencies.clock.now();
     const current = await this.getSnapshot();
     const outcome = executeSubmitQuest(current, input, { now, ids: this.dependencies.ids });
+    const submittedQuest = outcome.state.quests[
+      outcome.state.assignments[input.assignmentId].questId
+    ];
+    if (submittedQuest.purpose === "calibration") {
+      outcome.state.progress.skills = calibrateSkills(
+        outcome.state.progress.skills,
+        outcome.evaluation,
+      );
+      const hasTrainingAssignment = Object.values(outcome.state.assignments).some(
+        (assignment) => outcome.state.quests[assignment.questId].purpose === "training",
+      );
+      const selected = hasTrainingAssignment ? undefined : selectHardestFeasibleQuest({
+        quests: Object.values(outcome.state.quests).filter(
+          (quest) => quest.purpose === "training",
+        ),
+        skills: outcome.state.progress.skills,
+        weeklyMinutes: outcome.state.profile.weeklyMinutes,
+        excludedQuestIds: Object.values(outcome.state.assignments).map(
+          (assignment) => assignment.questId,
+        ),
+      });
+      if (selected) {
+        const assignmentId = this.dependencies.ids.next("assignment");
+        outcome.state.assignments[assignmentId] = {
+          id: assignmentId,
+          questId: selected.id,
+          assignedDate: localDateForInstant(now, outcome.state.profile.timezone),
+          slot: "primary",
+          status: "assigned",
+          assignedAt: now,
+        };
+      }
+    }
     await this.persistState(outcome.state);
     const state = await this.getSnapshot();
     return {
