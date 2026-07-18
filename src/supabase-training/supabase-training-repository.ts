@@ -212,11 +212,11 @@ export class SupabaseTrainingRepository implements DemoTrainingRepository {
     return data.user.id;
   }
 
-  private async selectRows<T>(table: string, userId?: string): Promise<T[]> {
+  private async selectRows<T>(table: string, userId?: string, orderColumn?: string): Promise<T[]> {
     const query = this.client.from<T>(table).select("*");
     const { data, error } = userId
-      ? await query.eq("user_id", userId).order("created_at")
-      : await query.order("id");
+      ? await query.eq("user_id", userId).order(orderColumn ?? "created_at")
+      : await query.order(orderColumn ?? "id");
     if (error) throw new Error(error.message);
     return data ?? [];
   }
@@ -259,7 +259,7 @@ export class SupabaseTrainingRepository implements DemoTrainingRepository {
       this.maybeProgress(userId),
       this.selectRows<QuestRow>("quests"),
       this.selectRows<ResourceRow>("resources"),
-      this.selectRows<SkillStatRow>("skill_stats", userId),
+      this.selectRows<SkillStatRow>("skill_stats", userId, "updated_at"),
       this.selectRows<AssignmentRow>("quest_assignments", userId),
       this.selectRows<SubmissionRow>("submissions", userId),
       this.selectRows<FeedbackRow>("feedback", userId),

@@ -44,7 +44,7 @@ const resourceRow = {
   credibility: 89,
 };
 
-function createClient(rows: Record<string, unknown[]>, singles: Record<string, unknown> = {}) {
+function createClient(rows: Record<string, unknown[]>, singles: Record<string, unknown> = {}, orders: Array<{ table: string; column: string }> = []) {
   return {
     auth: {
       getUser: async () => ({ data: { user: { id: "user-1" } }, error: null }),
@@ -57,11 +57,11 @@ function createClient(rows: Record<string, unknown[]>, singles: Record<string, u
         insert: async () => ({ data: null, error: null }),
         select() {
           const builder = {
-            order: async () => ({ data: tableRows, error: null }),
+            order: async (column: string) => { orders.push({ table, column }); return { data: tableRows, error: null }; },
             eq() {
               return {
                 maybeSingle: async () => ({ data: single, error: null }),
-                order: async () => ({ data: tableRows, error: null }),
+                order: async (column: string) => { orders.push({ table, column }); return { data: tableRows, error: null }; },
               };
             },
           };
@@ -78,6 +78,22 @@ function createClient(rows: Record<string, unknown[]>, singles: Record<string, u
 }
 
 describe("SupabaseTrainingRepository", () => {
+  it("orders skill stats by their actual updated_at column", async () => {
+    const orders: Array<{ table: string; column: string }> = [];
+    const repository = new SupabaseTrainingRepository({
+      client: createClient({
+        quests: [questRow], resources: [resourceRow], skill_stats: [], quest_assignments: [],
+        submissions: [], feedback: [], portfolio_artifacts: [], agent_runs: [],
+      }, {}, orders) as never,
+      clock: { now: () => "2026-07-18T06:00:00.000Z" },
+      ids: { next: () => "00000000-0000-4000-8000-000000000001" },
+    });
+
+    await repository.getSnapshot();
+
+    expect(orders).toContainEqual({ table: "skill_stats", column: "updated_at" });
+  });
+
   it("persists the courage oath timestamp", async () => {
     const profileUpserts: unknown[] = [];
     const client = createClient({
