@@ -3,13 +3,13 @@
 import { useRouter } from "next/navigation";
 
 import { DashboardOverview } from "@/components/features/dashboard/dashboard";
+import { dailyBudget, difficultyCeiling } from "@/domain/training/adaptive-selector";
 import { localDateForInstant } from "@/domain/training/calendar";
 import { selectPrimaryAssignment } from "@/domain/training/selectors";
 import { useTraining } from "@/providers/training-provider";
 
 import { TrainingPageShell } from "../_components/training-page-shell";
 import {
-  contractLabel,
   currentLevelXp,
   latestBy,
   mapActivity,
@@ -52,7 +52,8 @@ export default function DashboardPage() {
         currentXp={state ? currentLevelXp(state) : 0}
         nextLevelXp={500}
         streakDays={state?.progress.currentStreak ?? 0}
-        contractLabel={state ? contractLabel(state.profile.contract) : ""}
+        challengeCeiling={state ? difficultyCeiling(state.progress.skills) : 2}
+        dailyBudgetMinutes={state ? dailyBudget(state.profile.weeklyMinutes) : 30}
         primaryQuest={primary ? mapQuest(primary.assignment, primary.quest) : null}
         skills={state ? mapSkills(state) : []}
         feedback={feedback}

@@ -3,11 +3,10 @@
 import { useRouter } from "next/navigation";
 
 import { ProfileSettings } from "@/components/features/profile/profile-settings";
-import type { TrainingContract } from "@/domain/training/types";
 import { useTraining } from "@/providers/training-provider";
 
 import { TrainingPageShell } from "../_components/training-page-shell";
-import { CONTRACTS, GOALS } from "../_helpers/training-view-models";
+import { GOALS } from "../_helpers/training-view-models";
 
 export default function ProfilePage() {
   const router = useRouter();
@@ -16,9 +15,8 @@ export default function ProfilePage() {
   return (
     <TrainingPageShell>
       <ProfileSettings
-        profile={profile ? { goalId: profile.goal, contractId: profile.contract, weeklyMinutes: profile.weeklyMinutes } : null}
+        profile={profile ? { goalId: profile.goal, weeklyMinutes: profile.weeklyMinutes } : null}
         goals={GOALS}
-        contracts={CONTRACTS}
         status={training.status === "ready" ? "ready" : training.status}
         errorMessage={training.loadError ?? undefined}
         isSubmitting={training.commandStatus === "submitting"}
@@ -26,7 +24,7 @@ export default function ProfilePage() {
         successMessage={training.commandSuccess ?? undefined}
         onSave={(values) => {
           void training
-            .updateProfile({ goal: values.goalId, contract: values.contractId as TrainingContract, weeklyMinutes: values.weeklyMinutes })
+            .updateProfile({ goal: values.goalId, weeklyMinutes: values.weeklyMinutes })
             .catch(() => undefined);
         }}
         onReset={() => {

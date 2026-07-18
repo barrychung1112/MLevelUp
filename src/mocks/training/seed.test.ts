@@ -20,7 +20,7 @@ describe("deterministic mock seed", () => {
   ] as const)("keeps the %s plan within its time contract", (contract, total) => {
     const state = createTrainingSeed(now);
     const minutes = Object.values(state.quests)
-      .filter((quest) => quest.trainingContract === contract)
+      .filter((quest) => quest.trainingContract === contract && quest.purpose === "training")
       .reduce((sum, quest) => sum + quest.estimatedMinutes, 0);
     const limits = TRAINING_CONTRACTS[contract as TrainingContract].dailyMinutes;
 

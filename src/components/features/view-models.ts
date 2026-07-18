@@ -97,7 +97,6 @@ export type ActivityView = {
 
 export type ProfilePreferencesView = {
   goalId: string;
-  contractId: string;
   weeklyMinutes: number;
 };
 
