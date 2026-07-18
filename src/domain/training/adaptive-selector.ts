@@ -1,4 +1,5 @@
-import type { Difficulty, Quest, SkillStats } from "./types";
+import { evaluateMissionReadiness } from "./mission-readiness";
+import type { Difficulty, Quest, Resource, SkillStats } from "./types";
 
 const ACTIVE_TRAINING_DAYS = 5;
 const MIN_DAILY_MINUTES = 30;
@@ -24,6 +25,7 @@ type SelectorInput = {
   skills: SkillStats;
   weeklyMinutes: number;
   excludedQuestIds: readonly string[];
+  resources: readonly Resource[];
 };
 
 function weaknessCoverage(quest: Quest, skills: SkillStats): number {
@@ -54,8 +56,9 @@ export function selectHardestFeasibleQuest(input: SelectorInput): Quest | undefi
   const withinCeiling = input.quests.filter(
     (quest) => !excluded.has(quest.id) && quest.difficulty <= ceiling,
   );
-  const feasible = withinCeiling.filter((quest) => quest.estimatedMinutes <= budget);
-  const candidates = feasible.length > 0 ? feasible : withinCeiling;
+  const candidates = withinCeiling.filter((quest) =>
+    evaluateMissionReadiness({ quest, resources: input.resources, availableMinutes: budget }).ready,
+  );
 
   return [...candidates].sort((left, right) =>
     compareCandidates(left, right, input.skills, budget),

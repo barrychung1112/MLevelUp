@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import type { Quest, SkillKey, SkillStats } from "./types";
+import type { Quest, Resource, SkillKey, SkillStats } from "./types";
 import {
   dailyBudget,
   difficultyCeiling,
@@ -55,9 +55,30 @@ function quest(
     skillWeights: Object.fromEntries(
       skillKeys.map((key) => [key, key === primarySkill ? 1 : 0]),
     ) as Quest["skillWeights"],
-    resourceIds: [],
+    resourceIds: ["resource-ready"],
   };
 }
+
+const resources: Resource[] = [
+  {
+    id: "resource-ready",
+    title: "Focused training guide",
+    summary: "A short resource for the selected mission.",
+    url: "https://example.com/resource",
+    resourceType: "article",
+    difficulty: 2,
+    estimatedMinutes: 5,
+    skillTags: ["modeling"],
+    relevance: 90,
+    freshness: 80,
+    credibility: 90,
+    prerequisites: [],
+    requiredTools: ["Python"],
+    costTier: "free",
+    availabilityStatus: "available",
+    lastCheckedAt: "2026-07-18T08:00:00.000Z",
+  },
+];
 
 describe("adaptive quest selector", () => {
   it.each([
@@ -83,6 +104,7 @@ describe("adaptive quest selector", () => {
       skills: skills(50),
       weeklyMinutes: 500,
       excludedQuestIds: [],
+      resources,
     });
 
     expect(selected?.id).toBe("hard");
@@ -98,20 +120,22 @@ describe("adaptive quest selector", () => {
       skills: skills(50, { modeling: 80, evaluation: 15 }),
       weeklyMinutes: 500,
       excludedQuestIds: [],
+      resources,
     });
 
     expect(selected?.id).toBe("weak-close");
   });
 
-  it("falls back to the closest lower quest when none fits the time budget", () => {
+  it("returns no quest when none fits the complete mission time budget", () => {
     const selected = selectHardestFeasibleQuest({
       quests: [quest("closest", 2, 45, "modeling"), quest("longer", 2, 70, "modeling")],
       skills: skills(20),
       weeklyMinutes: 100,
       excludedQuestIds: [],
+      resources,
     });
 
-    expect(selected?.id).toBe("closest");
+    expect(selected).toBeUndefined();
   });
 
   it("never selects an excluded quest", () => {
@@ -120,8 +144,21 @@ describe("adaptive quest selector", () => {
       skills: skills(50),
       weeklyMinutes: 500,
       excludedQuestIds: ["used"],
+      resources,
     });
 
     expect(selected?.id).toBe("fresh");
+  });
+
+  it("never falls back to a mission without a ready resource", () => {
+    const selected = selectHardestFeasibleQuest({
+      quests: [quest("unsupported", 4, 60, "modeling")],
+      skills: skills(50),
+      weeklyMinutes: 500,
+      excludedQuestIds: [],
+      resources: [{ ...resources[0], availabilityStatus: "unavailable" }],
+    });
+
+    expect(selected).toBeUndefined();
   });
 });
