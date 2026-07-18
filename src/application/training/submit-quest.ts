@@ -15,7 +15,9 @@ import {
 import { transitionAssignment } from "@/domain/training/state-machine";
 import type {
   SkillScoreDeltas,
+  SkillWeights,
   Submission,
+  SubmissionEvaluation,
   SubmissionFeedback,
   TrainingState,
 } from "@/domain/training/types";
@@ -29,6 +31,22 @@ import type {
 export interface SubmitQuestDependencies {
   now: string;
   ids: IdGenerator;
+  adjudication?: PolicyGatedSubmissionAdjudication;
+}
+
+export interface PolicyGatedSubmissionAdjudication {
+  source: "ai" | "ai_fallback" | "deterministic";
+  evaluation: SubmissionEvaluation;
+  skillWeights: SkillWeights;
+  summary: string;
+  strengths: string[];
+  improvements: string[];
+  nextActions: string[];
+  explanation: string;
+  confidence?: number;
+  model?: string;
+  promptVersion?: string;
+  recommendedQuestId?: string | null;
 }
 
 function zeroDeltas(): SkillScoreDeltas {
@@ -57,11 +75,41 @@ export function executeSubmitQuest(
     Object.values(next.submissions).filter(
       (submission) => submission.assignmentId === assignment.id,
     ).length + 1;
-  const evaluation = evaluateSubmission({
+  const deterministicEvaluation = evaluateSubmission({
     quest,
     evidence: parsedInput.evidence,
     selfReflection: parsedInput.selfReflection,
   });
+  const adjudicatedEvaluation = dependencies.adjudication?.evaluation;
+  if (
+    adjudicatedEvaluation &&
+    (adjudicatedEvaluation.verificationStatus !==
+      deterministicEvaluation.verificationStatus ||
+      adjudicatedEvaluation.verificationMethod !==
+        deterministicEvaluation.verificationMethod ||
+      adjudicatedEvaluation.artifactReady !==
+        deterministicEvaluation.artifactReady ||
+      JSON.stringify(adjudicatedEvaluation.hardFailures) !==
+        JSON.stringify(deterministicEvaluation.hardFailures) ||
+      JSON.stringify(adjudicatedEvaluation.scoreBreakdown) !==
+        JSON.stringify(deterministicEvaluation.scoreBreakdown))
+  ) {
+    throw new Error("Adjudication attempted to override deterministic evidence authority");
+  }
+  const evaluation: SubmissionEvaluation = adjudicatedEvaluation
+    ? { ...deterministicEvaluation, qualityScore: adjudicatedEvaluation.qualityScore }
+    : deterministicEvaluation;
+  const feedbackMetadata = dependencies.adjudication
+    ? {
+        source: dependencies.adjudication.source,
+        model: dependencies.adjudication.model,
+        promptVersion: dependencies.adjudication.promptVersion,
+        aiConfidence: dependencies.adjudication.confidence,
+        adjustmentExplanation: dependencies.adjudication.explanation,
+        recommendedQuestId:
+          dependencies.adjudication.recommendedQuestId ?? undefined,
+      }
+    : { source: "demo" as const };
   const submission: Submission = {
     id: dependencies.ids.next("submission"),
     idempotencyKey: parsedInput.idempotencyKey,
@@ -92,6 +140,7 @@ export function executeSubmitQuest(
       scoreBreakdown: evaluation.scoreBreakdown,
       xpAwarded: 0,
       skillDeltas: zeroDeltas(),
+      ...feedbackMetadata,
       createdAt: dependencies.now,
     };
     next.feedback[feedback.id] = feedback;
@@ -129,7 +178,7 @@ export function executeSubmitQuest(
     streakDays,
     artifactReady: evaluation.artifactReady,
     difficulty: quest.difficulty,
-    skillWeights: quest.skillWeights,
+    skillWeights: dependencies.adjudication?.skillWeights ?? quest.skillWeights,
     currentSkills: next.progress.skills,
   });
 
@@ -160,13 +209,20 @@ export function executeSubmitQuest(
     id: feedbackId,
     kind: "submission",
     submissionId: submission.id,
-    summary: "Evidence verified in Demo mode. The quest reward is ready.",
-    strengths: ["Required evidence and reflection were complete."],
-    improvements: [],
-    nextActions: ["Use the result to choose the next experiment."],
+    summary:
+      dependencies.adjudication?.summary ??
+      "Evidence verified in Demo mode. The quest reward is ready.",
+    strengths: dependencies.adjudication?.strengths ?? [
+      "Required evidence and reflection were complete.",
+    ],
+    improvements: dependencies.adjudication?.improvements ?? [],
+    nextActions: dependencies.adjudication?.nextActions ?? [
+      "Use the result to choose the next experiment.",
+    ],
     scoreBreakdown: evaluation.scoreBreakdown,
     xpAwarded: reward.awardedXp,
     skillDeltas: reward.scoreDeltas,
+    ...feedbackMetadata,
     createdAt: dependencies.now,
   };
 

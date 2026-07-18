@@ -1,5 +1,6 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 
+import type { AgentRunDiagnostic } from "@/ai/contracts";
 import type {
   Clock,
   CompleteOnboardingInput,
@@ -9,7 +10,10 @@ import type {
   SubmitQuestInput,
   UpdateProfileInput,
 } from "@/application/training/training-repository";
-import { executeSubmitQuest } from "@/application/training/submit-quest";
+import {
+  executeSubmitQuest,
+  type PolicyGatedSubmissionAdjudication,
+} from "@/application/training/submit-quest";
 import { selectHardestFeasibleQuest } from "@/domain/training/adaptive-selector";
 import { calibrateSkills } from "@/domain/training/calibration";
 import { localDateForInstant } from "@/domain/training/calendar";
@@ -39,6 +43,8 @@ import type {
   XpEvent,
 } from "@/domain/training/types";
 import { SEED_VERSION } from "@/mocks/training/seed";
+
+import type { ServerSubmissionClient } from "./server-submit-client";
 
 import {
   mapAgentRunRow,
@@ -113,6 +119,7 @@ export interface SupabaseTrainingRepositoryDependencies {
   client: SupabaseClient | SupabaseDatabaseClient;
   clock: Clock;
   ids: IdGenerator;
+  submissionClient?: ServerSubmissionClient;
 }
 
 function defaultProgress(skills: SkillStats): UserProgress {
@@ -490,6 +497,12 @@ export class SupabaseTrainingRepository implements DemoTrainingRepository {
         score_breakdown: feedback.scoreBreakdown ?? null,
         xp_awarded: feedback.xpAwarded,
         skill_deltas: feedback.skillDeltas,
+        source: feedback.source === "demo" ? "deterministic" : feedback.source,
+        model: feedback.model ?? null,
+        prompt_version: feedback.promptVersion ?? null,
+        ai_confidence: feedback.aiConfidence ?? null,
+        adjustment_explanation: feedback.adjustmentExplanation ?? null,
+        recommended_quest_id: feedback.recommendedQuestId ?? null,
         created_at: feedback.createdAt,
       })),
     );
@@ -605,10 +618,18 @@ export class SupabaseTrainingRepository implements DemoTrainingRepository {
     return this.getSnapshot();
   }
 
-  async submitQuest(input: SubmitQuestInput): Promise<SubmissionOutcome> {
+  private async submitQuestInternal(
+    input: SubmitQuestInput,
+    adjudication?: PolicyGatedSubmissionAdjudication,
+    diagnostics: AgentRunDiagnostic[] = [],
+  ): Promise<SubmissionOutcome> {
     const now = this.dependencies.clock.now();
     const current = await this.getSnapshot();
-    const outcome = executeSubmitQuest(current, input, { now, ids: this.dependencies.ids });
+    const outcome = executeSubmitQuest(current, input, {
+      now,
+      ids: this.dependencies.ids,
+      adjudication,
+    });
     const submittedQuest = outcome.state.quests[
       outcome.state.assignments[input.assignmentId].questId
     ];
@@ -643,13 +664,78 @@ export class SupabaseTrainingRepository implements DemoTrainingRepository {
         };
       }
     }
-    await this.persistState(outcome.state);
+    if (diagnostics.length > 0) {
+      await this.persistSubmissionOutcome(outcome, diagnostics);
+    } else {
+      await this.persistState(outcome.state);
+    }
     const state = await this.getSnapshot();
     return {
       ...outcome,
       state,
       submission: state.submissions[outcome.submission.id],
     };
+  }
+
+  async submitQuest(input: SubmitQuestInput): Promise<SubmissionOutcome> {
+    if (this.dependencies.submissionClient) {
+      return this.dependencies.submissionClient.submit(input);
+    }
+    return this.submitQuestInternal(input);
+  }
+
+  async submitQuestWithAdjudication(
+    input: SubmitQuestInput,
+    adjudication: PolicyGatedSubmissionAdjudication,
+    diagnostics: AgentRunDiagnostic[],
+  ): Promise<SubmissionOutcome> {
+    return this.submitQuestInternal(input, adjudication, diagnostics);
+  }
+
+  async persistSubmissionOutcome(
+    outcome: SubmissionOutcome,
+    diagnostics: AgentRunDiagnostic[],
+  ): Promise<void> {
+    const authenticatedUserId = await this.userId();
+    if (outcome.state.profile.id !== authenticatedUserId) {
+      throw new Error("Submission outcome does not belong to the authenticated user");
+    }
+    if (!outcome.state.submissions[outcome.submission.id]) {
+      throw new Error("Submission outcome is missing its persisted submission");
+    }
+
+    await this.persistState(outcome.state);
+    if (diagnostics.length === 0) return;
+
+    const completedAt = this.dependencies.clock.now();
+    await this.upsert(
+      "agent_runs",
+      diagnostics.map((diagnostic) => ({
+        id: this.dependencies.ids.next("agent-run"),
+        user_id: authenticatedUserId,
+        submission_id: outcome.submission.id,
+        agent_type: diagnostic.agentType,
+        status: diagnostic.status,
+        summary:
+          diagnostic.status === "completed"
+            ? "Structured agent output validated."
+            : `Agent degraded: ${diagnostic.errorCode ?? "unknown_error"}.`,
+        input: diagnostic.inputSummary,
+        output: diagnostic.outputSummary,
+        is_mock: false,
+        model: diagnostic.model,
+        prompt_version: diagnostic.promptVersion,
+        latency_ms: diagnostic.latencyMs,
+        input_tokens: diagnostic.inputTokens,
+        output_tokens: diagnostic.outputTokens,
+        error_code: diagnostic.errorCode,
+        fallback_used: diagnostic.fallbackUsed,
+        trace_id: diagnostic.traceId,
+        completed_at: completedAt,
+        created_at: completedAt,
+      })),
+      { onConflict: "user_id,submission_id,agent_type,prompt_version" },
+    );
   }
 
   async resetDemo(): Promise<TrainingState> {

@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   mapAssignmentRow,
+  mapAgentRunRow,
   mapFeedbackRow,
   mapPortfolioArtifactRow,
   mapQuestRow,
@@ -11,6 +12,72 @@ import {
 } from "./row-mappers";
 
 describe("Supabase row mappers", () => {
+  it("maps Phase 3 feedback provenance and agent diagnostics", () => {
+    expect(
+      mapFeedbackRow({
+        id: "feedback-ai",
+        kind: "submission",
+        submission_id: "submission-1",
+        summary: "AI feedback",
+        strengths: ["Clear metric"],
+        improvements: ["Add error slices"],
+        next_actions: ["Create one slice table"],
+        xp_awarded: 70,
+        skill_deltas: {
+          dataHandling: 0,
+          modeling: 0.1,
+          evaluation: 0.2,
+          engineering: 0,
+          researchSense: 0,
+          productThinking: 0,
+          communication: 0,
+        },
+        source: "ai",
+        model: "gpt-5.6-terra",
+        prompt_version: "phase3-v1",
+        ai_confidence: 0.82,
+        adjustment_explanation: "Maintain difficulty.",
+        recommended_quest_id: "quest-next",
+        created_at: "2026-07-18T18:00:00.000Z",
+      }),
+    ).toMatchObject({
+      source: "ai",
+      model: "gpt-5.6-terra",
+      promptVersion: "phase3-v1",
+      aiConfidence: 0.82,
+      adjustmentExplanation: "Maintain difficulty.",
+      recommendedQuestId: "quest-next",
+    });
+
+    expect(
+      mapAgentRunRow({
+        agent_type: "coordinator",
+        status: "completed",
+        summary: "Feedback generated.",
+        completed_at: "2026-07-18T18:00:01.000Z",
+        created_at: "2026-07-18T18:00:00.000Z",
+        is_mock: false,
+        model: "gpt-5.6-terra",
+        prompt_version: "phase3-v1",
+        latency_ms: 900,
+        input_tokens: 200,
+        output_tokens: 80,
+        error_code: null,
+        fallback_used: false,
+        trace_id: "trace-1",
+      }),
+    ).toMatchObject({
+      isMock: false,
+      model: "gpt-5.6-terra",
+      promptVersion: "phase3-v1",
+      latencyMs: 900,
+      inputTokens: 200,
+      outputTokens: 80,
+      fallbackUsed: false,
+      traceId: "trace-1",
+    });
+  });
+
   it("maps catalog quest rows into domain quests", () => {
     expect(
       mapQuestRow({

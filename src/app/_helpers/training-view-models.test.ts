@@ -4,7 +4,7 @@ import { SKILL_KEYS } from "@/domain/training/constants";
 import type { ActivityEvent, SkillStats } from "@/domain/training/types";
 import { createTrainingSeed } from "@/mocks/training/seed";
 
-import { mapActivity, mapAgent, mapQuest, mapSkills } from "./training-view-models";
+import { mapActivity, mapAgent, mapFeedback, mapQuest, mapSkills } from "./training-view-models";
 
 const now = "2026-07-16T16:00:00.000Z";
 
@@ -45,5 +45,32 @@ describe("training view-model mapping", () => {
     expect(agent.lastRun).not.toContain("T");
     expect(agent.lastRun).not.toContain("Z");
     expect(mappedActivity.occurredAt).toBe(agent.lastRun);
+  });
+
+  test("maps AI, fallback, and Demo provenance explicitly", () => {
+    const state = createTrainingSeed(now);
+    expect(mapAgent(state.agents[0], "UTC").provenance).toBe("Demo");
+    expect(mapAgent({
+      ...state.agents[0],
+      isMock: false,
+      fallbackUsed: false,
+      model: "gpt-5.6-terra",
+      promptVersion: "phase3-v1",
+      latencyMs: 400,
+    }, "UTC")).toMatchObject({
+      provenance: "AI",
+      model: "gpt-5.6-terra",
+      latencyMs: 400,
+    });
+
+    const feedback = {
+      ...Object.values(state.feedback)[0],
+      source: "ai_fallback" as const,
+      adjustmentExplanation: "AI was unavailable; deterministic rules were preserved.",
+    };
+    expect(mapFeedback(feedback)).toMatchObject({
+      provenance: "Deterministic fallback",
+      adjustmentExplanation: "AI was unavailable; deterministic rules were preserved.",
+    });
   });
 });

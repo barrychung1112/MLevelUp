@@ -1,48 +1,34 @@
 # MLevelUp
 
-MLevelUp is a gamified training system for people who want to become machine learning engineers through execution, measurable evidence, feedback, and portfolio-building—not passive course consumption.
+MLevelUp is a gamified training system for people who want to become machine learning engineers through execution, measurable evidence, feedback, and portfolio building—not passive course consumption.
 
-Built as an OpenAI Hackathon project, the MVP turns long-term ML engineering growth into a demanding daily loop: accept a mission, complete concrete checkpoints, submit evidence, receive evaluation, and build a public body of work.
-
-## The problem
-
-Machine learning roadmaps explain what to learn, but they rarely answer three practical questions:
-
-- What should I build today?
-- How do I know whether the result is good enough?
-- How does today's work become credible portfolio evidence?
-
-MLevelUp addresses that gap with structured missions, explicit success metrics, evidence-based completion, and persistent progression.
+Built as an OpenAI Hackathon project, it turns long-term ML engineering growth into a demanding daily loop: accept a mission, complete concrete checkpoints, submit evidence, receive evaluation, and build a public body of work.
 
 ## Core training loop
 
-1. The learner commits to becoming a machine learning engineer.
-2. The system assigns the hardest mission that is still achievable within the learner's current ability and time constraints.
-3. A multi-day mainline mission runs alongside a 24-hour daily mission.
-4. Each mission defines execution steps, measurable success criteria, boundaries, required evidence, and supporting resources.
-5. Missed obligations generate additional penalty missions.
-6. Seven consecutive failure days trigger a decision: abandon and reset, or enter a three-day recovery window.
-7. Verified results contribute XP, seven ML engineering skill stats, training history, and portfolio artifacts.
+1. The learner commits to becoming a machine learning engineer with a fixed five-hour daily training capacity.
+2. The system assigns the hardest mission that is still achievable within the learner's current ability.
+3. A multi-day mainline mission runs alongside an independent 24-hour daily mission.
+4. Every mission defines measurable success criteria, required evidence, and supporting resources.
+5. Missed obligations create penalty missions. Seven consecutive failure days trigger a reset decision or a three-day recovery window.
+6. Valid evidence produces feedback, XP, seven skill-stat updates, history, and portfolio artifacts.
 
-## Current MVP
+## Current MVP — Phase 3
 
 - Email magic-link authentication through Supabase
-- Original dark command-center interface with responsive desktop and mobile layouts
-- Fixed target role: Machine Learning Engineer
-- Five-hour daily training commitment
+- Responsive dark command-center interface
 - Initial calibration mission: **The Courage to Challenge**
-- Multi-day mainline missions with explicit checkpoints
-- Independent 24-hour daily missions
-- Penalty missions for missed checkpoints and daily obligations
-- Seven-day failure review and three-day recovery state machine
-- Evidence submission for URLs, files, metrics, and written reflections
-- XP, levels, streaks, and seven skill dimensions
-- Resource readiness checks before mission assignment
-- Portfolio artifacts, battle log, progress review, and agent status views
-- Supabase persistence with row-level security policies
-- Demo mode backed by deterministic local data
+- Multi-day mainline, daily, penalty, and recovery mission flows
+- Evidence submission for URLs, files, metrics, and written reflection
+- Server-side Learning Strategist, Adjuster, and Coordinator modules
+- Structured OpenAI Responses API outputs validated with Zod
+- A deterministic policy gate that retains authority over completion, XP, skill growth, deadlines, penalties, recovery, and reset
+- Deterministic feedback fallback when AI is unavailable or invalid
+- Auditable feedback provenance and agent-run diagnostics
+- Supabase persistence protected by row-level security
+- Deterministic local Demo mode that does not require external services
 
-The coordinator, learning strategist, resource collector, and adjuster are represented in the current interface and data model. Their generative AI behavior is intentionally mocked in this Phase 2 MVP; real OpenAI-powered agent execution is planned for the next phase.
+The Resource Collector remains mocked in Phase 3. Live discovery, quality scoring, and scheduled resource ingestion belong to Phase 4.
 
 ## Seven skill dimensions
 
@@ -58,29 +44,29 @@ The coordinator, learning strategist, resource collector, and adjuster are repre
 
 ## Architecture
 
-MLevelUp uses a modular monolith so the MVP remains easy to operate while preserving clear boundaries for future agent and scheduling services.
+MLevelUp is a Next.js modular monolith. The browser submits a bounded payload to an authenticated server route. The server runs deterministic evidence checks, optionally requests structured recommendations from three AI modules, applies a pure policy gate, and persists one auditable result through the user's Supabase session.
 
 ```text
 Next.js App Router
 ├── Feature UI and route composition
-├── TrainingProvider application boundary
-├── Domain rules and state machines
-├── MockTrainingRepository for demo mode
-└── SupabaseTrainingRepository for authenticated persistence
-        ├── PostgreSQL
-        ├── Row Level Security
-        └── Magic-link authentication
+├── Authenticated submission API
+├── Application use cases
+├── Deterministic domain rules and state machines
+├── Structured AI workflow and policy gate
+├── MockTrainingRepository for Demo mode
+└── SupabaseTrainingRepository
+    ├── PostgreSQL
+    ├── Row Level Security
+    └── Magic-link authentication
 ```
 
 ### Technology
 
-- Next.js 16 and React 19
-- TypeScript
+- Next.js 16, React 19, and TypeScript
 - Supabase Auth and PostgreSQL
+- OpenAI Responses API with Zod structured outputs
 - Tailwind CSS
-- Zod domain validation
-- Vitest and Testing Library
-- Playwright browser testing
+- Vitest, Testing Library, and Playwright
 
 ## Run locally
 
@@ -92,13 +78,13 @@ cd MLevelUp
 npm install
 ```
 
-For the fastest local evaluation, create `.env.local` with demo mode enabled:
+For local evaluation without Supabase or OpenAI, create `.env.local`:
 
 ```env
 NEXT_PUBLIC_MLEVELUP_DEMO_MODE=1
 ```
 
-Then start the application:
+Then run:
 
 ```bash
 npm run dev
@@ -106,66 +92,70 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000).
 
-## Connect Supabase
+## Connect Supabase and OpenAI
 
-Copy `.env.example` to `.env.local` and provide the browser-safe project values:
+Copy `.env.example` to `.env.local` and supply your own values:
 
 ```env
 NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your-publishable-key
+OPENAI_API_KEY=your-server-only-openai-key
+OPENAI_MODEL=gpt-5.6-terra
+OPENAI_PROMPT_VERSION=phase3-v1
 ```
 
-Run the migrations in chronological order through the Supabase SQL Editor:
+`OPENAI_API_KEY` is optional at runtime. Without it, authenticated submissions remain usable and receive deterministic fallback feedback. Never add `NEXT_PUBLIC_` to this key and never use a Supabase secret or `service_role` key in browser variables.
 
-1. `supabase/migrations/202607160001_phase2_training.sql`
-2. `supabase/migrations/202607170001_adaptive_courage_path.sql`
-3. `supabase/migrations/202607180001_mainline_daily_missions.sql`
+Apply the four migrations in chronological order. Exact instructions and safety notes are in [docs/phase-3-supabase-setup.md](docs/phase-3-supabase-setup.md).
 
-Do not expose a Supabase secret or `service_role` key in browser environment variables.
+## Privacy and authority boundaries
+
+- The browser sends only assignment ID, idempotency key, evidence, and reflection.
+- Authentication determines the user; the request cannot choose row ownership.
+- AI receives bounded mission context, summarized evidence, recent aggregate outcomes, skills, and eligible resource/quest identifiers.
+- Raw access tokens, API keys, email addresses, and full database rows are excluded from AI context.
+- Raw prompts are not persisted. Agent logs contain redacted summaries and sanitized failures.
+- AI cannot directly award XP, mark completion, change deadlines, cancel penalties, extend recovery, or reset an account.
 
 ## Verification
 
 ```bash
 npm run lint
 npm run typecheck
-npm run test:unit
+npm run test:unit -- --maxWorkers=1
+npm run build
 npm run test:e2e
 ```
 
-The current release is covered by 221 unit and integration tests across 42 files and 20 real-browser scenarios across desktop and mobile Chromium.
+Automated tests use fake model transports and never call the live OpenAI API.
 
 ## Repository structure
 
 ```text
-src/app/                  Next.js routes and page composition
-src/components/           Feature and UI components
-src/domain/training/      Mission, reward, deadline, and recovery rules
-src/application/training/ Use cases and repository contracts
-src/supabase-training/    Supabase persistence implementation
-src/mocks/training/       Deterministic demo repository and seed data
+src/app/                  Next.js pages and authenticated API route
+src/ai/                   AI contracts, prompts, gateway, and orchestration
+src/domain/training/      Mission, reward, policy, deadline, and recovery rules
+src/application/training/ Submission and training use cases
+src/supabase-training/    Supabase persistence and browser submission client
+src/mocks/training/       Deterministic Demo repository and seed data
 supabase/migrations/      Database schema and migration history
 e2e/                      Playwright user-flow tests
 docs/superpowers/         Approved designs and implementation plans
 ```
 
-## Hackathon status and roadmap
+## Roadmap
 
-The repository contains a functional Phase 2 training dashboard rather than a landing-page prototype. The next milestones are:
-
-- OpenAI-powered coordinator, learning strategist, and adjuster agents
-- Evidence-aware AI feedback and quality scoring
-- Curated live resource ingestion with freshness and credibility checks
-- Kaggle and hackathon result integrations
-- Public portfolio export and shareable learner profiles
+- Phase 4: live resource collection, deduplication, credibility, freshness, and scheduled ingestion
+- Phase 5: Kaggle/hackathon integrations, richer anti-cheat signals, leaderboards, badges, and public portfolio export
 - Production deployment and hosted demo URL
 
 ## Responsible design
 
 - Mission completion requires evidence rather than a self-reported checkbox.
-- Reset rules are explicit before training begins.
-- Portfolio artifacts are preserved separately from transient mission state where appropriate.
+- Reset and recovery rules are explicit before training begins.
+- Model failure never blocks an otherwise valid submission.
 - The visual language is original and does not reuse copyrighted characters, logos, dialogue, or game assets.
 
 ## Project stage
 
-Active Hackathon MVP development. Feedback, issues, and contributions are welcome.
+Active OpenAI Hackathon MVP development. Feedback, issues, and contributions are welcome.

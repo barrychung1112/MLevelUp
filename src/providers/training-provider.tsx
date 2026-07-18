@@ -25,6 +25,7 @@ import { LocalTrainingStorage } from "@/mocks/training/local-storage";
 import { MockTrainingRepository } from "@/mocks/training/mock-training-repository";
 import { SEED_VERSION } from "@/mocks/training/seed";
 import { SupabaseTrainingRepository } from "@/supabase-training/supabase-training-repository";
+import { createServerSubmitClient } from "@/supabase-training/server-submit-client";
 
 export type TrainingLoadStatus = "loading" | "ready" | "error";
 export type TrainingCommandStatus = "idle" | "submitting" | "success" | "error";
@@ -73,6 +74,7 @@ export function createBrowserTrainingRepository(): DemoTrainingRepository {
           return globalThis.crypto.randomUUID();
         },
       },
+      submissionClient: createServerSubmitClient(supabase),
     });
   }
 

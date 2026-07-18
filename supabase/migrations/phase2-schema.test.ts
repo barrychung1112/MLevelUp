@@ -15,6 +15,12 @@ const missionMigrationPath = join(
   "migrations",
   "202607180001_mainline_daily_missions.sql",
 );
+const phase3MigrationPath = join(
+  process.cwd(),
+  "supabase",
+  "migrations",
+  "202607180002_phase3_ai_feedback.sql",
+);
 
 describe("phase 2 Supabase schema migration", () => {
   it("defines the compact training schema, RLS, and public-safe app credentials", () => {
@@ -88,5 +94,25 @@ describe("adaptive courage path migration", () => {
     expect(sql).toContain("'calibration'");
     expect(sql).toContain("difficulty");
     expect(sql).toContain("90");
+  });
+});
+
+describe("Phase 3 AI feedback migration", () => {
+  it("adds auditable AI fields, idempotency, and strict agent ownership", () => {
+    expect(existsSync(phase3MigrationPath)).toBe(true);
+    const sql = readFileSync(phase3MigrationPath, "utf8").toLowerCase();
+
+    for (const column of [
+      "submission_id", "model", "prompt_version", "latency_ms",
+      "input_tokens", "output_tokens", "error_code", "fallback_used",
+      "trace_id", "source", "ai_confidence", "adjustment_explanation",
+      "recommended_quest_id",
+    ]) expect(sql).toContain(column);
+
+    expect(sql).toContain("agent_runs_submission_prompt_uidx");
+    expect(sql).toContain("auth.uid() = user_id");
+    expect(sql).not.toContain("auth.uid() = user_id or user_id is null");
+    expect(sql).toContain("alter column user_id set not null");
+    expect(sql).toContain("'deterministic', 'ai', 'ai_fallback'");
   });
 });

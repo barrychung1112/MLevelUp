@@ -1,4 +1,7 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
+
+import type { AgentRunDiagnostic } from "@/ai/contracts";
+import { createTrainingSeed } from "@/mocks/training/seed";
 
 import { SupabaseTrainingRepository } from "./supabase-training-repository";
 
@@ -78,6 +81,108 @@ function createClient(rows: Record<string, unknown[]>, singles: Record<string, u
 }
 
 describe("SupabaseTrainingRepository", () => {
+  it("delegates browser submissions to the authenticated server client", async () => {
+    const outcome = { delegated: true };
+    const submit = vi.fn().mockResolvedValue(outcome);
+    const repository = new SupabaseTrainingRepository({
+      client: createClient({}) as never,
+      clock: { now: () => "2026-07-18T18:00:00.000Z" },
+      ids: { next: () => "00000000-0000-4000-8000-000000000001" },
+      submissionClient: { submit } as never,
+    });
+    const input = {
+      idempotencyKey: "delegated-key",
+      assignmentId: "assignment-1",
+      evidence: [],
+      selfReflection: "A reflection",
+    };
+
+    await expect(repository.submitQuest(input)).resolves.toBe(outcome);
+    expect(submit).toHaveBeenCalledOnce();
+    expect(submit).toHaveBeenCalledWith(input);
+  });
+
+  it("persists a user-owned outcome with redacted agent diagnostics", async () => {
+    const agentUpserts: unknown[] = [];
+    const client = createClient({});
+    const originalFrom = client.from;
+    client.from = (table: string) => {
+      const tableClient = originalFrom(table);
+      return {
+        ...tableClient,
+        upsert: async (value: unknown) => {
+          if (table === "agent_runs") agentUpserts.push(value);
+          return { data: null, error: null };
+        },
+      };
+    };
+    const repository = new SupabaseTrainingRepository({
+      client: client as never,
+      clock: { now: () => "2026-07-18T18:00:01.000Z" },
+      ids: { next: () => "00000000-0000-4000-8000-000000000099" },
+    });
+    const state = createTrainingSeed("2026-07-18T18:00:00.000Z");
+    state.profile.id = "user-1";
+    const assignment = Object.values(state.assignments)[0];
+    const submission = {
+      id: "00000000-0000-4000-8000-000000000010",
+      idempotencyKey: "phase3-persist",
+      assignmentId: assignment.id,
+      revisionNo: 1,
+      evidence: [],
+      selfReflection: "A verified reflection.",
+      verificationStatus: "verified" as const,
+      verificationMethod: "automatic" as const,
+      qualityScore: 80,
+      scoreBreakdown: {
+        evidenceCompleteness: 35,
+        evidenceValidity: 20,
+        reflection: 15,
+        artifactReadiness: 10,
+      },
+      hardFailures: [],
+      submittedAt: "2026-07-18T18:00:00.000Z",
+    };
+    state.submissions[submission.id] = submission;
+    const diagnostics: AgentRunDiagnostic[] = [{
+      agentType: "coordinator",
+      status: "completed",
+      model: "gpt-5.6-terra",
+      promptVersion: "phase3-v1",
+      latencyMs: 900,
+      inputTokens: 200,
+      outputTokens: 80,
+      errorCode: null,
+      fallbackUsed: false,
+      traceId: "trace-1",
+      inputSummary: { questId: "quest-safe" },
+      outputSummary: { responseId: "response-safe" },
+    }];
+
+    await repository.persistSubmissionOutcome(
+      { state, submission, evaluation: {
+        qualityScore: 80,
+        verificationStatus: "verified",
+        verificationMethod: "automatic",
+        scoreBreakdown: submission.scoreBreakdown,
+        artifactReady: false,
+        hardFailures: [],
+      } },
+      diagnostics,
+    );
+
+    expect(agentUpserts).toContainEqual([
+      expect.objectContaining({
+        user_id: "user-1",
+        submission_id: submission.id,
+        agent_type: "coordinator",
+        is_mock: false,
+        input: { questId: "quest-safe" },
+        output: { responseId: "response-safe" },
+      }),
+    ]);
+  });
+
   it("orders skill stats by their actual updated_at column", async () => {
     const orders: Array<{ table: string; column: string }> = [];
     const repository = new SupabaseTrainingRepository({

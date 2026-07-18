@@ -112,6 +112,12 @@ export type FeedbackRow = {
   score_breakdown?: SubmissionFeedback["scoreBreakdown"] | null;
   xp_awarded: number;
   skill_deltas: SubmissionFeedback["skillDeltas"];
+  source?: SubmissionFeedback["source"] | null;
+  model?: string | null;
+  prompt_version?: string | null;
+  ai_confidence?: number | null;
+  adjustment_explanation?: string | null;
+  recommended_quest_id?: string | null;
   created_at: string;
 };
 
@@ -137,6 +143,14 @@ export type AgentRunRow = {
   started_at?: string | null;
   created_at: string;
   is_mock: boolean;
+  model?: string | null;
+  prompt_version?: string | null;
+  latency_ms?: number | null;
+  input_tokens?: number | null;
+  output_tokens?: number | null;
+  error_code?: string | null;
+  fallback_used?: boolean | null;
+  trace_id?: string | null;
 };
 
 export function mapQuestRow(row: QuestRow): Quest {
@@ -253,6 +267,12 @@ export function mapFeedbackRow(row: FeedbackRow): SubmissionFeedback {
     scoreBreakdown: row.score_breakdown ?? undefined,
     xpAwarded: row.xp_awarded,
     skillDeltas: row.skill_deltas,
+    source: row.source ?? "demo",
+    model: row.model ?? undefined,
+    promptVersion: row.prompt_version ?? undefined,
+    aiConfidence: row.ai_confidence ?? undefined,
+    adjustmentExplanation: row.adjustment_explanation ?? undefined,
+    recommendedQuestId: row.recommended_quest_id ?? undefined,
     createdAt: row.created_at,
   };
 
@@ -281,6 +301,14 @@ export function mapAgentRunRow(row: AgentRunRow): AgentStatus {
     status: row.status,
     lastRunAt: row.completed_at ?? row.started_at ?? row.created_at,
     summary: row.summary,
-    isMock: true,
+    isMock: row.is_mock,
+    model: row.model ?? undefined,
+    promptVersion: row.prompt_version ?? undefined,
+    latencyMs: row.latency_ms ?? undefined,
+    inputTokens: row.input_tokens ?? undefined,
+    outputTokens: row.output_tokens ?? undefined,
+    errorCode: row.error_code ?? undefined,
+    fallbackUsed: row.fallback_used ?? undefined,
+    traceId: row.trace_id ?? undefined,
   };
 }

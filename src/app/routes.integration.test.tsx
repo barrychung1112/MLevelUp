@@ -98,6 +98,30 @@ describe("adaptive courage route integration", () => {
     await waitFor(() => expect(navigation.push).toHaveBeenCalledWith(`/quests/${primary.id}`));
   });
 
+  test("keeps Demo submissions deterministic and labels their feedback", async () => {
+    const repository = createRepository();
+    const state = await completeOnboarding(repository);
+    const primary = Object.values(state.assignments).find((item) => item.slot === "primary")!;
+    await repository.startQuest(primary.id);
+    await repository.submitQuest({
+      idempotencyKey: "route-demo-feedback",
+      assignmentId: primary.id,
+      evidence: [{
+        id: "route-demo-metric",
+        requirementId: "metric",
+        type: "metricResult",
+        metricName: "validation_accuracy",
+        metricValue: 0.78,
+      }],
+      selfReflection:
+        "I recorded the validation result, but this revision still needs the required artifact and a clearer reproducibility note.",
+    });
+
+    renderRoute(<DashboardPage />, repository);
+    expect(await screen.findByText("The evidence needs revision before this quest can award XP.")).toBeVisible();
+    expect(screen.getAllByText("Demo").length).toBeGreaterThan(0);
+  });
+
   test("shows fixed profile settings and resets progress", async () => {
     const repository = createRepository();
     await completeOnboarding(repository);
