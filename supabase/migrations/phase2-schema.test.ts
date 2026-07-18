@@ -21,6 +21,12 @@ const phase3MigrationPath = join(
   "migrations",
   "202607180002_phase3_ai_feedback.sql",
 );
+const phase4MigrationPath = join(
+  process.cwd(),
+  "supabase",
+  "migrations",
+  "202607180003_phase4_resource_collector.sql",
+);
 
 describe("phase 2 Supabase schema migration", () => {
   it("defines the compact training schema, RLS, and public-safe app credentials", () => {
@@ -114,5 +120,22 @@ describe("Phase 3 AI feedback migration", () => {
     expect(sql).not.toContain("auth.uid() = user_id or user_id is null");
     expect(sql).toContain("alter column user_id set not null");
     expect(sql).toContain("'deterministic', 'ai', 'ai_fallback'");
+  });
+});
+
+describe("Phase 4 resource collector migration", () => {
+  it("adds catalog provenance, collection diagnostics, and read-only client access", () => {
+    expect(existsSync(phase4MigrationPath)).toBe(true);
+    const sql = readFileSync(phase4MigrationPath, "utf8").toLowerCase();
+
+    for (const value of [
+      "canonical_url", "external_id", "content_fingerprint", "quality_score",
+      "task_fit", "published_at", "ingested_at", "resource_collection_runs",
+      "resource_collection_items", "resources_source_external_uidx",
+      "resources_canonical_url_uidx",
+    ]) expect(sql).toContain(value);
+
+    expect(sql).toContain("resources_write_service_only");
+    expect(sql).toContain("to service_role");
   });
 });
