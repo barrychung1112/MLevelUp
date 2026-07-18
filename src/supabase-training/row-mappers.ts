@@ -19,6 +19,7 @@ import type {
 export type QuestRow = {
   id: string;
   training_contract: Quest["trainingContract"];
+  purpose: Quest["purpose"];
   title: string;
   summary: string;
   instructions: string;
@@ -126,6 +127,7 @@ export function mapQuestRow(row: QuestRow): Quest {
   return QuestSchema.parse({
     id: row.id,
     trainingContract: row.training_contract,
+    purpose: row.purpose,
     title: row.title,
     summary: row.summary,
     instructions: row.instructions,

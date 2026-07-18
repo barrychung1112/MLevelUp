@@ -9,6 +9,7 @@ export type SkillKey =
 
 export type TrainingContract = "foundation" | "standard" | "intensive";
 export type Difficulty = 1 | 2 | 3 | 4 | 5;
+export type QuestPurpose = "calibration" | "training";
 
 export type AssignmentStatus =
   | "assigned"
@@ -65,6 +66,7 @@ export type SkillWeights = Record<SkillKey, number>;
 export interface Quest {
   id: string;
   trainingContract: TrainingContract;
+  purpose: QuestPurpose;
   title: string;
   summary: string;
   instructions: string;
@@ -89,6 +91,7 @@ export interface UserProfile {
   weeklyMinutes: number;
   timezone: string;
   onboardingCompleted: boolean;
+  challengeAcceptedAt: string | null;
 }
 
 export type VerificationStatus =

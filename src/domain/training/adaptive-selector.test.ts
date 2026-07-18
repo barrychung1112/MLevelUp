@@ -35,6 +35,7 @@ function quest(
   return {
     id,
     trainingContract: "standard",
+    purpose: "training",
     title: id,
     summary: id,
     instructions: id,

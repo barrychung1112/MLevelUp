@@ -89,6 +89,7 @@ const EvidenceRequirementsSchema = z
 export const QuestSchema = z.strictObject({
   id: z.string().min(1),
   trainingContract: TrainingContractSchema,
+  purpose: z.enum(["calibration", "training"]),
   title: z.string().min(1),
   summary: z.string().min(1),
   instructions: z.string().min(1),
@@ -136,6 +137,7 @@ export const UserProfileSchema = z.strictObject({
   weeklyMinutes: z.number().int().positive(),
   timezone: TimeZoneSchema,
   onboardingCompleted: z.boolean(),
+  challengeAcceptedAt: z.iso.datetime().nullable(),
 });
 
 const MAX_EVIDENCE_URL_LENGTH = 2_048;

@@ -85,6 +85,7 @@ type ProfileRow = {
   weekly_minutes: number;
   timezone: string;
   onboarding_completed: boolean;
+  challenge_accepted_at: string | null;
 };
 
 type ProgressRow = {
@@ -121,6 +122,7 @@ function defaultProfile(userId: string): UserProfile {
     weeklyMinutes: 600,
     timezone: "America/Los_Angeles",
     onboardingCompleted: false,
+    challengeAcceptedAt: null,
   };
 }
 
@@ -273,6 +275,7 @@ export class SupabaseTrainingRepository implements DemoTrainingRepository {
           weeklyMinutes: profileRow.weekly_minutes,
           timezone: profileRow.timezone,
           onboardingCompleted: profileRow.onboarding_completed,
+          challengeAcceptedAt: profileRow.challenge_accepted_at,
         })
       : defaultProfile(userId);
 
@@ -358,6 +361,7 @@ export class SupabaseTrainingRepository implements DemoTrainingRepository {
       weekly_minutes: state.profile.weeklyMinutes,
       timezone: state.profile.timezone,
       onboarding_completed: state.profile.onboardingCompleted,
+      challenge_accepted_at: state.profile.challengeAcceptedAt,
       updated_at: this.dependencies.clock.now(),
     });
     await this.upsert("user_progress", {

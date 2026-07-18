@@ -16,6 +16,7 @@ import {
 const validQuest = {
   id: "quest-baseline",
   trainingContract: "standard",
+  purpose: "training",
   title: "Build a baseline model",
   summary: "Train and evaluate a reproducible baseline.",
   instructions: "Create a baseline and document the validation strategy.",
@@ -45,6 +46,13 @@ const validQuest = {
 describe("strict domain schemas", () => {
   test("accepts a quest whose skill weights total one", () => {
     expect(QuestSchema.parse(validQuest)).toEqual(validQuest);
+  });
+
+  test("accepts calibration and training quest purposes", () => {
+    expect(QuestSchema.parse({ ...validQuest, purpose: "calibration" })).toMatchObject({
+      purpose: "calibration",
+    });
+    expect(() => QuestSchema.parse({ ...validQuest, purpose: "unknown" })).toThrow();
   });
 
   test("rejects quest skill weights that do not total one", () => {

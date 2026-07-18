@@ -16,6 +16,7 @@ describe("Supabase row mappers", () => {
       mapQuestRow({
         id: "quest",
         training_contract: "standard",
+        purpose: "calibration",
         title: "Quest",
         summary: "Summary",
         instructions: "Do it",
@@ -42,6 +43,7 @@ describe("Supabase row mappers", () => {
     ).toMatchObject({
       id: "quest",
       trainingContract: "standard",
+      purpose: "calibration",
       estimatedMinutes: 70,
       expectedArtifactType: "githubRepository",
     });

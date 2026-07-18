@@ -16,6 +16,7 @@ const quests: Quest[] = [
   {
     id: "quest-foundation-eda",
     trainingContract: "foundation",
+    purpose: "training",
     title: "Inspect a small dataset",
     summary: "Find one data-quality issue and report a metric.",
     instructions: "Inspect missing values, distributions, and one target relationship.",
@@ -41,6 +42,7 @@ const quests: Quest[] = [
   {
     id: "quest-foundation-note",
     trainingContract: "foundation",
+    purpose: "training",
     title: "Write a validation note",
     summary: "Explain why train and validation data must stay separate.",
     instructions: "Write a concise explanation with one leakage example.",
@@ -69,6 +71,7 @@ const quests: Quest[] = [
   {
     id: "quest-standard-baseline",
     trainingContract: "standard",
+    purpose: "training",
     title: "Ship a reproducible baseline",
     summary: "Train a baseline, document validation, and commit the experiment.",
     instructions: "Create one reproducible training run and commit the result.",
@@ -97,6 +100,7 @@ const quests: Quest[] = [
   {
     id: "quest-standard-report",
     trainingContract: "standard",
+    purpose: "training",
     title: "Package an evaluation report",
     summary: "Turn experiment results into a concise model evaluation report.",
     instructions: "Include the metric, one error slice, and a next experiment.",
@@ -125,6 +129,7 @@ const quests: Quest[] = [
   {
     id: "quest-intensive-deploy",
     trainingContract: "intensive",
+    purpose: "training",
     title: "Deploy a model inference service",
     summary: "Package a model behind an API and expose a working demo.",
     instructions: "Build, validate, and deploy one inference endpoint.",
@@ -153,6 +158,7 @@ const quests: Quest[] = [
   {
     id: "quest-intensive-design",
     trainingContract: "intensive",
+    purpose: "training",
     title: "Design a production ML pipeline",
     summary: "Document data, training, deployment, and monitoring boundaries.",
     instructions: "Write a system design note with failure and rollback paths.",
@@ -178,6 +184,42 @@ const quests: Quest[] = [
     expectedArtifactType: "systemDesignNote",
     resourceIds: ["resource-mlops"],
   },
+  {
+    id: "quest-courage-challenge",
+    trainingContract: "intensive",
+    purpose: "calibration",
+    title: "挑戰的勇氣",
+    summary: "用一份真實成果證明你願意踏上成長之路。",
+    instructions:
+      "檢查小型表格資料、建立可重現 baseline、說明 validation 方法與指標，並記錄完成與未完成的部分。",
+    questType: "modelExperiment",
+    difficulty: 4,
+    estimatedMinutes: 90,
+    baseXp: 120,
+    optional: false,
+    acceptanceCriteria: [
+      "指出至少一項資料品質問題",
+      "建立 baseline 並回報 validation 指標",
+      "說明完成、未完成與下一步",
+    ],
+    evidenceRequirements: [
+      { id: "artifact", type: "githubCommit", required: true },
+      { id: "metric", type: "metricResult", required: true },
+      { id: "reflection", type: "writtenReflection", required: true },
+    ],
+    reflectionMinChars: 80,
+    skillWeights: {
+      dataHandling: 0.2,
+      modeling: 0.25,
+      evaluation: 0.2,
+      engineering: 0.15,
+      researchSense: 0,
+      productThinking: 0,
+      communication: 0.2,
+    },
+    expectedArtifactType: "githubRepository",
+    resourceIds: ["resource-baseline", "resource-validation"],
+  },
 ];
 
 function initialSkills(): SkillStats {
@@ -192,7 +234,9 @@ export function createAssignmentsForContract(
   timezone = DEFAULT_TIMEZONE,
 ): Record<string, QuestAssignment> {
   const assignedDate = localDateForInstant(now, timezone);
-  const plan = quests.filter((quest) => quest.trainingContract === contract);
+  const plan = quests.filter(
+    (quest) => quest.purpose === "training" && quest.trainingContract === contract,
+  );
 
   return Object.fromEntries(
     plan.map((quest, index) => {
@@ -229,6 +273,7 @@ export function createTrainingSeed(
       weeklyMinutes: 600,
       timezone,
       onboardingCompleted: false,
+      challengeAcceptedAt: null,
     },
     progress: {
       totalXp: 0,

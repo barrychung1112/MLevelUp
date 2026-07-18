@@ -10,6 +10,7 @@ const reflection = "這次實驗先建立基準模型，再比較驗證集誤差
 const quest: Quest = {
   id: "quest-github",
   trainingContract: "standard",
+  purpose: "training",
   title: "Ship a model experiment",
   summary: "Commit a reproducible experiment.",
   instructions: "Submit the commit and reflect on the result.",
