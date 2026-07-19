@@ -24,3 +24,4 @@ async function runLiveCollection(): Promise<CollectionOutcome> {
 }
 
 export const POST = createResourceCollectionHandler({ cronSecret: process.env.CRON_SECRET ?? "", run: runLiveCollection });
+export const GET = POST;

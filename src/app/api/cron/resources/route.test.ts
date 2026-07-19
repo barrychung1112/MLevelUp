@@ -1,8 +1,12 @@
 import { describe, expect, test, vi } from "vitest";
 
-import { createResourceCollectionHandler } from "./route";
+import { GET, POST, createResourceCollectionHandler } from "./route";
 
 describe("resource collection cron handler", () => {
+  test("exports GET for Vercel Cron and POST for manual smoke tests", () => {
+    expect(GET).toBe(POST);
+  });
+
   test("rejects a missing cron secret before collection begins", async () => {
     const run = vi.fn();
     const post = createResourceCollectionHandler({ cronSecret: "secret", run });

@@ -13,7 +13,7 @@ Built as an OpenAI Hackathon project, it turns long-term ML engineering growth i
 5. Missed obligations create penalty missions. Seven consecutive failure days trigger a reset decision or a three-day recovery window.
 6. Valid evidence produces feedback, XP, seven skill-stat updates, history, and portfolio artifacts.
 
-## Current MVP — Phase 3
+## Current MVP — Phase 4
 
 - Email magic-link authentication through Supabase
 - Responsive dark command-center interface
@@ -27,8 +27,12 @@ Built as an OpenAI Hackathon project, it turns long-term ML engineering growth i
 - Auditable feedback provenance and agent-run diagnostics
 - Supabase persistence protected by row-level security
 - Deterministic local Demo mode that does not require external services
+- Resource collection from GitHub and arXiv with canonicalization, deduplication, quality scoring, and safe fallback
+- Protected Vercel Cron routes for resource collection and daily assignment generation
+- Server-only Supabase catalog writes and per-user/day daily-assignment idempotency
+- Resource source, quality, and availability metadata in the dashboard
 
-The Resource Collector remains mocked in Phase 3. Live discovery, quality scoring, and scheduled resource ingestion belong to Phase 4.
+See [Phase 4 operations](docs/phase-4-resource-collector-setup.md) for deployment settings and smoke tests.
 
 ## Seven skill dimensions
 

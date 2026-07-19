@@ -84,3 +84,4 @@ async function runLiveDailyTraining(): Promise<DailyTrainingRunSummary> {
 }
 
 export const POST = createDailyTrainingHandler({ cronSecret: process.env.CRON_SECRET ?? "", run: runLiveDailyTraining });
+export const GET = POST;

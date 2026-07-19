@@ -1,8 +1,12 @@
 import { describe, expect, test, vi } from "vitest";
 
-import { createDailyTrainingHandler } from "./route";
+import { GET, POST, createDailyTrainingHandler } from "./route";
 
 describe("daily training cron handler", () => {
+  test("exports GET for Vercel Cron and POST for manual smoke tests", () => {
+    expect(GET).toBe(POST);
+  });
+
   test("rejects an invalid cron secret before processing learners", async () => {
     const run = vi.fn();
     const post = createDailyTrainingHandler({ cronSecret: "secret", run });
