@@ -27,6 +27,12 @@ const phase4MigrationPath = join(
   "migrations",
   "202607180003_phase4_resource_collector.sql",
 );
+const dailyIdempotencyMigrationPath = join(
+  process.cwd(),
+  "supabase",
+  "migrations",
+  "202607190001_daily_assignment_idempotency.sql",
+);
 
 describe("phase 2 Supabase schema migration", () => {
   it("defines the compact training schema, RLS, and public-safe app credentials", () => {
@@ -137,5 +143,16 @@ describe("Phase 4 resource collector migration", () => {
 
     expect(sql).toContain("resources_write_service_only");
     expect(sql).toContain("to service_role");
+  });
+});
+
+describe("daily assignment idempotency migration", () => {
+  it("prevents duplicate scheduler assignments per learner and local date", () => {
+    expect(existsSync(dailyIdempotencyMigrationPath)).toBe(true);
+    const sql = readFileSync(dailyIdempotencyMigrationPath, "utf8").toLowerCase();
+
+    expect(sql).toContain("generation_key");
+    expect(sql).toContain("quest_assignments_user_generation_uidx");
+    expect(sql).toContain("where generation_key is not null");
   });
 });

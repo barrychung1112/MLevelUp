@@ -63,8 +63,15 @@ async function runLiveDailyTraining(): Promise<DailyTrainingRunSummary> {
       const { error: insertError } = await client.from("quest_assignments").insert({
         id: assignment.id, user_id: userId, quest_id: assignment.questId, assigned_date: assignment.assignedDate,
         slot: assignment.slot, status: assignment.status, assigned_at: assignment.assignedAt, updated_at: now,
+        generation_key: `daily:${assignment.assignedDate}`,
       });
-      if (insertError) throw new Error(insertError.message);
+      if (insertError) {
+        if (insertError.code === "23505") {
+          summary.skipped += 1;
+          continue;
+        }
+        throw new Error(insertError.message);
+      }
       summary.assigned += 1;
     } catch {
       summary.failures += 1;
