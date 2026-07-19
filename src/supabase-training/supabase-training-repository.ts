@@ -646,7 +646,7 @@ export class SupabaseTrainingRepository implements DemoTrainingRepository {
           (quest) => quest.purpose === "training",
         ),
         skills: outcome.state.progress.skills,
-        weeklyMinutes: outcome.state.profile.weeklyMinutes,
+        availableMinutes: outcome.state.profile.dailyMinutes,
         resources: outcome.state.resources,
         excludedQuestIds: Object.values(outcome.state.assignments).map(
           (assignment) => assignment.questId,

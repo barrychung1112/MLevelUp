@@ -39,3 +39,5 @@ export const DIFFICULTY_FACTORS = {
 export const PENALTY_DUE_HOURS = 24;
 export const RECOVERY_WINDOW_HOURS = 72;
 export const FAILURE_REVIEW_THRESHOLD_DAYS = 7;
+export const MAINLINE_DAILY_MINUTES = 300;
+export const DAILY_QUEST_MAX_MINUTES = 60;
