@@ -41,6 +41,7 @@ describe("resource quality", () => {
     { costTier: "paid" },
     { relevance: 59 },
     { lastCheckedAt: "2026-07-10T11:59:59.000Z" },
+    { lastCheckedAt: "2026-07-19T12:00:00.000Z" },
   ])("rejects a resource that is not mission eligible: %o", (change) => {
     expect(
       isMissionEligibleResource({ ...resource, ...change } as Resource, now),

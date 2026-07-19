@@ -36,6 +36,17 @@ describe("generateDailyTraining", () => {
     expect(generateDailyTraining({ state, now, localDate, nextId: () => "unused" }).reason).toBe("penalty_priority");
   });
 
+  test("does not duplicate a daily assignment when the scheduler retries", () => {
+    const state = createTrainingSeed(now);
+
+    const result = generateDailyTraining({ state, now, localDate, nextId: () => "must-not-be-created" });
+
+    expect(result.reason).toBe("already_assigned");
+    expect(Object.values(result.state.assignments).filter((assignment) =>
+      assignment.assignedDate === localDate && result.state.quests[assignment.questId]?.scope === "daily",
+    )).toHaveLength(1);
+  });
+
   test("returns resource_gap instead of assigning an unverifiable mission", () => {
     const state = stateWithoutDaily();
     state.resources = state.resources.map((resource) => ({ ...resource, availabilityStatus: "unavailable" as const }));

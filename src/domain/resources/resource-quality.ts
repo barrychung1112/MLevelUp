@@ -31,5 +31,6 @@ export function isMissionEligibleResource(resource: Resource, now: string): bool
 
   const checkedAt = Date.parse(resource.lastCheckedAt);
   const current = Date.parse(now);
-  return Number.isFinite(checkedAt) && Number.isFinite(current) && current - checkedAt <= MAX_AVAILABILITY_AGE_MS;
+  const age = current - checkedAt;
+  return Number.isFinite(checkedAt) && Number.isFinite(current) && age >= 0 && age <= MAX_AVAILABILITY_AGE_MS;
 }
