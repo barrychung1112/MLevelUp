@@ -115,6 +115,9 @@ export function ResourceLibrary({
                 <div><dt className="text-command-muted">新鮮度</dt><dd className="font-data text-command-text">Freshness {resource.freshness}</dd></div>
                 <div><dt className="text-command-muted">可信度</dt><dd className="font-data text-command-text">Credibility {resource.credibility}</dd></div>
                 <div><dt className="text-command-muted">預估時間</dt><dd className="font-data text-command-text">{resource.estimatedMinutes} 分鐘</dd></div>
+                {resource.qualityScore !== undefined ? <div><dt className="text-command-muted">Quality</dt><dd className="font-data text-command-cyan">Quality {resource.qualityScore}</dd></div> : null}
+                {resource.source ? <div><dt className="text-command-muted">Source</dt><dd className="font-data text-command-text">{resource.source === "github" ? "GitHub" : resource.source}</dd></div> : null}
+                {resource.availabilityStatus ? <div><dt className="text-command-muted">Availability</dt><dd className="font-data text-command-text">{resource.availabilityStatus === "available" ? "Available" : resource.availabilityStatus}</dd></div> : null}
               </dl>
               <ul aria-label="資源能力標籤" className="mt-4 flex flex-wrap gap-2">
                 {resource.skillTags.map((skill) => <li key={skill}><Badge>{skill}</Badge></li>)}

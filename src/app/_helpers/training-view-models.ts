@@ -119,6 +119,10 @@ export function mapResource(resource: Resource): ResourceView {
     relevance: resource.relevance,
     freshness: resource.freshness,
     credibility: resource.credibility,
+    qualityScore: resource.qualityScore,
+    source: resource.source,
+    availabilityStatus: resource.availabilityStatus,
+    lastCheckedAt: resource.lastCheckedAt,
   };
 }
 
