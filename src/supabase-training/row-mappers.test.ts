@@ -224,12 +224,25 @@ describe("Supabase row mappers", () => {
         availability_status: "available",
         last_checked_at: "2026-07-18T08:00:00.000Z",
         fallback_resource_id: "resource-fallback",
+        source: "github",
+        external_id: "123",
+        canonical_url: "https://github.com/example/resource",
+        content_fingerprint: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        quality_score: 88,
+        task_fit: 80,
+        published_at: "2026-07-01T08:00:00.000Z",
+        updated_at: "2026-07-17T08:00:00.000Z",
+        ingested_at: "2026-07-18T08:00:00.000Z",
+        metadata_version: "phase4-resource-v1",
       }),
     ).toMatchObject({
       id: "resource",
       resourceType: "repository",
       requiredTools: ["Git"],
       fallbackResourceId: "resource-fallback",
+      source: "github",
+      qualityScore: 88,
+      taskFit: 80,
     });
 
     expect(

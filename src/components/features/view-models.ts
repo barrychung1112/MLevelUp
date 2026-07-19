@@ -73,6 +73,10 @@ export type ResourceView = {
   skillTags: readonly string[];
   summary?: string;
   url?: string;
+  qualityScore?: number;
+  source?: string;
+  availabilityStatus?: string;
+  lastCheckedAt?: string | null;
 };
 
 export type AgentRunView = {

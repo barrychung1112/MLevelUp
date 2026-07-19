@@ -59,6 +59,16 @@ export type ResourceRow = {
   availability_status?: Resource["availabilityStatus"];
   last_checked_at?: string | null;
   fallback_resource_id?: string | null;
+  source?: Resource["source"] | null;
+  external_id?: string | null;
+  canonical_url?: string | null;
+  content_fingerprint?: string | null;
+  quality_score?: number | null;
+  task_fit?: number | null;
+  published_at?: string | null;
+  updated_at?: string | null;
+  ingested_at?: string | null;
+  metadata_version?: string | null;
 };
 
 export type SkillStatRow = {
@@ -199,6 +209,16 @@ export function mapResourceRow(row: ResourceRow): Resource {
     availabilityStatus: row.availability_status ?? "available",
     lastCheckedAt: row.last_checked_at ?? null,
     fallbackResourceId: row.fallback_resource_id ?? undefined,
+    source: row.source ?? undefined,
+    externalId: row.external_id ?? undefined,
+    canonicalUrl: row.canonical_url ?? undefined,
+    contentFingerprint: row.content_fingerprint ?? undefined,
+    qualityScore: row.quality_score ?? undefined,
+    taskFit: row.task_fit ?? undefined,
+    publishedAt: row.published_at ?? undefined,
+    updatedAt: row.updated_at ?? undefined,
+    ingestedAt: row.ingested_at ?? undefined,
+    metadataVersion: row.metadata_version ?? undefined,
   });
 }
 

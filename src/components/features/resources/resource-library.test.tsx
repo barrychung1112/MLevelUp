@@ -13,6 +13,9 @@ const resources = [
     freshness: 88,
     credibility: 91,
     estimatedMinutes: 20,
+    qualityScore: 86,
+    source: "github",
+    availabilityStatus: "available",
     skillTags: ["Evaluation"],
     url: "https://example.com/resources/validation",
   },
@@ -86,6 +89,9 @@ describe("ResourceLibrary", () => {
     expect(screen.getByText("Difficulty 3 / 5")).toBeVisible();
     expect(screen.getByText("Freshness 88")).toBeVisible();
     expect(screen.getByText("Credibility 91")).toBeVisible();
+    expect(screen.getByText("Quality 86")).toBeVisible();
+    expect(screen.getByText("GitHub")).toBeVisible();
+    expect(screen.getByText("Available")).toBeVisible();
     expect(screen.getByText("20 分鐘")).toBeVisible();
     expect(screen.getByText("article", { selector: "span" })).toBeVisible();
     expect(within(screen.getAllByRole("list", { name: "資源能力標籤" })[0]).getByText("Evaluation")).toBeVisible();

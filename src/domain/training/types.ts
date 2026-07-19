@@ -234,9 +234,19 @@ export interface Resource {
   prerequisites: string[];
   requiredTools: string[];
   costTier: "free" | "paid";
-  availabilityStatus: "available" | "unavailable" | "unchecked";
+  availabilityStatus: "available" | "unavailable" | "unchecked" | "stale" | "manual_review";
   lastCheckedAt: string | null;
   fallbackResourceId?: string;
+  source?: "github" | "arxiv" | "official" | "manual";
+  externalId?: string;
+  canonicalUrl?: string;
+  contentFingerprint?: string;
+  qualityScore?: number;
+  taskFit?: number;
+  publishedAt?: string;
+  updatedAt?: string;
+  ingestedAt?: string;
+  metadataVersion?: string;
 }
 
 export type AgentType = "coordinator" | "learningStrategist" | "resourceCollector" | "adjuster";
