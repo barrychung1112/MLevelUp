@@ -33,6 +33,12 @@ const dailyIdempotencyMigrationPath = join(
   "migrations",
   "202607190001_daily_assignment_idempotency.sql",
 );
+const phase41MigrationPath = join(
+  process.cwd(),
+  "supabase",
+  "migrations",
+  "202607190002_phase4_1_resource_closeout.sql",
+);
 
 describe("phase 2 Supabase schema migration", () => {
   it("defines the compact training schema, RLS, and public-safe app credentials", () => {
@@ -154,5 +160,24 @@ describe("daily assignment idempotency migration", () => {
     expect(sql).toContain("generation_key");
     expect(sql).toContain("quest_assignments_user_generation_uidx");
     expect(sql).toContain("where generation_key is not null");
+  });
+});
+
+describe("Phase 4.1 resource collector closeout migration", () => {
+  it("adds aggregate diagnostics and exposes only a sanitized authenticated RPC", () => {
+    expect(existsSync(phase41MigrationPath)).toBe(true);
+    const sql = readFileSync(phase41MigrationPath, "utf8").toLowerCase();
+
+    for (const column of ["fallback_count", "unavailable_count", "unchecked_count"]) {
+      expect(sql).toContain(column);
+    }
+    expect(sql).toContain("get_latest_resource_collector_status");
+    expect(sql).toContain("security definer");
+    expect(sql).toContain("set search_path = public, pg_temp");
+    expect(sql).toContain("revoke all on function public.get_latest_resource_collector_status() from public");
+    expect(sql).toContain("grant execute on function public.get_latest_resource_collector_status() to authenticated");
+    expect(sql).not.toContain("trace_id");
+    expect(sql).not.toContain("input_tokens");
+    expect(sql).not.toContain("output_tokens");
   });
 });
