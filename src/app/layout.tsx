@@ -5,6 +5,7 @@ import type { ReactNode } from "react";
 import { AuthGate } from "@/auth/auth-gate";
 import { AuthProvider } from "@/auth/auth-provider";
 import { TrainingProvider } from "@/providers/training-provider";
+import { PortfolioPublicationProvider } from "@/providers/portfolio-publication-provider";
 
 import "./globals.css";
 
@@ -40,7 +41,9 @@ export default function RootLayout({ children }: Readonly<{ children: ReactNode 
       <body className={`${displayFont.variable} ${bodyFont.variable} ${dataFont.variable}`}>
         <AuthProvider>
           <AuthGate>
-            <TrainingProvider>{children}</TrainingProvider>
+            <TrainingProvider>
+              <PortfolioPublicationProvider>{children}</PortfolioPublicationProvider>
+            </TrainingProvider>
           </AuthGate>
         </AuthProvider>
       </body>
