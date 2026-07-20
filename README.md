@@ -35,6 +35,16 @@ Built as an OpenAI Hackathon project, it turns long-term ML engineering growth i
 
 See [Phase 4 operations](docs/phase-4-resource-collector-setup.md) for deployment settings and smoke tests.
 
+## Phase 5.1–5.3 public portfolio
+
+- Public portfolio setup and artifact controls live at `/portfolio`.
+- Publication is opt-in, and only verified artifacts can be selected.
+- Ownership-checking Supabase RPCs copy canonical quality, skill, type, and safe URL fields into dedicated public projection tables.
+- Anonymous recruiter-facing portfolios render at `/p/{slug}` with evidence-backed skill coverage.
+- Public responses exclude submissions, reflections, feedback, email, failure state, and recovery state.
+
+See [Phase 5 public portfolio deployment](docs/phase-5-public-portfolio-setup.md) for migration, RLS, privacy, and production smoke tests. Kaggle integrations, AI case-study writing, leaderboards, badges, and export remain future work.
+
 ## Seven skill dimensions
 
 | Skill | What it measures |
