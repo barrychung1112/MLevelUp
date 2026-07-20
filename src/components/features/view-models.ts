@@ -104,7 +104,9 @@ export type PortfolioArtifactView = {
   id: string;
   title: string;
   artifactType: string;
+  skillKeys: readonly SkillKey[];
   skillTags: readonly string[];
+  artifactUrl?: string;
   qualityScore: number;
   verificationStatus: string;
   isPrivate: true;
@@ -128,3 +130,4 @@ export type TrendPointView = {
   label: string;
   value: number;
 };
+import type { SkillKey } from "@/domain/training/types";

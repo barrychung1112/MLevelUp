@@ -1,14 +1,35 @@
 import { describe, expect, test } from "vitest";
 
 import { SKILL_KEYS } from "@/domain/training/constants";
-import type { ActivityEvent, SkillStats } from "@/domain/training/types";
+import type { ActivityEvent, PortfolioArtifact, SkillStats } from "@/domain/training/types";
 import { createTrainingSeed } from "@/mocks/training/seed";
 
-import { mapActivity, mapAgent, mapFeedback, mapQuest, mapSkills } from "./training-view-models";
+import { mapActivity, mapAgent, mapArtifact, mapFeedback, mapQuest, mapSkills } from "./training-view-models";
 
 const now = "2026-07-16T16:00:00.000Z";
 
 describe("training view-model mapping", () => {
+  test("preserves canonical artifact skills and a safe evidence URL", () => {
+    const artifact: PortfolioArtifact = {
+      id: "artifact-1",
+      submissionId: "submission-1",
+      assignmentId: "assignment-1",
+      artifactType: "modelEvaluationReport",
+      title: "Validation report",
+      description: "Private source description",
+      artifactUrl: "https://example.com/report",
+      skillTags: ["modeling", "evaluation"],
+      qualityScore: 88,
+      verificationStatus: "verified",
+      createdAt: now,
+    };
+
+    expect(mapArtifact(artifact)).toMatchObject({
+      skillKeys: ["modeling", "evaluation"],
+      artifactUrl: "https://example.com/report",
+    });
+  });
+
   test("always maps skills in the explicit domain order", () => {
     const state = createTrainingSeed(now);
     state.progress.skills = Object.fromEntries(
