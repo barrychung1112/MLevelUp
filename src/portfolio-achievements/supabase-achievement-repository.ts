@@ -14,15 +14,33 @@ export class SupabaseAchievementRepository implements AchievementRepository {
   constructor(private readonly client: SupabaseClient) {}
 
   async loadOwnedSource(userId: string, artifactId: string): Promise<AchievementSourceBundle | null> {
-    const { data, error } = await this.client.from("portfolio_artifacts").select("id,user_id,title,artifact_type,quality_score,skill_tags").eq("user_id", userId).eq("id", artifactId).maybeSingle();
+    const { data, error } = await this.client.from("portfolio_artifacts").select("id,user_id,title,artifact_type,quality_score,skill_tags,assignment_id,submission_id").eq("user_id", userId).eq("id", artifactId).maybeSingle();
     if (error) throw new Error("Achievement source unavailable");
     if (!data) return null;
     const row = data as Record<string, unknown>;
+    let quest: AchievementSourceBundle["quest"] = null;
+    if (typeof row.assignment_id === "string") {
+      const assignmentResult = await this.client.from("quest_assignments").select("quest_id").eq("user_id", userId).eq("id", row.assignment_id).maybeSingle();
+      const assignment = assignmentResult.data as { quest_id?: string } | null;
+      if (assignment?.quest_id) {
+        const questResult = await this.client.from("quests").select("title,summary,execution_steps,success_metrics").eq("id", assignment.quest_id).maybeSingle();
+        const value = questResult.data as Record<string, unknown> | null;
+        if (value) quest = { title: String(value.title), objective: String(value.summary), executionSteps: Array.isArray(value.execution_steps) ? value.execution_steps.map(String) : [], successMetrics: Array.isArray(value.success_metrics) ? value.success_metrics.map(String) : [] };
+      }
+    }
+    let metrics: AchievementSourceBundle["metrics"] = [];
+    if (typeof row.submission_id === "string") {
+      const submissionResult = await this.client.from("submissions").select("evidence").eq("user_id", userId).eq("id", row.submission_id).maybeSingle();
+      const evidence = (submissionResult.data as { evidence?: unknown } | null)?.evidence;
+      if (Array.isArray(evidence)) metrics = evidence.flatMap((item) => { const value = item as Record<string, unknown>; return value.type === "metricResult" && typeof value.metricName === "string" && (typeof value.metricValue === "number" || typeof value.metricValue === "string") ? [{ name: value.metricName, value: value.metricValue }] : []; });
+    }
     const verificationResult = await this.client.from("artifact_link_verifications").select("provider,verified_at,metadata").eq("user_id", userId).eq("artifact_id", artifactId).eq("status", "verified").order("verified_at", { ascending: false }).limit(1).maybeSingle();
     if (verificationResult.error) throw new Error("Achievement source unavailable");
     const verification = verificationResult.data as Record<string, unknown> | null;
     return {
       artifact: { title: String(row.title), artifactType: String(row.artifact_type), qualityScore: Number(row.quality_score), skillTags: Array.isArray(row.skill_tags) ? row.skill_tags.map(String) : [] },
+      quest,
+      metrics,
       verification: verification ? { provider: String(verification.provider), verifiedAt: String(verification.verified_at), metadata: (verification.metadata ?? {}) as Record<string, unknown> } : null,
     };
   }

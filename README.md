@@ -1,5 +1,7 @@
 # MLevelUp
 
+Phase 5.4 adds manual GitHub link-existence verification with an explicit ownership disclaimer and source-grounded AI resume achievements that remain private until the learner edits and approves them.
+
 MLevelUp is a gamified training system for people who want to become machine learning engineers through execution, measurable evidence, feedback, and portfolio building—not passive course consumption.
 
 Built as an OpenAI Hackathon project, it turns long-term ML engineering growth into a demanding daily loop: accept a mission, complete concrete checkpoints, submit evidence, receive evaluation, and build a public body of work.

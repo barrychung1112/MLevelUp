@@ -1,5 +1,11 @@
 # Phase 5 public portfolio deployment
 
+## Phase 5.4 deployment
+
+Apply `supabase/migrations/202607200001_phase5_4_achievements_verification.sql` after the Phase 5 migration and before deploying the UI. Set server-only `SUPABASE_SERVICE_ROLE_KEY` and `OPENAI_API_KEY`; optional values are `OPENAI_MODEL`, `PORTFOLIO_ACHIEVEMENTS_PROMPT_VERSION` (default `phase5-4-v1`), and `GITHUB_TOKEN`. Never expose these through `NEXT_PUBLIC_*`.
+
+Kaggle verification returns `Unsupported` until a stable official server-side metadata client is configured. The application does not scrape Kaggle HTML or collect learner credentials.
+
 Phase 5.1–5.3 adds opt-in publication of verified training artifacts. Private training tables remain owner-only; anonymous visitors read only `public_portfolios` and `published_artifacts`.
 
 ## Deploy
