@@ -46,6 +46,8 @@ function mapProfile(row: Record<string, unknown>): PublicPortfolioProfile {
 }
 
 function mapArtifact(row: Record<string, unknown>): PublishedArtifact {
+  const staleAfter = typeof row.verification_stale_after === "string" ? row.verification_stale_after : null;
+  const currentVerification = Boolean(row.link_existence_verified) && staleAfter !== null && Date.parse(staleAfter) > Date.now();
   return {
     artifactId: String(row.artifact_id), artifactType: String(row.artifact_type),
     publicTitle: String(row.public_title), publicSummary: String(row.public_summary),
@@ -53,6 +55,12 @@ function mapArtifact(row: Record<string, unknown>): PublishedArtifact {
     skillTags: z.array(SkillKeySchema).parse(row.skill_tags), qualityScore: Number(row.quality_score),
     featured: Boolean(row.featured), displayOrder: Number(row.display_order),
     publishedAt: String(row.published_at), updatedAt: String(row.updated_at),
+    keyAchievements: z.array(z.string().max(160)).max(5).catch([]).parse(row.key_achievements),
+    linkVerification: currentVerification ? {
+      provider: z.enum(["github", "kaggle"]).parse(row.verification_provider),
+      resourceType: z.enum(["repository", "commit", "notebook", "competition"]).parse(row.verification_resource_type),
+      verifiedAt: String(row.link_verified_at), staleAfter, ownershipVerified: false,
+    } : null,
   };
 }
 
@@ -62,7 +70,7 @@ export function createPublicPortfolioReader(client: PublicClient) {
     if (profileResult.error) throw new PublicPortfolioReadError("Public portfolio unavailable");
     if (!profileResult.data) return null;
     const profile = mapProfile(profileResult.data as Record<string, unknown>);
-    const artifactResult = await client.from("published_artifacts").select("artifact_id,public_title,public_summary,artifact_type,artifact_url,skill_tags,quality_score,featured,display_order,published_at,updated_at").eq("user_id", profile.userId).order("featured", { ascending: false }).order("display_order", { ascending: true }).order("published_at", { ascending: true }).order("artifact_id", { ascending: true });
+    const artifactResult = await client.from("published_artifacts").select("artifact_id,public_title,public_summary,artifact_type,artifact_url,skill_tags,quality_score,featured,display_order,published_at,updated_at,key_achievements,link_existence_verified,verification_provider,verification_resource_type,link_verified_at,verification_stale_after").eq("user_id", profile.userId).order("featured", { ascending: false }).order("display_order", { ascending: true }).order("published_at", { ascending: true }).order("artifact_id", { ascending: true });
     if (artifactResult.error) throw new PublicPortfolioReadError("Public portfolio unavailable");
     return { profile, artifacts: ((artifactResult.data ?? []) as Record<string, unknown>[]).map(mapArtifact) };
   };

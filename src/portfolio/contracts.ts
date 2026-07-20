@@ -47,6 +47,14 @@ export type PublishedArtifact = {
   displayOrder: number;
   publishedAt: string;
   updatedAt: string;
+  keyAchievements?: readonly string[];
+  linkVerification?: {
+    provider: "github" | "kaggle";
+    resourceType: "repository" | "commit" | "notebook" | "competition";
+    verifiedAt: string;
+    staleAfter: string;
+    ownershipVerified: false;
+  } | null;
 };
 
 export type PublicPortfolio = {

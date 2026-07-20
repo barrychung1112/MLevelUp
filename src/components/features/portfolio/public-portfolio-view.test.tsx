@@ -27,4 +27,12 @@ describe("PublicPortfolioView", () => {
     expect(screen.queryByRole("link", { name: /Churn model validation dossier/ })).not.toBeInTheDocument();
     expect(screen.getAllByRole("link", { name: /Production inference gateway/ })[0]).toHaveAttribute("rel", "noopener noreferrer");
   });
+
+  it("renders approved achievements and an explicit existence-only badge", () => {
+    const portfolio = { ...demoPublicPortfolio, artifacts: demoPublicPortfolio.artifacts.map((item, index) => index === 0 ? { ...item, keyAchievements: ["Compared 3 validation strategies."], linkVerification: { provider: "github" as const, resourceType: "repository" as const, verifiedAt: "2026-07-20T00:00:00.000Z", staleAfter: "2099-08-19T00:00:00.000Z", ownershipVerified: false as const } } : item) };
+    render(<PublicPortfolioView portfolio={portfolio} />);
+    expect(screen.getAllByText("Key achievements")[0]).toBeVisible();
+    expect(screen.getAllByText("Compared 3 validation strategies.")[0]).toBeVisible();
+    expect(screen.getAllByText("Link verified; ownership not verified")[0]).toBeVisible();
+  });
 });
