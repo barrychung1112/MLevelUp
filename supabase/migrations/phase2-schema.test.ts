@@ -39,6 +39,12 @@ const phase41MigrationPath = join(
   "migrations",
   "202607190002_phase4_1_resource_closeout.sql",
 );
+const resourceUpsertFixMigrationPath = join(
+  process.cwd(),
+  "supabase",
+  "migrations",
+  "202607190003_fix_resource_upsert_conflict.sql",
+);
 
 describe("phase 2 Supabase schema migration", () => {
   it("defines the compact training schema, RLS, and public-safe app credentials", () => {
@@ -179,5 +185,17 @@ describe("Phase 4.1 resource collector closeout migration", () => {
     expect(sql).not.toContain("trace_id");
     expect(sql).not.toContain("input_tokens");
     expect(sql).not.toContain("output_tokens");
+  });
+});
+
+describe("resource collector upsert conflict migration", () => {
+  it("replaces the partial source identity index with an inferable unique index", () => {
+    expect(existsSync(resourceUpsertFixMigrationPath)).toBe(true);
+    const sql = readFileSync(resourceUpsertFixMigrationPath, "utf8").toLowerCase();
+
+    expect(sql).toContain("drop index if exists public.resources_source_external_uidx");
+    expect(sql).toContain("create unique index resources_source_external_uidx");
+    expect(sql).toContain("on public.resources (source, external_id)");
+    expect(sql).not.toContain("where external_id is not null");
   });
 });
