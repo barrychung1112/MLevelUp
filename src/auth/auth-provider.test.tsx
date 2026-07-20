@@ -13,6 +13,10 @@ vi.mock("@/lib/supabase/client", () => ({
   getBrowserSupabaseClient: mocks.getBrowserSupabaseClient,
 }));
 
+vi.mock("next/navigation", () => ({
+  usePathname: () => window.location.pathname,
+}));
+
 function createClient(session: unknown = null) {
   return {
     auth: {
@@ -66,6 +70,20 @@ describe("AuthProvider and AuthGate", () => {
     );
 
     expect(await screen.findByText("training app")).toBeVisible();
+  });
+
+  it("allows an anonymous public portfolio route without bypassing private routes", async () => {
+    mocks.getBrowserSupabaseClient.mockReturnValue(null);
+    window.history.replaceState(null, "", "http://localhost:3000/p/demo-ml-engineer");
+
+    renderAuth(
+      <AuthGate>
+        <p>public portfolio</p>
+      </AuthGate>,
+    );
+
+    expect(await screen.findByText("public portfolio")).toBeVisible();
+    expect(screen.queryByRole("heading", { name: "Supabase setup required" })).not.toBeInTheDocument();
   });
 
   it("shows a magic-link form and sends the request through Supabase", async () => {

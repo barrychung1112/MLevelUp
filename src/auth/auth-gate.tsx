@@ -1,6 +1,7 @@
 "use client";
 
 import { LogIn } from "lucide-react";
+import { usePathname } from "next/navigation";
 import { useState, type FormEvent, type ReactNode } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -11,12 +12,13 @@ import { useAuth } from "./auth-provider";
 
 export function AuthGate({ children }: { children: ReactNode }) {
   const auth = useAuth();
+  const pathname = usePathname();
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
-  if (isDemoMode()) return children;
+  if (isDemoMode() || pathname.startsWith("/p/")) return children;
 
   if (auth.status === "loading") {
     return (
