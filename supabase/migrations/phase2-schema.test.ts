@@ -51,6 +51,12 @@ const publicPortfolioMigrationPath = join(
   "migrations",
   "202607190004_phase5_public_portfolio.sql",
 );
+const phase54MigrationPath = join(
+  process.cwd(),
+  "supabase",
+  "migrations",
+  "202607200001_phase5_4_achievements_verification.sql",
+);
 
 describe("phase 2 Supabase schema migration", () => {
   it("defines the compact training schema, RLS, and public-safe app credentials", () => {
@@ -258,5 +264,67 @@ describe("Phase 5 public portfolio migration", () => {
     expect(sql).toContain("portfolio_artifact_url_not_https");
     expect(sql).toContain("portfolio_featured_limit");
     expect(sql).toContain("on conflict (artifact_id) do update");
+  });
+});
+
+describe("Phase 5.4 achievements and link verification migration", () => {
+  it("creates constrained private verification and achievement tables", () => {
+    expect(existsSync(phase54MigrationPath)).toBe(true);
+    const sql = readFileSync(phase54MigrationPath, "utf8").toLowerCase();
+
+    for (const table of [
+      "artifact_link_verifications",
+      "artifact_achievement_drafts",
+    ]) {
+      expect(sql).toContain(`create table public.${table}`);
+      expect(sql).toContain(
+        `alter table public.${table} enable row level security`,
+      );
+    }
+
+    expect(sql).toContain("unique (artifact_id, normalized_url)");
+    expect(sql).toContain(
+      "status in ('verified', 'unavailable', 'unsupported', 'error', 'stale')",
+    );
+    expect(sql).toContain("status in ('draft', 'approved', 'outdated')");
+    expect(sql).toContain("jsonb_typeof(bullets) = 'array'");
+    expect(sql).toContain("jsonb_typeof(metadata) = 'object'");
+  });
+
+  it("allows owners to read but reserves writes for server routes", () => {
+    const sql = readFileSync(phase54MigrationPath, "utf8").toLowerCase();
+
+    expect(sql).toContain("auth.uid() = user_id");
+    expect(sql).toContain(
+      "grant select on public.artifact_link_verifications, public.artifact_achievement_drafts to authenticated",
+    );
+    expect(sql).toContain(
+      "revoke insert, update, delete on public.artifact_link_verifications, public.artifact_achievement_drafts from anon, authenticated",
+    );
+    expect(sql).not.toMatch(
+      /create policy[^;]+artifact_link_verifications[^;]+for (?:insert|update|all)/iu,
+    );
+    expect(sql).not.toMatch(
+      /create policy[^;]+artifact_achievement_drafts[^;]+for (?:insert|update|all)/iu,
+    );
+  });
+
+  it("adds only minimal achievement and existence fields to the public projection", () => {
+    const sql = readFileSync(phase54MigrationPath, "utf8").toLowerCase();
+
+    for (const field of [
+      "key_achievements",
+      "link_existence_verified",
+      "verification_provider",
+      "verification_resource_type",
+      "link_verified_at",
+      "verification_stale_after",
+    ]) {
+      expect(sql).toContain(field);
+    }
+
+    expect(sql).not.toMatch(/alter table public\.published_artifacts[\s\S]+source_refs/iu);
+    expect(sql).not.toMatch(/alter table public\.published_artifacts[\s\S]+prompt_version/iu);
+    expect(sql).not.toMatch(/alter table public\.published_artifacts[\s\S]+reviewer_notes/iu);
   });
 });
