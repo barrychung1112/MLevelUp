@@ -163,6 +163,23 @@ export type AgentRunRow = {
   trace_id?: string | null;
 };
 
+export type ResourceCollectorStatusRow = {
+  status: "running" | "completed" | "degraded" | "failed";
+  candidate_count: number;
+  inserted_count: number;
+  updated_count: number;
+  duplicate_count: number;
+  rejected_count: number;
+  fallback_count: number;
+  unavailable_count: number;
+  unchecked_count: number;
+  model?: string | null;
+  prompt_version?: string | null;
+  error_code?: string | null;
+  started_at: string;
+  completed_at?: string | null;
+};
+
 export function mapQuestRow(row: QuestRow): Quest {
   return QuestSchema.parse({
     id: row.id,
@@ -330,5 +347,19 @@ export function mapAgentRunRow(row: AgentRunRow): AgentStatus {
     errorCode: row.error_code ?? undefined,
     fallbackUsed: row.fallback_used ?? undefined,
     traceId: row.trace_id ?? undefined,
+  };
+}
+
+export function mapResourceCollectorStatusRow(row: ResourceCollectorStatusRow): AgentStatus {
+  return {
+    agentType: "resourceCollector",
+    status: row.status,
+    lastRunAt: row.completed_at ?? row.started_at,
+    summary: `${row.candidate_count} candidates: ${row.inserted_count} inserted, ${row.updated_count} updated, ${row.duplicate_count} duplicates, ${row.rejected_count} rejected; ${row.fallback_count} fallbacks, ${row.unavailable_count} unavailable, ${row.unchecked_count} unchecked.`,
+    isMock: false,
+    model: row.model ?? undefined,
+    promptVersion: row.prompt_version ?? undefined,
+    errorCode: row.error_code ?? undefined,
+    fallbackUsed: row.fallback_count > 0,
   };
 }

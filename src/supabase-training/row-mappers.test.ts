@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   mapAssignmentRow,
   mapAgentRunRow,
+  mapResourceCollectorStatusRow,
   mapFeedbackRow,
   mapPortfolioArtifactRow,
   mapQuestRow,
@@ -12,6 +13,34 @@ import {
 } from "./row-mappers";
 
 describe("Supabase row mappers", () => {
+  it("maps sanitized collector diagnostics into a real degraded agent status", () => {
+    expect(mapResourceCollectorStatusRow({
+      status: "degraded",
+      candidate_count: 8,
+      inserted_count: 3,
+      updated_count: 2,
+      duplicate_count: 1,
+      rejected_count: 1,
+      fallback_count: 2,
+      unavailable_count: 1,
+      unchecked_count: 1,
+      model: "gpt-test",
+      prompt_version: "phase4-resource-v1",
+      error_code: null,
+      started_at: "2026-07-19T08:00:00.000Z",
+      completed_at: "2026-07-19T08:01:00.000Z",
+    })).toMatchObject({
+      agentType: "resourceCollector",
+      status: "degraded",
+      lastRunAt: "2026-07-19T08:01:00.000Z",
+      isMock: false,
+      fallbackUsed: true,
+      model: "gpt-test",
+      promptVersion: "phase4-resource-v1",
+      summary: expect.stringContaining("8 candidates"),
+    });
+  });
+
   it("maps Phase 3 feedback provenance and agent diagnostics", () => {
     expect(
       mapFeedbackRow({
