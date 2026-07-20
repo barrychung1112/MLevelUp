@@ -15,7 +15,7 @@ export const PublicPortfolioProfileInputSchema = z.strictObject({
 });
 
 export const PublishArtifactInputSchema = z.strictObject({
-  artifactId: z.string().uuid(),
+  artifactId: z.string().min(1).max(120),
   publicTitle: z.string().trim().min(3).max(200),
   publicSummary: z.string().trim().min(20).max(1_200),
   showArtifactUrl: z.boolean(),

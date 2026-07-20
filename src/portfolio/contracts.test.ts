@@ -72,6 +72,17 @@ describe("public portfolio contracts", () => {
     expect(result).not.toHaveProperty("artifactType");
   });
 
+  it("supports prefixed local artifact identifiers in demo mode contracts", () => {
+    expect(PublishArtifactInputSchema.parse({
+      artifactId: "artifact-demo-1",
+      publicTitle: "Validated churn model",
+      publicSummary: "Compared three baselines and documented validation leakage controls.",
+      showArtifactUrl: false,
+      featured: false,
+      displayOrder: 0,
+    }).artifactId).toBe("artifact-demo-1");
+  });
+
   it("rejects unexpected canonical fields", () => {
     expect(() =>
       PublishArtifactInputSchema.parse({

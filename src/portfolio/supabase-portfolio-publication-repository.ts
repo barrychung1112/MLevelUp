@@ -200,8 +200,9 @@ export class SupabasePortfolioPublicationRepository
 
   async publishArtifact(input: Parameters<PortfolioPublicationRepository["publishArtifact"]>[0]) {
     const values = PublishArtifactInputSchema.parse(input);
+    const artifactId = z.string().uuid().parse(values.artifactId);
     const { error } = await this.client.rpc("publish_portfolio_artifact", {
-      p_artifact_id: values.artifactId,
+      p_artifact_id: artifactId,
       p_public_title: values.publicTitle,
       p_public_summary: values.publicSummary,
       p_show_artifact_url: values.showArtifactUrl,
