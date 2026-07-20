@@ -253,7 +253,7 @@ export type AgentType = "coordinator" | "learningStrategist" | "resourceCollecto
 
 export interface AgentStatus {
   agentType: AgentType;
-  status: "idle" | "running" | "completed" | "degraded";
+  status: "idle" | "running" | "completed" | "degraded" | "failed";
   lastRunAt: string;
   summary: string;
   isMock: boolean;

@@ -442,4 +442,15 @@ describe("Phase 3 feedback schemas", () => {
       }).isMock,
     ).toBe(false);
   });
+
+  test("accepts a failed collector run for operational visibility", () => {
+    expect(AgentStatusSchema.parse({
+      agentType: "resourceCollector",
+      status: "failed",
+      lastRunAt: "2026-07-19T18:00:00.000Z",
+      summary: "Collection failed before completion.",
+      isMock: false,
+      errorCode: "catalog_write_failed",
+    }).status).toBe("failed");
+  });
 });

@@ -1,15 +1,6 @@
 import { evaluateMissionReadiness } from "./mission-readiness";
 import type { Difficulty, Quest, Resource, SkillStats } from "./types";
 
-const ACTIVE_TRAINING_DAYS = 5;
-const MIN_DAILY_MINUTES = 30;
-const MAX_DAILY_MINUTES = 180;
-
-export function dailyBudget(weeklyMinutes: number): number {
-  const perDay = Math.round(weeklyMinutes / ACTIVE_TRAINING_DAYS);
-  return Math.min(MAX_DAILY_MINUTES, Math.max(MIN_DAILY_MINUTES, perDay));
-}
-
 export function difficultyCeiling(skills: SkillStats): Difficulty {
   const values = Object.values(skills);
   const average = values.reduce((sum, skill) => sum + skill.score, 0) / values.length;
@@ -23,7 +14,7 @@ export function difficultyCeiling(skills: SkillStats): Difficulty {
 type SelectorInput = {
   quests: readonly Quest[];
   skills: SkillStats;
-  weeklyMinutes: number;
+  availableMinutes: number;
   excludedQuestIds: readonly string[];
   resources: readonly Resource[];
 };
@@ -51,7 +42,7 @@ function compareCandidates(
 
 export function selectHardestFeasibleQuest(input: SelectorInput): Quest | undefined {
   const excluded = new Set(input.excludedQuestIds);
-  const budget = dailyBudget(input.weeklyMinutes);
+  const budget = input.availableMinutes;
   const ceiling = difficultyCeiling(input.skills);
   const withinCeiling = input.quests.filter(
     (quest) => !excluded.has(quest.id) && quest.difficulty <= ceiling,

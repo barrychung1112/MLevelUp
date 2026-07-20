@@ -26,7 +26,7 @@ export function AgentStatusBoard({ agents, status = "ready", errorMessage = "無
       <header>
         <p className="text-sm uppercase tracking-[0.24em] text-command-warning">Agent telemetry</p>
         <h1 id="agents-heading" className="text-3xl font-semibold text-command-text">Agent 狀態</h1>
-        <p className="mt-2 text-command-muted">學習策略、調整者與協調員會顯示真實執行狀態；資源收集維持 Phase 4 Demo。</p>
+        <p className="mt-2 text-command-muted">顯示學習 Agent 與資源收集排程的最近執行狀態。</p>
       </header>
       <ul className="grid gap-4 md:grid-cols-2">
         {agents.map((agent) => (
@@ -43,7 +43,13 @@ export function AgentStatusBoard({ agents, status = "ready", errorMessage = "無
             </p>
             <p className="mt-2 text-command-muted">{agent.summary}</p>
             <p className="mt-3 text-sm text-command-muted">最後執行：{agent.lastRun}</p>
-            {agent.model ? <p className="mt-1 text-xs text-command-muted">{agent.model}{agent.latencyMs !== undefined ? ` · ${agent.latencyMs} ms` : ""}</p> : null}
+            {agent.model || agent.promptVersion ? (
+              <p className="mt-1 text-xs text-command-muted">
+                {[agent.model, agent.promptVersion, agent.latencyMs !== undefined ? `${agent.latencyMs} ms` : null]
+                  .filter(Boolean)
+                  .join(" · ")}
+              </p>
+            ) : null}
             {agent.errorCode ? <p className="mt-1 text-xs text-command-danger">錯誤：{agent.errorCode}</p> : null}
           </li>
         ))}

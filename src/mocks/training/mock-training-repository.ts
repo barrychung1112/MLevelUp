@@ -242,7 +242,7 @@ export class MockTrainingRepository implements DemoTrainingRepository {
                 (candidate) => candidate.purpose === "training" && candidate.scope === scope,
               ),
               skills: outcome.state.progress.skills,
-              weeklyMinutes: outcome.state.profile.weeklyMinutes,
+              availableMinutes: outcome.state.profile.dailyMinutes,
               resources: outcome.state.resources,
               excludedQuestIds: Object.values(outcome.state.assignments).map(
                 (assignment) => assignment.questId,

@@ -53,4 +53,13 @@ describe("generateDailyTraining", () => {
 
     expect(generateDailyTraining({ state, now, localDate, nextId: () => "unused" }).reason).toBe("resource_gap");
   });
+
+  test("does not assign a daily mission whose quest and resources exceed 60 minutes", () => {
+    const state = stateWithoutDaily();
+    for (const quest of Object.values(state.quests)) {
+      if (quest.scope === "daily") quest.estimatedMinutes = 60;
+    }
+
+    expect(generateDailyTraining({ state, now, localDate, nextId: () => "unused" }).reason).toBe("resource_gap");
+  });
 });

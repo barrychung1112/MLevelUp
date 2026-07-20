@@ -28,9 +28,10 @@ Built as an OpenAI Hackathon project, it turns long-term ML engineering growth i
 - Supabase persistence protected by row-level security
 - Deterministic local Demo mode that does not require external services
 - Resource collection from GitHub and arXiv with canonicalization, deduplication, quality scoring, and safe fallback
+- Bounded URL availability checks and AI Resource Curator enrichment with deterministic fallback
 - Protected Vercel Cron routes for resource collection and daily assignment generation
 - Server-only Supabase catalog writes and per-user/day daily-assignment idempotency
-- Resource source, quality, and availability metadata in the dashboard
+- Resource source, quality, availability metadata, and real collector telemetry in the dashboard
 
 See [Phase 4 operations](docs/phase-4-resource-collector-setup.md) for deployment settings and smoke tests.
 
@@ -106,11 +107,12 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=your-publishable-key
 OPENAI_API_KEY=your-server-only-openai-key
 OPENAI_MODEL=gpt-5.6-terra
 OPENAI_PROMPT_VERSION=phase3-v1
+OPENAI_RESOURCE_PROMPT_VERSION=phase4-resource-v1
 ```
 
 `OPENAI_API_KEY` is optional at runtime. Without it, authenticated submissions remain usable and receive deterministic fallback feedback. Never add `NEXT_PUBLIC_` to this key and never use a Supabase secret or `service_role` key in browser variables.
 
-Apply the four migrations in chronological order. Exact instructions and safety notes are in [docs/phase-3-supabase-setup.md](docs/phase-3-supabase-setup.md).
+Apply all migrations in chronological order. Exact instructions and safety notes are in [docs/phase-3-supabase-setup.md](docs/phase-3-supabase-setup.md) and [docs/phase-4-resource-collector-setup.md](docs/phase-4-resource-collector-setup.md).
 
 ## Privacy and authority boundaries
 
@@ -149,9 +151,9 @@ docs/superpowers/         Approved designs and implementation plans
 
 ## Roadmap
 
-- Phase 4: live resource collection, deduplication, credibility, freshness, and scheduled ingestion
+- Phase 4: completed live resource collection, AI curation, URL verification, scheduled ingestion, and Agent telemetry
 - Phase 5: Kaggle/hackathon integrations, richer anti-cheat signals, leaderboards, badges, and public portfolio export
-- Production deployment and hosted demo URL
+- Production deployment: [m-level-up.vercel.app](https://m-level-up.vercel.app/)
 
 ## Responsible design
 

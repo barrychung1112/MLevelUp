@@ -47,11 +47,17 @@ const resourceRow = {
   credibility: 89,
 };
 
-function createClient(rows: Record<string, unknown[]>, singles: Record<string, unknown> = {}, orders: Array<{ table: string; column: string }> = []) {
+function createClient(
+  rows: Record<string, unknown[]>,
+  singles: Record<string, unknown> = {},
+  orders: Array<{ table: string; column: string }> = [],
+  rpcRows: Record<string, unknown[]> = {},
+) {
   return {
     auth: {
       getUser: async () => ({ data: { user: { id: "user-1" } }, error: null }),
     },
+    rpc: async (name: string) => ({ data: rpcRows[name] ?? [], error: null }),
     from(table: string) {
       const tableRows = rows[table] ?? [];
       const single = singles[table] ?? null;
@@ -81,6 +87,49 @@ function createClient(rows: Record<string, unknown[]>, singles: Record<string, u
 }
 
 describe("SupabaseTrainingRepository", () => {
+  it("merges the latest real collector status without removing learner agent runs", async () => {
+    const repository = new SupabaseTrainingRepository({
+      client: createClient({
+        quests: [questRow], resources: [resourceRow], skill_stats: [], quest_assignments: [],
+        submissions: [], feedback: [], portfolio_artifacts: [], agent_runs: [{
+          agent_type: "coordinator",
+          status: "completed",
+          summary: "Feedback generated.",
+          completed_at: "2026-07-19T07:00:00.000Z",
+          created_at: "2026-07-19T07:00:00.000Z",
+          is_mock: false,
+        }],
+      }, {}, [], {
+        get_latest_resource_collector_status: [{
+          status: "degraded",
+          candidate_count: 8,
+          inserted_count: 3,
+          updated_count: 2,
+          duplicate_count: 1,
+          rejected_count: 1,
+          fallback_count: 2,
+          unavailable_count: 1,
+          unchecked_count: 1,
+          model: "gpt-test",
+          prompt_version: "phase4-resource-v1",
+          error_code: null,
+          started_at: "2026-07-19T08:00:00.000Z",
+          completed_at: "2026-07-19T08:01:00.000Z",
+        }],
+      }) as never,
+      clock: { now: () => "2026-07-19T09:00:00.000Z" },
+      ids: { next: () => "00000000-0000-4000-8000-000000000001" },
+    });
+
+    const snapshot = await repository.getSnapshot();
+
+    expect(snapshot.agents).toEqual(expect.arrayContaining([
+      expect.objectContaining({ agentType: "coordinator", isMock: false }),
+      expect.objectContaining({ agentType: "resourceCollector", isMock: false, status: "degraded" }),
+    ]));
+    expect(snapshot.agents.filter((agent) => agent.agentType === "resourceCollector")).toHaveLength(1);
+  });
+
   it("delegates browser submissions to the authenticated server client", async () => {
     const outcome = { delegated: true };
     const submit = vi.fn().mockResolvedValue(outcome);

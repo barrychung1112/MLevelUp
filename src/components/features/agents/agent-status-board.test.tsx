@@ -9,7 +9,7 @@ describe("AgentStatusBoard", () => {
       <AgentStatusBoard
         agents={[
           { id: "coordinator", name: "Coordinator", status: "complete", lastRun: "07:30", summary: "Feedback ready", provenance: "AI", model: "gpt-5.6-terra", latencyMs: 420 },
-          { id: "strategist", name: "Strategist", status: "degraded", lastRun: "07:28", summary: "Fallback used", provenance: "Fallback", errorCode: "rate_limited" },
+          { id: "strategist", name: "Strategist", status: "degraded", lastRun: "07:28", summary: "Fallback used", provenance: "Fallback", promptVersion: "phase4-resource-v1", errorCode: "rate_limited" },
           { id: "collector", name: "Resource Collector", status: "idle", lastRun: "02:10", summary: "Phase 4", provenance: "Demo" },
         ]}
       />,
@@ -20,6 +20,7 @@ describe("AgentStatusBoard", () => {
     expect(screen.getByText("Demo")).toBeVisible();
     expect(screen.getByText(/gpt-5.6-terra/)).toBeVisible();
     expect(screen.getByText(/rate_limited/)).toBeVisible();
+    expect(screen.getByText(/phase4-resource-v1/)).toBeVisible();
   }, 15_000);
 
   test("announces its loading state", () => {

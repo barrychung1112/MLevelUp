@@ -2,7 +2,6 @@ import { describe, expect, it } from "vitest";
 
 import type { Quest, Resource, SkillKey, SkillStats } from "./types";
 import {
-  dailyBudget,
   difficultyCeiling,
   selectHardestFeasibleQuest,
 } from "./adaptive-selector";
@@ -82,14 +81,6 @@ const resources: Resource[] = [
 
 describe("adaptive quest selector", () => {
   it.each([
-    [60, 30],
-    [600, 120],
-    [1_500, 180],
-  ])("clamps %i weekly minutes to a %i minute daily budget", (weekly, expected) => {
-    expect(dailyBudget(weekly)).toBe(expected);
-  });
-
-  it.each([
     [0, 2],
     [30, 3],
     [45, 4],
@@ -102,7 +93,7 @@ describe("adaptive quest selector", () => {
     const selected = selectHardestFeasibleQuest({
       quests: [quest("easy", 2, 30, "modeling"), quest("hard", 4, 80, "engineering")],
       skills: skills(50),
-      weeklyMinutes: 500,
+      availableMinutes: 100,
       excludedQuestIds: [],
       resources,
     });
@@ -118,7 +109,7 @@ describe("adaptive quest selector", () => {
         quest("weak-close", 3, 90, "evaluation"),
       ],
       skills: skills(50, { modeling: 80, evaluation: 15 }),
-      weeklyMinutes: 500,
+      availableMinutes: 100,
       excludedQuestIds: [],
       resources,
     });
@@ -130,7 +121,7 @@ describe("adaptive quest selector", () => {
     const selected = selectHardestFeasibleQuest({
       quests: [quest("closest", 2, 45, "modeling"), quest("longer", 2, 70, "modeling")],
       skills: skills(20),
-      weeklyMinutes: 100,
+      availableMinutes: 49,
       excludedQuestIds: [],
       resources,
     });
@@ -142,7 +133,7 @@ describe("adaptive quest selector", () => {
     const selected = selectHardestFeasibleQuest({
       quests: [quest("used", 4, 60, "modeling"), quest("fresh", 3, 60, "modeling")],
       skills: skills(50),
-      weeklyMinutes: 500,
+      availableMinutes: 100,
       excludedQuestIds: ["used"],
       resources,
     });
@@ -154,11 +145,23 @@ describe("adaptive quest selector", () => {
     const selected = selectHardestFeasibleQuest({
       quests: [quest("unsupported", 4, 60, "modeling")],
       skills: skills(50),
-      weeklyMinutes: 500,
+      availableMinutes: 100,
       excludedQuestIds: [],
       resources: [{ ...resources[0], availabilityStatus: "unavailable" }],
     });
 
     expect(selected).toBeUndefined();
+  });
+
+  it("allows a complete mainline mission to use the full 300-minute capacity", () => {
+    const selected = selectHardestFeasibleQuest({
+      quests: [quest("mainline", 3, 295, "engineering")],
+      skills: skills(40),
+      availableMinutes: 300,
+      excludedQuestIds: [],
+      resources,
+    });
+
+    expect(selected?.id).toBe("mainline");
   });
 });

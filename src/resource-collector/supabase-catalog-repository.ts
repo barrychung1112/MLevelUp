@@ -21,14 +21,31 @@ export class SupabaseResourceCatalogRepository implements ResourceCatalogReposit
   constructor(private readonly client: SupabaseClient) {}
 
   async findRun(runKey: string): Promise<StoredCollectionRun | null> {
-    const { data, error } = await this.client.from("resource_collection_runs").select("status, inserted_count, updated_count, duplicate_count, rejected_count").eq("run_key", runKey).maybeSingle();
+    const { data, error } = await this.client.from("resource_collection_runs").select("status, candidate_count, inserted_count, updated_count, duplicate_count, rejected_count, fallback_count, unavailable_count, unchecked_count").eq("run_key", runKey).maybeSingle();
     if (error) throw new Error(error.message);
     if (!data || data.status === "running") return null;
-    return { status: data.status as StoredCollectionRun["status"], inserted: data.inserted_count, updated: data.updated_count, duplicates: data.duplicate_count, rejected: data.rejected_count };
+    return {
+      status: data.status as StoredCollectionRun["status"],
+      candidateCount: data.candidate_count ?? 0,
+      inserted: data.inserted_count,
+      updated: data.updated_count,
+      duplicates: data.duplicate_count,
+      rejected: data.rejected_count,
+      fallbackCount: data.fallback_count ?? 0,
+      unavailableCount: data.unavailable_count ?? 0,
+      uncheckedCount: data.unchecked_count ?? 0,
+    };
   }
 
-  async startRun(input: { runKey: string; now: string }): Promise<string> {
-    const { data, error } = await this.client.from("resource_collection_runs").insert({ run_key: input.runKey, source: "catalog", status: "running", started_at: input.now }).select("id").single();
+  async startRun(input: { runKey: string; now: string; model?: string; promptVersion?: string }): Promise<string> {
+    const { data, error } = await this.client.from("resource_collection_runs").insert({
+      run_key: input.runKey,
+      source: "catalog",
+      status: "running",
+      started_at: input.now,
+      model: input.model,
+      prompt_version: input.promptVersion,
+    }).select("id").single();
     if (error || !data) throw new Error(error?.message ?? "Unable to create resource collection run");
     return data.id;
   }
@@ -47,7 +64,18 @@ export class SupabaseResourceCatalogRepository implements ResourceCatalogReposit
   }
 
   async finishRun(runId: string, outcome: Omit<StoredCollectionRun, "failed">): Promise<void> {
-    const { error } = await this.client.from("resource_collection_runs").update({ status: outcome.status, inserted_count: outcome.inserted, updated_count: outcome.updated, duplicate_count: outcome.duplicates, rejected_count: outcome.rejected, completed_at: new Date().toISOString() }).eq("id", runId);
+    const { error } = await this.client.from("resource_collection_runs").update({
+      status: outcome.status,
+      candidate_count: outcome.candidateCount,
+      inserted_count: outcome.inserted,
+      updated_count: outcome.updated,
+      duplicate_count: outcome.duplicates,
+      rejected_count: outcome.rejected,
+      fallback_count: outcome.fallbackCount,
+      unavailable_count: outcome.unavailableCount,
+      unchecked_count: outcome.uncheckedCount,
+      completed_at: new Date().toISOString(),
+    }).eq("id", runId);
     if (error) throw new Error(error.message);
   }
 }

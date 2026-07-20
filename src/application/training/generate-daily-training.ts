@@ -1,4 +1,5 @@
 import { selectHardestFeasibleQuest } from "@/domain/training/adaptive-selector";
+import { DAILY_QUEST_MAX_MINUTES } from "@/domain/training/constants";
 import type { QuestAssignment, TrainingState } from "@/domain/training/types";
 
 export type DailyGenerationReason = "assigned" | "already_assigned" | "penalty_priority" | "resource_gap";
@@ -32,7 +33,7 @@ export function generateDailyTraining(input: {
       candidate.scope === "daily" && candidate.trainingContract === state.profile.contract,
     ),
     skills: state.progress.skills,
-    weeklyMinutes: state.profile.weeklyMinutes,
+    availableMinutes: DAILY_QUEST_MAX_MINUTES,
     excludedQuestIds: assignments.map((assignment) => assignment.questId),
     resources: state.resources,
   });

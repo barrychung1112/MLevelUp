@@ -387,7 +387,7 @@ export const AgentStatusSchema = z.strictObject({
     "resourceCollector",
     "adjuster",
   ]),
-  status: z.enum(["idle", "running", "completed", "degraded"]),
+  status: z.enum(["idle", "running", "completed", "degraded", "failed"]),
   lastRunAt: IsoTimestampSchema,
   summary: z.string().min(1),
   isMock: z.boolean(),

@@ -52,6 +52,7 @@ import {
   mapFeedbackRow,
   mapPortfolioArtifactRow,
   mapQuestRow,
+  mapResourceCollectorStatusRow,
   mapResourceRow,
   mapSkillStatsRows,
   mapSubmissionRow,
@@ -60,6 +61,7 @@ import {
   type FeedbackRow,
   type PortfolioArtifactRow,
   type QuestRow,
+  type ResourceCollectorStatusRow,
   type ResourceRow,
   type SkillStatRow,
   type SubmissionRow,
@@ -87,6 +89,7 @@ type SupabaseDatabaseClient = {
   auth: {
     getUser(): Promise<{ data: { user: { id: string } | null }; error: { message: string } | null }>;
   };
+  rpc(name: string): QueryResult<unknown[]>;
   from<T>(table: string): TableClient<T>;
 };
 
@@ -265,6 +268,12 @@ export class SupabaseTrainingRepository implements DemoTrainingRepository {
     return data;
   }
 
+  private async latestResourceCollectorStatus(): Promise<ResourceCollectorStatusRow | null> {
+    const { data, error } = await this.client.rpc("get_latest_resource_collector_status");
+    if (error || !data || data.length === 0) return null;
+    return data[0] as ResourceCollectorStatusRow;
+  }
+
   async getSnapshot(): Promise<TrainingState> {
     const userId = await this.userId();
     const [
@@ -278,6 +287,7 @@ export class SupabaseTrainingRepository implements DemoTrainingRepository {
       feedbackRows,
       artifactRows,
       agentRows,
+      collectorStatusRow,
     ] = await Promise.all([
       this.maybeProfile(userId),
       this.maybeProgress(userId),
@@ -289,6 +299,7 @@ export class SupabaseTrainingRepository implements DemoTrainingRepository {
       this.selectRows<FeedbackRow>("feedback", userId),
       this.selectRows<PortfolioArtifactRow>("portfolio_artifacts", userId),
       this.selectRows<AgentRunRow>("agent_runs", userId),
+      this.latestResourceCollectorStatus(),
     ]);
 
     const skills = mapSkillStatsRows(skillRows);
@@ -322,6 +333,16 @@ export class SupabaseTrainingRepository implements DemoTrainingRepository {
         }
       : defaultProgress(skills);
 
+    const agents = agentRows.length > 0
+      ? agentRows.map(mapAgentRunRow)
+      : defaultAgents(this.dependencies.clock.now());
+    if (collectorStatusRow) {
+      const collectorStatus = mapResourceCollectorStatusRow(collectorStatusRow);
+      const collectorIndex = agents.findIndex((agent) => agent.agentType === "resourceCollector");
+      if (collectorIndex >= 0) agents[collectorIndex] = collectorStatus;
+      else agents.push(collectorStatus);
+    }
+
     const state: TrainingState = {
       schemaVersion: 1,
       seedVersion: SEED_VERSION,
@@ -345,7 +366,7 @@ export class SupabaseTrainingRepository implements DemoTrainingRepository {
       })),
       resources: resourceRows.map(mapResourceRow),
       artifacts: artifactRows.map(mapPortfolioArtifactRow),
-      agents: agentRows.length > 0 ? agentRows.map(mapAgentRunRow) : defaultAgents(this.dependencies.clock.now()),
+      agents,
       activity: [],
       xpEvents: noXpEvents(),
     };
@@ -646,7 +667,7 @@ export class SupabaseTrainingRepository implements DemoTrainingRepository {
           (quest) => quest.purpose === "training",
         ),
         skills: outcome.state.progress.skills,
-        weeklyMinutes: outcome.state.profile.weeklyMinutes,
+        availableMinutes: outcome.state.profile.dailyMinutes,
         resources: outcome.state.resources,
         excludedQuestIds: Object.values(outcome.state.assignments).map(
           (assignment) => assignment.questId,
