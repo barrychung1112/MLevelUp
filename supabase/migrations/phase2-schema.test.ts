@@ -45,6 +45,12 @@ const resourceUpsertFixMigrationPath = join(
   "migrations",
   "202607190003_fix_resource_upsert_conflict.sql",
 );
+const publicPortfolioMigrationPath = join(
+  process.cwd(),
+  "supabase",
+  "migrations",
+  "202607190004_phase5_public_portfolio.sql",
+);
 
 describe("phase 2 Supabase schema migration", () => {
   it("defines the compact training schema, RLS, and public-safe app credentials", () => {
@@ -197,5 +203,60 @@ describe("resource collector upsert conflict migration", () => {
     expect(sql).toContain("create unique index resources_source_external_uidx");
     expect(sql).toContain("on public.resources (source, external_id)");
     expect(sql).not.toContain("where external_id is not null");
+  });
+});
+
+describe("Phase 5 public portfolio migration", () => {
+  it("keeps public portfolio writes behind owner checks and authenticated RPCs", () => {
+    expect(existsSync(publicPortfolioMigrationPath)).toBe(true);
+    const sql = readFileSync(publicPortfolioMigrationPath, "utf8").toLowerCase();
+
+    expect(sql).toContain(
+      "alter table public.public_portfolios enable row level security",
+    );
+    expect(sql).toContain(
+      "alter table public.published_artifacts enable row level security",
+    );
+    expect(sql).toContain("auth.uid() = user_id");
+    expect(sql).toContain("verification_status <> 'verified'");
+    expect(sql).toContain("set search_path = pg_catalog, public");
+    expect(sql).toContain(
+      "revoke all on function public.publish_portfolio_artifact",
+    );
+    expect(sql).toContain(
+      "grant execute on function public.publish_portfolio_artifact",
+    );
+    expect(sql).not.toMatch(/publish_portfolio_artifact\s*\([^)]*user_id/iu);
+  });
+
+  it("allows anonymous reads only through a published public projection", () => {
+    const sql = readFileSync(publicPortfolioMigrationPath, "utf8").toLowerCase();
+
+    expect(sql).toContain("is_published or auth.uid() = user_id");
+    expect(sql).toContain("p.is_published");
+    expect(sql).toContain(
+      "grant select on public.public_portfolios, public.published_artifacts to anon, authenticated",
+    );
+    expect(sql).toContain(
+      "revoke insert, update, delete on public.published_artifacts from anon, authenticated",
+    );
+  });
+
+  it("copies canonical artifact fields and enforces publication limits", () => {
+    const sql = readFileSync(publicPortfolioMigrationPath, "utf8").toLowerCase();
+
+    for (const field of [
+      "artifact_type",
+      "artifact_url",
+      "skill_tags",
+      "quality_score",
+      "verification_status",
+    ]) {
+      expect(sql).toContain(field);
+    }
+    expect(sql).toContain("portfolio_artifact_not_verified");
+    expect(sql).toContain("portfolio_artifact_url_not_https");
+    expect(sql).toContain("portfolio_featured_limit");
+    expect(sql).toContain("on conflict (artifact_id) do update");
   });
 });
