@@ -11,6 +11,8 @@ import type { PortfolioPublicationState, PublicPortfolioProfileInput, PublishArt
 
 import type { PortfolioArtifactView } from "../view-models";
 import { ArtifactPublicationDialog } from "./artifact-publication-dialog";
+import { ArtifactEnhancementPanel } from "./artifact-enhancement-panel";
+import type { AchievementDraftView } from "@/portfolio/portfolio-command-client";
 
 type Props = {
   privateArtifacts: readonly PortfolioArtifactView[];
@@ -23,6 +25,9 @@ type Props = {
   onSetVisibility(isPublished: boolean): Promise<void>;
   onPublishArtifact(input: PublishArtifactInput): Promise<void>;
   onUnpublishArtifact(artifactId: string): Promise<void>;
+  onVerifyLink?(artifactId: string): Promise<{ ok: boolean; status?: string; code?: string }>;
+  onGenerateAchievements?(artifactId: string, replace: boolean): Promise<{ ok: boolean; draft?: AchievementDraftView; code?: string }>;
+  onUpdateAchievements?(artifactId: string, action: "save" | "approve", bullets: Array<{ id: string; text: string }>): Promise<{ ok: boolean; status?: string; code?: string }>;
 };
 
 function ArtifactFacts({ artifact }: { artifact: PortfolioArtifactView }) {
@@ -40,6 +45,7 @@ export function PortfolioManager(props: Props) {
   const publishable = props.privateArtifacts.filter((artifact) => artifact.verificationStatus === "verified" && !publishedIds.has(artifact.id));
   const blocked = props.privateArtifacts.filter((artifact) => artifact.verificationStatus !== "verified");
   const busy = props.commandStatus === "submitting";
+  const enhancement = (artifactId: string) => props.onVerifyLink && props.onGenerateAchievements && props.onUpdateAchievements ? <ArtifactEnhancementPanel artifactId={artifactId} onVerify={props.onVerifyLink} onGenerate={props.onGenerateAchievements} onUpdate={props.onUpdateAchievements} /> : null;
 
   async function save(event: FormEvent) {
     event.preventDefault();
@@ -76,8 +82,8 @@ export function PortfolioManager(props: Props) {
       {props.errorMessage ? <p role="alert" className="text-sm text-command-danger">{props.errorMessage}</p> : null}
 
       <div className="grid gap-8">
-        <section><div className="mb-4 flex items-center gap-3"><Eye className="size-5 text-command-success" /><h2 className="text-2xl font-semibold">Published</h2><Badge>{props.publication.artifacts.length}</Badge></div><ul className="grid gap-4 md:grid-cols-2">{props.publication.artifacts.map((snapshot) => { const source = props.privateArtifacts.find((item) => item.id === snapshot.artifactId); return <li key={snapshot.artifactId} className="command-panel border border-command-success/35 bg-command-surface/92 p-5"><h3 className="text-lg font-semibold">{snapshot.publicTitle}</h3><p className="mt-2 text-sm text-command-muted">{snapshot.publicSummary}</p><div className="mt-4 flex gap-2"><Button size="sm" variant="secondary" disabled={!source} onClick={() => source && setEditing({ artifact: source, snapshot })}>Edit</Button><Button size="sm" variant="danger" onClick={() => void props.onUnpublishArtifact(snapshot.artifactId)}>Unpublish</Button></div></li>; })}</ul>{props.publication.artifacts.length === 0 ? <p className="text-sm text-command-muted">No public evidence yet.</p> : null}</section>
-        <section><div className="mb-4 flex items-center gap-3"><RadioTower className="size-5 text-command-cyan" /><h2 className="text-2xl font-semibold">Publishable</h2><Badge>{publishable.length}</Badge></div><ul className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">{publishable.map((artifact) => <li key={artifact.id} className="command-panel border border-command-border bg-command-surface/92 p-5"><h3 className="text-lg font-semibold">{artifact.title}</h3><p className="mt-2 text-sm text-command-muted">{artifact.summary}</p><div className="mt-4"><ArtifactFacts artifact={artifact} /></div><Button className="mt-5" size="sm" aria-label={`Publish artifact: ${artifact.title}`} onClick={() => setEditing({ artifact })}>Publish artifact</Button></li>)}</ul>{publishable.length === 0 ? <p className="text-sm text-command-muted">Complete a task with verified evidence to unlock publication.</p> : null}</section>
+        <section><div className="mb-4 flex items-center gap-3"><Eye className="size-5 text-command-success" /><h2 className="text-2xl font-semibold">Published</h2><Badge>{props.publication.artifacts.length}</Badge></div><ul className="grid gap-4 md:grid-cols-2">{props.publication.artifacts.map((snapshot) => { const source = props.privateArtifacts.find((item) => item.id === snapshot.artifactId); return <li key={snapshot.artifactId} className="command-panel border border-command-success/35 bg-command-surface/92 p-5"><h3 className="text-lg font-semibold">{snapshot.publicTitle}</h3><p className="mt-2 text-sm text-command-muted">{snapshot.publicSummary}</p><div className="mt-4 flex gap-2"><Button size="sm" variant="secondary" disabled={!source} onClick={() => source && setEditing({ artifact: source, snapshot })}>Edit</Button><Button size="sm" variant="danger" onClick={() => void props.onUnpublishArtifact(snapshot.artifactId)}>Unpublish</Button></div>{enhancement(snapshot.artifactId)}</li>; })}</ul>{props.publication.artifacts.length === 0 ? <p className="text-sm text-command-muted">No public evidence yet.</p> : null}</section>
+        <section><div className="mb-4 flex items-center gap-3"><RadioTower className="size-5 text-command-cyan" /><h2 className="text-2xl font-semibold">Publishable</h2><Badge>{publishable.length}</Badge></div><ul className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">{publishable.map((artifact) => <li key={artifact.id} className="command-panel border border-command-border bg-command-surface/92 p-5"><h3 className="text-lg font-semibold">{artifact.title}</h3><p className="mt-2 text-sm text-command-muted">{artifact.summary}</p><div className="mt-4"><ArtifactFacts artifact={artifact} /></div><Button className="mt-5" size="sm" aria-label={`Publish artifact: ${artifact.title}`} onClick={() => setEditing({ artifact })}>Publish artifact</Button>{enhancement(artifact.id)}</li>)}</ul>{publishable.length === 0 ? <p className="text-sm text-command-muted">Complete a task with verified evidence to unlock publication.</p> : null}</section>
         <section><div className="mb-4 flex items-center gap-3"><LockKeyhole className="size-5 text-command-warning" /><h2 className="text-2xl font-semibold">Not publishable</h2><Badge>{blocked.length}</Badge></div><ul className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">{blocked.map((artifact) => <li key={artifact.id} className="command-panel border border-command-warning/25 bg-command-surface/60 p-5"><h3 className="text-lg font-semibold">{artifact.title}</h3><p className="mt-2 text-sm text-command-warning">Verification: {artifact.verificationStatus}</p><div className="mt-4"><ArtifactFacts artifact={artifact} /></div></li>)}</ul></section>
       </div>
 

@@ -7,6 +7,7 @@ import { generateAchievements } from "@/portfolio-achievements/generate-achievem
 import { SupabaseAchievementRepository } from "@/portfolio-achievements/supabase-achievement-repository";
 
 const InputSchema = z.strictObject({ artifactId: z.string().uuid(), replaceExistingDraft: z.boolean() });
+const UpdateSchema = z.strictObject({ artifactId: z.string().uuid(), action: z.enum(["save", "approve"]), bullets: z.array(z.strictObject({ id: z.string().min(1).max(100), text: z.string().trim().min(1).max(160) })).min(3).max(5) });
 type Dependencies = { authenticate(token: string): Promise<unknown>; generate(context: unknown, input: z.infer<typeof InputSchema>): Promise<Awaited<ReturnType<typeof generateAchievements>>> };
 
 export function createGenerateAchievementsHandler(dependencies: Dependencies) {
@@ -33,6 +34,24 @@ export function createGenerateAchievementsHandler(dependencies: Dependencies) {
   };
 }
 
+export function createUpdateAchievementsHandler(dependencies: { authenticate(token: string): Promise<unknown>; update(context: unknown, input: z.infer<typeof UpdateSchema>): Promise<{ ok: boolean; reason?: string; status?: string }> }) {
+  return async (request: Request): Promise<Response> => {
+    const token = request.headers.get("authorization")?.match(/^Bearer\s+(.+)$/iu)?.[1];
+    if (!token) return Response.json({ error: "Authentication required" }, { status: 401 });
+    try {
+      const context = await dependencies.authenticate(token);
+      const input = UpdateSchema.parse(JSON.parse(await request.text()));
+      const result = await dependencies.update(context, input);
+      if (!result.ok) return Response.json({ error: result.reason, code: result.reason }, { status: result.reason === "artifact_not_found" ? 404 : 422 });
+      return Response.json(result);
+    } catch (error) {
+      if (error instanceof SyntaxError || error instanceof ZodError) return Response.json({ error: "Invalid achievement payload" }, { status: 400 });
+      if (error instanceof ServerSupabaseAuthenticationError) return Response.json({ error: "Authentication failed" }, { status: 401 });
+      return Response.json({ error: "Achievement update unavailable" }, { status: 503 });
+    }
+  };
+}
+
 async function authenticate(token: string) {
   const auth = await createAuthenticatedSupabaseClient(token);
   const { data } = await auth.auth.getUser();
@@ -49,3 +68,7 @@ async function generate(context: unknown, input: z.infer<typeof InputSchema>) {
 }
 
 export const POST = createGenerateAchievementsHandler({ authenticate, generate });
+export const PATCH = createUpdateAchievementsHandler({ authenticate, update: async (context, input) => {
+  const value = context as Awaited<ReturnType<typeof authenticate>>;
+  return value.repository.updateDraft(value.userId, input.artifactId, input.bullets, input.action);
+} });
