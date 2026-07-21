@@ -21,6 +21,7 @@ type QuestDetailProps = LoadableViewProps & {
   isSubmitting?: boolean;
   submitError?: string;
   successMessage?: string;
+  sampleEvidence?: EvidenceSubmissionView;
 };
 
 type QuestDetailFormProps = Omit<QuestDetailProps, "quest" | "status" | "errorMessage"> & {
@@ -47,6 +48,7 @@ function QuestDetailForm({
   isSubmitting = false,
   submitError,
   successMessage,
+  sampleEvidence,
 }: QuestDetailFormProps) {
   const fieldId = useId();
   const [evidenceType, setEvidenceType] = useState<EvidenceType>(quest?.evidenceTypes[0] ?? "url");
@@ -105,6 +107,17 @@ function QuestDetailForm({
     });
   }
 
+  function loadSampleEvidence() {
+    if (!sampleEvidence) return;
+    setEvidenceType(sampleEvidence.evidenceType);
+    setEvidenceUrl(sampleEvidence.evidenceUrl ?? "");
+    setFileMetadata(sampleEvidence.fileMetadata);
+    setMetricResult(sampleEvidence.metricResult ?? "");
+    setEvidenceText(sampleEvidence.evidenceText ?? "");
+    setSelfReflection(sampleEvidence.selfReflection);
+    setErrors({});
+  }
+
   return (
     <article aria-labelledby="quest-title" className="space-y-6">
       <header className="border-b border-command-border pb-5">
@@ -158,7 +171,10 @@ function QuestDetailForm({
       ) : null}
 
       <form className="command-panel space-y-5 border border-command-cyan/40 bg-command-surface/95 p-5" noValidate onSubmit={handleSubmit}>
-        <h2 className="text-lg font-semibold text-command-text">Submit Evidence</h2>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <h2 className="text-lg font-semibold text-command-text">Submit Evidence</h2>
+          {sampleEvidence ? <Button type="button" size="sm" variant="secondary" onClick={loadSampleEvidence}>Load sample evidence</Button> : null}
+        </div>
         {submitError ? <p role="alert" className="text-sm text-command-danger">{submitError}</p> : null}
         {successMessage ? <p role="status" className="text-sm text-command-success">{successMessage}</p> : null}
 

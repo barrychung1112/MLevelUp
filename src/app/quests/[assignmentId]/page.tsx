@@ -5,12 +5,14 @@ import { useState } from "react";
 
 import type { SubmissionOutcome } from "@/application/training/training-repository";
 import { QuestDetail } from "@/components/features/quests/quest-detail";
+import { MissionCompletion } from "@/components/features/quests/mission-completion";
 import type { EvidenceSubmissionView } from "@/components/features/view-models";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Panel } from "@/components/ui/panel";
 import type { EvidenceRecord, EvidenceRequirement } from "@/domain/training/types";
 import { useTraining } from "@/providers/training-provider";
+import { isSandboxSession } from "@/demo/sandbox-session";
+import { createSandboxSampleEvidence, selectNextSandboxAssignment } from "@/demo/sandbox-mission-flow";
 
 import { TrainingPageShell } from "../../_components/training-page-shell";
 import { deriveSubmissionIdentity } from "../../_helpers/submission-identity";
@@ -62,6 +64,10 @@ export default function QuestAssignmentPage() {
       )
     : undefined;
   const feedbackView = submissionFeedback ? mapFeedback(submissionFeedback) : null;
+  const sandbox = isSandboxSession();
+  const nextSandboxAssignment = sandbox && displayedState
+    ? selectNextSandboxAssignment(displayedState, assignment?.id)
+    : undefined;
 
   async function handleStart() {
     if (!assignment) return;
@@ -131,7 +137,11 @@ export default function QuestAssignmentPage() {
           </Panel>
         </section>
       ) : result || assignment?.status === "completed" ? (
-        <section className="space-y-6" aria-labelledby="verified-heading"><header><p className="text-sm uppercase tracking-[0.24em] text-command-success">Mission cleared</p><h1 id="verified-heading" className="text-3xl font-semibold">Mission Verification Complete</h1></header><Panel><div className="flex flex-wrap items-center justify-between gap-2"><p className="text-command-success">Evidence verification passed.</p><Badge tone={feedbackView?.provenance === "AI" ? "cyan" : feedbackView?.provenance === "Deterministic fallback" ? "warning" : "neutral"}>{feedbackView?.provenance ?? "Deterministic"}</Badge></div><p className="mt-2 text-command-muted">Quality {result?.evaluation.qualityScore ?? state?.submissions[latestSubmissionId ?? ""]?.qualityScore ?? 0} / 100 · Awarded {submissionFeedback?.xpAwarded ?? 0} XP</p>{feedbackView ? <p className="mt-3 text-sm text-command-muted">{feedbackView.summary}</p> : null}</Panel></section>
+        <MissionCompletion
+          qualityScore={result?.evaluation.qualityScore ?? state?.submissions[latestSubmissionId ?? ""]?.qualityScore ?? 0}
+          feedback={feedbackView}
+          nextAssignmentId={nextSandboxAssignment?.id}
+        />
       ) : (
         <QuestDetail
           quest={assignment && quest ? mapQuest(assignment, quest, state?.resources ?? []) : null}
@@ -140,6 +150,9 @@ export default function QuestAssignmentPage() {
           isSubmitting={training.commandStatus === "submitting"}
           submitError={localError ?? training.commandError ?? undefined}
           successMessage={localError ? undefined : training.commandSuccess ?? undefined}
+          sampleEvidence={sandbox && assignment && quest
+            ? createSandboxSampleEvidence(mapQuest(assignment, quest, state?.resources ?? []))
+            : undefined}
           onSubmit={(submission) => { void handleSubmit(submission); }}
         />
       )}

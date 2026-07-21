@@ -111,4 +111,31 @@ describe("QuestDetail", () => {
       metricResult: "validation_accuracy: 0.82",
     }));
   });
+
+  test("loads deterministic Sandbox evidence through the normal submission form", () => {
+    const onSubmit = vi.fn();
+    const sampleEvidence = {
+      evidenceType: "url" as const,
+      evidenceUrl: "https://github.com/barrychung1112/MLevelUp/commit/example",
+      metricResult: "validation_accuracy: 0.842",
+      evidenceText: "The reproducible baseline records its split, metric, and result.",
+      selfReflection: "I selected a validation strategy, measured the result, and documented the next experiment.",
+    };
+    render(
+      <QuestDetail
+        quest={{ ...quest, evidenceTypes: ["url", "metric", "text"] }}
+        onSubmit={onSubmit}
+        sampleEvidence={sampleEvidence}
+      />,
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "Load sample evidence" }));
+    expect(screen.getByLabelText("Evidence URL")).toHaveValue(sampleEvidence.evidenceUrl);
+    expect(screen.getByLabelText("Metric result")).toHaveValue(sampleEvidence.metricResult);
+    expect(screen.getByLabelText("Evidence notes")).toHaveValue(sampleEvidence.evidenceText);
+    expect(screen.getByLabelText("Self-reflection")).toHaveValue(sampleEvidence.selfReflection);
+
+    fireEvent.click(screen.getByRole("button", { name: "Submit Evidence" }));
+    expect(onSubmit).toHaveBeenCalledWith(sampleEvidence);
+  });
 });

@@ -27,6 +27,7 @@ import {
   reconcileTrainingState,
 } from "@/domain/training/reconcile-training";
 import type { TrainingState } from "@/domain/training/types";
+import { ensureNextSandboxMission } from "@/demo/sandbox-mission-flow";
 
 import { LocalTrainingStorage } from "./local-storage";
 import {
@@ -264,7 +265,12 @@ export class MockTrainingRepository implements DemoTrainingRepository {
         };
       }
     }
-    const reconciled = reconcileTrainingState(outcome.state, now, this.dependencies.ids).state;
+    const continued = ensureNextSandboxMission(
+      outcome.state,
+      now,
+      this.dependencies.ids,
+    );
+    const reconciled = reconcileTrainingState(continued, now, this.dependencies.ids).state;
     const committed = this.commit(reconciled, now);
     return {
       ...outcome,

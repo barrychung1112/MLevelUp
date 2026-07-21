@@ -95,6 +95,11 @@ export type AgentRunView = {
 export type FeedbackView = {
   summary: string;
   provenance: "Demo" | "AI" | "Deterministic" | "Deterministic fallback";
+  strengths?: readonly string[];
+  improvements?: readonly string[];
+  nextActions?: readonly string[];
+  xpAwarded?: number;
+  skillGrowth?: readonly { label: string; delta: number }[];
   adjustmentExplanation?: string;
   confidence?: number;
   recommendedQuestId?: string;

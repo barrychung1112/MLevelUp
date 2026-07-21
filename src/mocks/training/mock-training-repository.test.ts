@@ -202,6 +202,62 @@ describe("mock training repository", () => {
     ).toBe("2026-07-17T16:00:00.000Z");
   });
 
+  test("continues with an unused catalog mission after every active training assignment is cleared", async () => {
+    const { repository } = createRepository();
+    const calibrationId = await startPrimary(repository);
+    const calibrated = await repository.submitQuest({
+      idempotencyKey: "calibration-for-continuation",
+      assignmentId: calibrationId,
+      evidence: validEvidence(),
+      selfReflection: reflection,
+    });
+    const initialTrainingAssignments = Object.values(calibrated.state.assignments)
+      .filter((assignment) => calibrated.state.quests[assignment.questId].purpose === "training")
+      .map((assignment) => assignment.id);
+    const initiallyAssignedQuestIds = new Set(
+      Object.values(calibrated.state.assignments).map((assignment) => assignment.questId),
+    );
+
+    for (const [index, assignmentId] of initialTrainingAssignments.entries()) {
+      const started = await repository.startQuest(assignmentId);
+      const quest = started.quests[started.assignments[assignmentId].questId];
+      const evidence = quest.evidenceRequirements.map((requirement, evidenceIndex) => ({
+        id: `continuation-evidence-${index}-${evidenceIndex}`,
+        requirementId: requirement.id,
+        type: requirement.type,
+        ...(requirement.type === "githubCommit"
+          ? { url: "https://github.com/barrychung1112/MLevelUp/commit/76f5f7312e25c540e611bf52987ad80445dbdc21" }
+          : {}),
+        ...(requirement.type === "deployedApp"
+          ? { url: "https://m-level-up.vercel.app/" }
+          : {}),
+        ...(["modelEvaluationReport", "screenshot", "experimentLog"].includes(requirement.type)
+          ? { fileName: "validation-report.md", mimeType: "text/markdown", byteSize: 2048 }
+          : {}),
+        ...(["writtenReflection", "systemDesignNote"].includes(requirement.type)
+          ? { text: "This evidence documents a reproducible result, its limitations, and the next measurable engineering decision." }
+          : {}),
+        ...(requirement.type === "metricResult"
+          ? { metricName: "validation_accuracy", metricValue: 0.842 }
+          : {}),
+      }));
+      await repository.submitQuest({
+        idempotencyKey: `continuation-submit-${index}`,
+        assignmentId,
+        evidence,
+        selfReflection: reflection,
+      });
+    }
+
+    const continued = await repository.getSnapshot();
+    const next = Object.values(continued.assignments).find(
+      (assignment) => assignment.status === "assigned" && !initialTrainingAssignments.includes(assignment.id),
+    );
+    expect(next).toBeDefined();
+    expect(initiallyAssignedQuestIds.has(next!.questId)).toBe(false);
+    expect(continued.quests[next!.questId].purpose).toBe("training");
+  });
+
   test("reconciles expired mainline and daily work when the snapshot reloads", async () => {
     let now = clock.now();
     const activeClock = { now: () => now };

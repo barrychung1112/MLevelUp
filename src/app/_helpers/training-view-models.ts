@@ -171,6 +171,16 @@ export function mapFeedback(feedback: SubmissionFeedback): FeedbackView {
   return {
     summary: feedback.summary,
     provenance: provenance[feedback.source],
+    strengths: feedback.strengths,
+    improvements: feedback.improvements,
+    nextActions: feedback.nextActions,
+    xpAwarded: feedback.xpAwarded,
+    skillGrowth: SKILL_KEYS
+      .filter((key) => (feedback.skillDeltas?.[key] ?? 0) > 0)
+      .map((key) => ({
+        label: SKILL_LABELS[key],
+        delta: Number((feedback.skillDeltas?.[key] ?? 0).toFixed(1)),
+      })),
     adjustmentExplanation: feedback.adjustmentExplanation,
     confidence: feedback.aiConfidence,
     recommendedQuestId: feedback.recommendedQuestId,

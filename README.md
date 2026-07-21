@@ -37,7 +37,7 @@ The result is deterministic and resets from the link above, so every reviewer se
 
 ### Free exploration
 
-Open the [interactive sandbox](https://m-level-up.vercel.app/demo/sandbox?restart=1). Accept the challenger warning to sign in as the preloaded learner **Alex Pathfinder**, then explore the dashboard, missions, resources, progress, agents, archive, profile, and portfolio controls.
+Open the [interactive sandbox](https://m-level-up.vercel.app/demo/sandbox?restart=1). Accept the challenger warning to sign in as the preloaded learner **Alex Pathfinder**, start the calibration mission, and select `Load sample evidence`. Submit through the normal validation path to receive feedback, XP, skill growth, and a direct link to the next mission. You can then explore the dashboard, resources, progress, agents, archive, profile, and portfolio controls.
 
 The sandbox runs entirely in the browser. It does not send an email, create a real account, or call Supabase, OpenAI, GitHub, or Kaggle.
 
