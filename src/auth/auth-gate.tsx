@@ -7,11 +7,23 @@ import { isDemoMode } from "@/lib/demo-mode";
 
 import { useAuth } from "./auth-provider";
 import { LoginTerminal } from "./login-terminal";
+import { PublicEntry } from "./public-entry";
 
 export function AuthGate({ children }: { children: ReactNode }) {
   const auth = useAuth();
   const pathname = usePathname();
-  if (isDemoMode() || pathname.startsWith("/p/")) return children;
+  if (pathname === "/demo" || pathname.startsWith("/p/")) return children;
+
+  if (pathname === "/" && auth.status !== "signedIn") {
+    return (
+      <PublicEntry
+        requestMagicLink={auth.requestMagicLink}
+        authError={auth.error}
+      />
+    );
+  }
+
+  if (isDemoMode()) return children;
 
   if (auth.status === "loading") {
     return (

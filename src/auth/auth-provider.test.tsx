@@ -46,7 +46,7 @@ describe("AuthProvider and AuthGate", () => {
     window.history.replaceState(null, "", "http://localhost:3000/");
   });
 
-  it("reports unavailable when public Supabase configuration is missing", async () => {
+  it("keeps the public entry usable when Supabase configuration is missing", async () => {
     mocks.getBrowserSupabaseClient.mockReturnValue(null);
 
     renderAuth(
@@ -55,13 +55,14 @@ describe("AuthProvider and AuthGate", () => {
       </AuthGate>,
     );
 
-    expect(await screen.findByRole("heading", { name: "Supabase setup required" })).toBeVisible();
+    expect(await screen.findByRole("link", { name: "Watch the challenge" })).toBeVisible();
     expect(screen.queryByText("training app")).not.toBeInTheDocument();
   });
 
   it("bypasses auth only when demo mode is enabled", async () => {
     process.env.NEXT_PUBLIC_MLEVELUP_DEMO_MODE = "1";
     mocks.getBrowserSupabaseClient.mockReturnValue(null);
+    window.history.replaceState(null, "", "http://localhost:3000/dashboard");
 
     renderAuth(
       <AuthGate>
@@ -86,6 +87,20 @@ describe("AuthProvider and AuthGate", () => {
     expect(screen.queryByRole("heading", { name: "Supabase setup required" })).not.toBeInTheDocument();
   });
 
+  it("allows the guided demo anonymously in every build mode", async () => {
+    mocks.getBrowserSupabaseClient.mockReturnValue(null);
+    window.history.replaceState(null, "", "http://localhost:3000/demo?guided=1");
+
+    renderAuth(
+      <AuthGate>
+        <p>guided demo</p>
+      </AuthGate>,
+    );
+
+    expect(await screen.findByText("guided demo")).toBeVisible();
+    expect(screen.queryByRole("heading", { name: "Supabase setup required" })).not.toBeInTheDocument();
+  });
+
   it("shows a magic-link form and sends the request after confirmation", async () => {
     const client = createClient();
     mocks.getBrowserSupabaseClient.mockReturnValue(client);
@@ -96,6 +111,7 @@ describe("AuthProvider and AuthGate", () => {
       </AuthGate>,
     );
 
+    fireEvent.click(await screen.findByRole("button", { name: "Sign in" }));
     expect(await screen.findByRole("heading", { name: /become anyone you want to be/i })).toBeVisible();
     fireEvent.change(screen.getByLabelText("Email"), {
       target: { value: "hunter@example.com" },
