@@ -27,15 +27,15 @@ import type {
 import { SKILL_KEYS } from "@/domain/training/constants";
 
 export const GOALS: readonly GoalOptionView[] = [
-  { id: "job-ready", label: "成為可就業的 ML Engineer" },
-  { id: "competition", label: "提升競賽與實驗能力" },
-  { id: "portfolio", label: "建立 ML Engineer 作品集" },
+  { id: "job-ready", label: "Become a job-ready ML Engineer" },
+  { id: "competition", label: "Improve competition and experimentation skills" },
+  { id: "portfolio", label: "Build an ML Engineer portfolio" },
 ];
 
 export const CONTRACTS: readonly TrainingContractView[] = [
-  { id: "foundation", label: "簡單模式", timeCommitment: "每日 30–45 分鐘", description: "拆小任務、穩定完成並建立基礎。" },
-  { id: "standard", label: "普通人模式", timeCommitment: "每日 1–2 小時", description: "實作、閱讀、實驗紀錄與作品集並進。" },
-  { id: "intensive", label: "超級戰士模式", timeCommitment: "每日 3 小時以上", description: "以競賽、部署、研究與系統設計進行高強度訓練。" },
+  { id: "foundation", label: "Foundation", timeCommitment: "30–45 minutes daily", description: "Build fundamentals through small, consistently completed missions." },
+  { id: "standard", label: "Standard", timeCommitment: "1–2 hours daily", description: "Combine implementation, reading, experiment logs, and portfolio work." },
+  { id: "intensive", label: "Intensive", timeCommitment: "3+ hours daily", description: "Train through competitions, deployment, research, and system design." },
 ];
 
 export const SKILL_LABELS: Record<SkillKey, string> = {
@@ -49,16 +49,16 @@ export const SKILL_LABELS: Record<SkillKey, string> = {
 };
 
 const CONTRACT_LABELS: Record<TrainingContract, string> = {
-  foundation: "簡單模式",
-  standard: "普通人模式",
-  intensive: "超級戰士模式",
+  foundation: "Foundation",
+  standard: "Standard",
+  intensive: "Intensive",
 };
 
 const AGENT_LABELS: Record<AgentStatus["agentType"], string> = {
-  coordinator: "協調員 Agent",
-  learningStrategist: "學習策略 Agent",
-  resourceCollector: "資源收集 Agent",
-  adjuster: "調整者 Agent",
+  coordinator: "Coordinator",
+  learningStrategist: "Learning Strategist",
+  resourceCollector: "Resource Collector",
+  adjuster: "Adjuster",
 };
 
 const URL_EVIDENCE = new Set<DomainEvidenceType>(["githubCommit", "kaggleNotebook", "deployedApp", "competitionRank"]);
@@ -138,7 +138,7 @@ export function formatTimestamp(instant: string, timezone: string): string {
       hourCycle: "h23",
     }).format(new Date(instant));
   } catch {
-    return "時間無法顯示";
+    return "Time unavailable";
   }
 }
 
@@ -215,9 +215,9 @@ export function latestBy<T>(items: readonly T[], timestamp: (item: T) => string)
 }
 
 export function progressTrend(state: TrainingState): TrendPointView[] {
-  if (state.xpEvents.length === 0) return [{ label: "起點", value: 0 }];
+  if (state.xpEvents.length === 0) return [{ label: "Start", value: 0 }];
   let total = 0;
   return [...state.xpEvents]
     .sort((left, right) => left.createdAt.localeCompare(right.createdAt))
-    .map((event, index) => ({ label: `任務 ${index + 1}`, value: (total += event.awardedXp) }));
+    .map((event, index) => ({ label: `Mission ${index + 1}`, value: (total += event.awardedXp) }));
 }

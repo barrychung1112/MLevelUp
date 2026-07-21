@@ -56,7 +56,7 @@ type TrainingProviderProps = {
 const TrainingContext = createContext<TrainingContextValue | null>(null);
 
 function messageFor(error: unknown): string {
-  return error instanceof Error ? error.message : "訓練資料更新失敗，請再試一次。";
+  return error instanceof Error ? error.message : "Training data could not be updated. Try again.";
 }
 
 export function createBrowserTrainingRepository(): DemoTrainingRepository {
@@ -158,7 +158,7 @@ export function TrainingProvider({
         try {
           const repository = repositoryRef.current;
           if (!repository || !readyRef.current) {
-            throw new Error("訓練資料尚未完成載入。");
+            throw new Error("Training data has not finished loading.");
           }
           const result = await operation(repository);
           if (mountedRef.current) {
@@ -203,7 +203,7 @@ export function TrainingProvider({
       enqueue(
         (repository) => repository.completeOnboarding(input),
         (nextSnapshot) => nextSnapshot,
-        "訓練契約已建立。",
+        "Training contract created.",
       ),
     [enqueue],
   );
@@ -213,7 +213,7 @@ export function TrainingProvider({
       enqueue(
         (repository) => repository.acceptChallenge(),
         (nextSnapshot) => nextSnapshot,
-        "挑戰誓約已確認。",
+        "Challenge oath accepted.",
       ),
     [enqueue],
   );
@@ -233,7 +233,7 @@ export function TrainingProvider({
       enqueue(
         (repository) => repository.updateProfile(input),
         (nextSnapshot) => nextSnapshot,
-        "個人設定已儲存。",
+        "Profile settings saved.",
       ),
     [enqueue],
   );
@@ -243,7 +243,7 @@ export function TrainingProvider({
       enqueue(
         (repository) => repository.startQuest(assignmentId),
         (nextSnapshot) => nextSnapshot,
-        "任務已開始。",
+        "Mission started.",
       ),
     [enqueue],
   );
@@ -253,7 +253,7 @@ export function TrainingProvider({
       enqueue(
         (repository) => repository.submitQuest(input),
         (outcome) => outcome.state,
-        "成果已完成 Demo 評估。",
+        "Evidence completed deterministic demo evaluation.",
       ),
     [enqueue],
   );
@@ -263,7 +263,7 @@ export function TrainingProvider({
       enqueue(
         (repository) => repository.resetDemo(),
         (nextSnapshot) => nextSnapshot,
-        "Demo 資料已重設。",
+        "Demo training data reset.",
       ),
     [enqueue],
   );

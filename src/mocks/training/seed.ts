@@ -9,7 +9,7 @@ import type {
   TrainingState,
 } from "@/domain/training/types";
 
-export const SEED_VERSION = "phase1-2026-07-16.2";
+export const SEED_VERSION = "phase1-2026-07-20.en";
 export const DEFAULT_TIMEZONE = "America/Los_Angeles";
 
 const quests: Quest[] = [
@@ -223,19 +223,19 @@ const quests: Quest[] = [
     executionSteps: ["Inspect the dataset", "Train a baseline", "Record validation evidence", "Reflect on the result"],
     successMetrics: ["Artifact, metric, and reflection evidence are submitted"],
     outOfScope: ["Production deployment"],
-    title: "挑戰的勇氣",
-    summary: "用一份真實成果證明你願意踏上成長之路。",
+    title: "The Courage to Begin",
+    summary: "Prove your willingness to grow through one real result.",
     instructions:
-      "檢查小型表格資料、建立可重現 baseline、說明 validation 方法與指標，並記錄完成與未完成的部分。",
+      "Inspect a small tabular dataset, build a reproducible baseline, explain the validation method and metric, and record what was and was not completed.",
     questType: "modelExperiment",
     difficulty: 4,
     estimatedMinutes: 90,
     baseXp: 120,
     optional: false,
     acceptanceCriteria: [
-      "指出至少一項資料品質問題",
-      "建立 baseline 並回報 validation 指標",
-      "說明完成、未完成與下一步",
+      "Identify at least one data-quality issue",
+      "Build a baseline and report a validation metric",
+      "Explain what was completed, what remains, and the next step",
     ],
     evidenceRequirements: [
       { id: "artifact", type: "githubCommit", required: true },

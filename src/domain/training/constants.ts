@@ -12,15 +12,15 @@ export const SKILL_KEYS = [
 
 export const TRAINING_CONTRACTS = {
   foundation: {
-    label: "簡單模式",
+    label: "Foundation",
     dailyMinutes: { min: 30, max: 45 },
   },
   standard: {
-    label: "普通人模式",
+    label: "Standard",
     dailyMinutes: { min: 60, max: 120 },
   },
   intensive: {
-    label: "超級戰士模式",
+    label: "Intensive",
     dailyMinutes: { min: 180, max: null },
   },
 } as const satisfies Record<
