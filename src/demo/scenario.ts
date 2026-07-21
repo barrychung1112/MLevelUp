@@ -1,0 +1,83 @@
+export const GUIDED_DEMO_VERSION = "guided-demo-v1" as const;
+
+export const GUIDED_DEMO_SCENARIO = {
+  version: GUIDED_DEMO_VERSION,
+  challenger: {
+    name: "Alex",
+    goal: "Become a machine learning engineer",
+    level: 3,
+    weakestSkill: "Evaluation",
+  },
+  yesterday: {
+    title: "Build a reproducible validation baseline",
+    completedCheckpoints: 2,
+    totalCheckpoints: 4,
+    missingItems: ["Second validation run", "Reproducible metric comparison"],
+    status: "expired",
+    xpAwarded: 0,
+  },
+  penalty: {
+    title: "Recover missing validation evidence",
+    summary: "Rerun the missing validation seed and preserve a reproducible experiment log.",
+    estimatedMinutes: 30,
+    status: "completed",
+    statusLabel: "Recovered before demo",
+    evidenceLabel: "seed-29-experiment.log",
+    xpAwarded: 0,
+  },
+  dailyMission: {
+    title: "Measure validation stability",
+    summary: "Compare two validation runs and turn the observed difference into a defensible decision.",
+    estimatedMinutes: 60,
+    executionSteps: [
+      "Run the fixed baseline with seeds 11 and 29.",
+      "Calculate the absolute difference between both validation scores.",
+      "Write validation-stability.md with the result and recommendation.",
+    ],
+    acceptanceCriteria: [
+      "Both validation scores are recorded.",
+      "The same model configuration is used for both runs.",
+      "The report explains the measured difference and next decision.",
+    ],
+    successMetric: "Two scores and their absolute difference are reported to three decimal places.",
+    requiredEvidence: "Model evaluation report",
+  },
+  evidence: {
+    label: "Demo evidence fixture",
+    commitUrl: "https://github.com/mlevelup-demo/validation-stability/commit/8f3c92a",
+    reportName: "validation-stability.md",
+    seed11Score: 0.842,
+    seed29Score: 0.824,
+    absoluteDifference: 0.018,
+    reflection: "The score changed enough to justify reporting uncertainty and repeating validation before promotion.",
+  },
+  feedback: {
+    disclaimer: "Simulated AI response - No external API call",
+    summary: "The evidence directly addresses yesterday's missing comparison and makes the validation risk visible.",
+    strength: "Both runs use the same model configuration and report reproducible scores.",
+    improvement: "Add a third seed before making a production promotion decision.",
+    nextAction: "Track score variance across three or more seeds in the next experiment.",
+  },
+  decision: {
+    verificationStatus: "verified",
+    qualityScore: 88,
+    checks: ["Evidence complete", "Metrics measurable", "Required artifact present"],
+  },
+  reward: {
+    xpBefore: 1160,
+    xpAwarded: 40,
+    xpAfter: 1200,
+    level: 3,
+    evaluationBefore: 38,
+    evaluationAfter: 39.4,
+    communicationBefore: 34,
+    communicationAfter: 34.6,
+    artifactTitle: "Validation stability report",
+  },
+  publicProof: {
+    slug: "demo-ml-engineer",
+    verifiedArtifacts: 3,
+    demonstratedSkills: 7,
+    averageQuality: 87,
+  },
+} as const;
