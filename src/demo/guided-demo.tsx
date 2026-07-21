@@ -9,13 +9,15 @@ import { advanceDemoState, initialDemoState, type DemoAction } from "./state-mac
 import { clearDemoSession, readDemoSession, writeDemoSession } from "./session-store";
 
 export function GuidedDemo({ restart = false }: { restart?: boolean }) {
-  const [state, setState] = useState(initialDemoState);
+  const [state, setState] = useState(() => {
+    if (typeof window === "undefined") return initialDemoState();
+    if (restart) {
+      clearDemoSession(window.sessionStorage);
+      return initialDemoState();
+    }
+    return readDemoSession(window.sessionStorage);
+  });
   const headingRef = useRef<HTMLHeadingElement>(null);
-
-  useEffect(() => {
-    if (restart) clearDemoSession(window.sessionStorage);
-    setState(restart ? initialDemoState() : readDemoSession(window.sessionStorage));
-  }, [restart]);
 
   useEffect(() => {
     writeDemoSession(window.sessionStorage, state);

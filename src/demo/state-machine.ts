@@ -46,7 +46,8 @@ export function advanceDemoState(
   return state;
 }
 
-export function resetDemoState(_state?: GuidedDemoState): GuidedDemoState {
+export function resetDemoState(state?: GuidedDemoState): GuidedDemoState {
+  void state;
   return initialDemoState();
 }
 
