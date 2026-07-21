@@ -102,6 +102,12 @@ flowchart TD
     DEMO["Deterministic Demo Repository"] --> UI
 ```
 
+## How Codex Was Used
+
+Codex was used throughout the project, not just for small code snippets. I used Codex to critique the original idea, narrow the scope from a broad life-goal system into a focused ML engineering training product, design the architecture, implement the Next.js application, build the Supabase-backed data flow, create the structured GPT-5.6 agent workflow, write and refine tests, debug issues, and polish the no-login judge demo.
+
+Codex also helped shape the product narrative around hard but fair missions, evidence-based progression, deterministic policy control, and portfolio-ready proof.
+
 ### Agent responsibilities
 
 | Module | Responsibility |
