@@ -12,6 +12,7 @@ import {
 } from "react";
 
 import { isDemoMode } from "@/lib/demo-mode";
+import { isSandboxSession } from "@/demo/sandbox-session";
 import { getBrowserSupabaseClient } from "@/lib/supabase/client";
 import { DemoPortfolioPublicationRepository } from "@/portfolio/demo-portfolio-publication-repository";
 import type { PortfolioPublicationRepository } from "@/portfolio/portfolio-publication-repository";
@@ -40,7 +41,7 @@ const Context = createContext<PortfolioPublicationContextValue | null>(null);
 
 export function createBrowserPortfolioPublicationRepository(): PortfolioPublicationRepository {
   if (typeof window === "undefined") throw new Error("Portfolio publication requires a browser");
-  if (isDemoMode()) return new DemoPortfolioPublicationRepository(window.localStorage);
+  if (isDemoMode() || isSandboxSession()) return new DemoPortfolioPublicationRepository(window.localStorage);
   const client = getBrowserSupabaseClient();
   if (!client) throw new Error("Supabase setup required");
   return new SupabasePortfolioPublicationRepository(client as never);

@@ -4,14 +4,17 @@ import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
 
 import { isDemoMode } from "@/lib/demo-mode";
+import { isSandboxSession } from "@/demo/sandbox-session";
 
 import { useAuth } from "./auth-provider";
 import { LoginTerminal } from "./login-terminal";
 import { PublicEntry } from "./public-entry";
+import { SandboxBoundary } from "./sandbox-boundary";
 
 export function AuthGate({ children }: { children: ReactNode }) {
   const auth = useAuth();
   const pathname = usePathname();
+  if (pathname === "/demo/sandbox") return <SandboxBoundary>{children}</SandboxBoundary>;
   if (pathname === "/demo" || pathname.startsWith("/p/")) return children;
 
   if (pathname === "/" && auth.status !== "signedIn") {
@@ -23,7 +26,7 @@ export function AuthGate({ children }: { children: ReactNode }) {
     );
   }
 
-  if (isDemoMode()) return children;
+  if (isDemoMode() || isSandboxSession()) return children;
 
   if (auth.status === "loading") {
     return (

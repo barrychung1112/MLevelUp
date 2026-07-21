@@ -11,7 +11,7 @@ import {
   type PublishedArtifact,
 } from "./contracts";
 
-const STORAGE_KEY = "mlevelup-portfolio-publication-v1";
+export const PORTFOLIO_STORAGE_KEY = "mlevelup-portfolio-publication-v1";
 const DEMO_SKILLS: readonly SkillKey[] = ["engineering", "communication"];
 
 export class DemoPortfolioPublicationRepository
@@ -23,7 +23,7 @@ export class DemoPortfolioPublicationRepository
   ) {}
 
   private read(): PortfolioPublicationState {
-    const raw = this.storage.getItem(STORAGE_KEY);
+    const raw = this.storage.getItem(PORTFOLIO_STORAGE_KEY);
     if (!raw) return { profile: null, artifacts: [] };
     try {
       return JSON.parse(raw) as PortfolioPublicationState;
@@ -33,7 +33,7 @@ export class DemoPortfolioPublicationRepository
   }
 
   private write(state: PortfolioPublicationState) {
-    this.storage.setItem(STORAGE_KEY, JSON.stringify(state));
+    this.storage.setItem(PORTFOLIO_STORAGE_KEY, JSON.stringify(state));
   }
 
   async load() {

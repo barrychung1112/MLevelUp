@@ -16,6 +16,8 @@ import { useEffect, type ReactNode } from "react";
 import { AppShell } from "@/components/shell/app-shell";
 import { NAVIGATION_COPY } from "@/presentation/product-copy";
 import { useTraining } from "@/providers/training-provider";
+import { isSandboxSession } from "@/demo/sandbox-session";
+import { SandboxBanner } from "@/demo/sandbox-banner";
 
 const ICONS = [
   Gauge,
@@ -51,6 +53,7 @@ export function TrainingPageShell({ children }: { children: ReactNode }) {
   return (
     <AppShell items={ITEMS} currentPath={pathname}>
       <div className="mx-auto w-full max-w-[96rem] px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
+        {isSandboxSession() ? <div className="mb-5"><SandboxBanner /></div> : null}
         {redirectTo ? <p role="status" className="text-command-muted">Entering training sector…</p> : children}
       </div>
     </AppShell>

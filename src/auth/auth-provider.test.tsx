@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 
 import { AuthGate } from "./auth-gate";
 import { AuthProvider, useAuth } from "./auth-provider";
+import { SANDBOX_SESSION_KEY } from "@/demo/sandbox-session";
 
 const mocks = vi.hoisted(() => ({
   getBrowserSupabaseClient: vi.fn(),
@@ -44,6 +45,7 @@ describe("AuthProvider and AuthGate", () => {
     mocks.getBrowserSupabaseClient.mockReset();
     delete process.env.NEXT_PUBLIC_MLEVELUP_DEMO_MODE;
     window.history.replaceState(null, "", "http://localhost:3000/");
+    window.sessionStorage.clear();
   });
 
   it("keeps the public entry usable when Supabase configuration is missing", async () => {
@@ -99,6 +101,26 @@ describe("AuthProvider and AuthGate", () => {
 
     expect(await screen.findByText("guided demo")).toBeVisible();
     expect(screen.queryByRole("heading", { name: "Supabase setup required" })).not.toBeInTheDocument();
+  });
+
+  it("activates the anonymous sandbox before rendering application providers", async () => {
+    mocks.getBrowserSupabaseClient.mockReturnValue(null);
+    window.history.replaceState(null, "", "http://localhost:3000/demo/sandbox?restart=1");
+
+    renderAuth(<AuthGate><p>sandbox app</p></AuthGate>);
+
+    expect(await screen.findByText("sandbox app")).toBeVisible();
+    expect(window.sessionStorage.getItem(SANDBOX_SESSION_KEY)).toBe("active");
+  });
+
+  it("allows private routes only while an anonymous sandbox session is active", async () => {
+    mocks.getBrowserSupabaseClient.mockReturnValue(null);
+    window.sessionStorage.setItem(SANDBOX_SESSION_KEY, "active");
+    window.history.replaceState(null, "", "http://localhost:3000/dashboard");
+
+    renderAuth(<AuthGate><p>sandbox dashboard</p></AuthGate>);
+
+    expect(await screen.findByText("sandbox dashboard")).toBeVisible();
   });
 
   it("shows a magic-link form and sends the request after confirmation", async () => {

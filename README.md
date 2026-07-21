@@ -51,7 +51,7 @@ See [Phase 5 public portfolio deployment](docs/phase-5-public-portfolio-setup.md
 
 ## 60-second guided demo
 
-The judge path is deterministic and requires no account, cookie, API key, Supabase project, OpenAI request, GitHub request, or Kaggle request.
+The judge experience has two anonymous paths. `/demo` is a deterministic six-step story, while `/demo/sandbox` resets and opens a fake learner account for free exploration. Neither path requires an account, API key, Supabase project, OpenAI request, GitHub request, or Kaggle request.
 
 macOS / Linux:
 
@@ -67,7 +67,7 @@ npm install
 $env:NEXT_PUBLIC_MLEVELUP_DEMO_MODE='1'; npm run dev
 ```
 
-Open `http://localhost:3000/demo?restart=1`, complete the six guided actions, then open `/p/demo-ml-engineer`. Returning from the public portfolio restores the last guided step; entering from the home page always adds `restart=1` and starts from the beginning.
+Open `http://localhost:3000/demo?restart=1`, complete the six guided actions, then open `/p/demo-ml-engineer`. To explore the full application with local simulated data, open `/demo/sandbox?restart=1`; every new entry resets the fake account, while navigation and refreshes in the same tab preserve that sandbox run. Returning from the public portfolio restores the last guided step.
 
 For Vercel, create a separate project from this repository, set `NEXT_PUBLIC_MLEVELUP_DEMO_MODE=1`, and deploy. No other environment variable is required for the guided route or its demo portfolio.
 

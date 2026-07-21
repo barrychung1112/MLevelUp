@@ -7,6 +7,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 
 import { LoginTerminal } from "./login-terminal";
+import { ChallengerSilhouette } from "./challenger-silhouette";
 
 interface PublicEntryProps {
   requestMagicLink(email: string): Promise<void>;
@@ -38,6 +39,7 @@ export function PublicEntry({ requestMagicLink, authError }: PublicEntryProps) {
       <div aria-hidden className="command-grid pointer-events-none absolute inset-0 opacity-55" />
       <div aria-hidden className="command-glow pointer-events-none absolute inset-0" />
       <div aria-hidden className="pointer-events-none absolute -right-24 top-20 size-96 rotate-12 border border-command-cyan/15 bg-command-cyan/[0.025] [clip-path:polygon(50%_0,100%_30%,82%_100%,18%_100%,0_30%)]" />
+      <ChallengerSilhouette />
 
       <div className="relative mx-auto flex min-h-screen w-full max-w-7xl flex-col px-5 py-6 sm:px-8 lg:px-12">
         <header className="flex items-center justify-between border-b border-command-border/70 pb-5">
@@ -63,7 +65,7 @@ export function PublicEntry({ requestMagicLink, authError }: PublicEntryProps) {
                 <Play aria-hidden className="size-4 fill-current" />
                 Watch the challenge
               </Link>
-              <Link href="/demo?restart=1" className="inline-flex min-h-12 items-center justify-center gap-3 border border-command-border bg-command-surface/80 px-5 font-display font-semibold text-command-text transition hover:border-command-cyan/60 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-command-cyan">
+              <Link href="/demo/sandbox?restart=1" className="inline-flex min-h-12 items-center justify-center gap-3 border border-command-border bg-command-surface/80 px-5 font-display font-semibold text-command-text transition hover:border-command-cyan/60 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-command-cyan">
                 <Eye aria-hidden className="size-4" />
                 Enter live demo
               </Link>

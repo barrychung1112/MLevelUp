@@ -20,6 +20,7 @@ import type {
 } from "@/application/training/training-repository";
 import type { TrainingState } from "@/domain/training/types";
 import { isDemoMode } from "@/lib/demo-mode";
+import { isSandboxSession } from "@/demo/sandbox-session";
 import { getBrowserSupabaseClient } from "@/lib/supabase/client";
 import { LocalTrainingStorage } from "@/mocks/training/local-storage";
 import { MockTrainingRepository } from "@/mocks/training/mock-training-repository";
@@ -64,7 +65,7 @@ export function createBrowserTrainingRepository(): DemoTrainingRepository {
     throw new Error("The browser training repository requires a window");
   }
 
-  const supabase = isDemoMode() ? null : getBrowserSupabaseClient();
+  const supabase = isDemoMode() || isSandboxSession() ? null : getBrowserSupabaseClient();
   if (supabase) {
     return new SupabaseTrainingRepository({
       client: supabase,

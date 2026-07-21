@@ -20,7 +20,7 @@ describe("PublicEntry", () => {
       "href", "/demo?guided=1&restart=1",
     );
     expect(screen.getByRole("link", { name: "Enter live demo" })).toHaveAttribute(
-      "href", "/demo?restart=1",
+      "href", "/demo/sandbox?restart=1",
     );
     expect(screen.getByRole("button", { name: "Sign in" })).toBeVisible();
     expect(screen.queryByLabelText("Email")).not.toBeInTheDocument();
