@@ -150,7 +150,7 @@ export function mapAgent(agent: AgentStatus, timezone: string): AgentRunView {
     lastRun: formatTimestamp(agent.lastRunAt, timezone),
     summary: agent.summary,
     provenance: agent.isMock
-      ? "Demo"
+      ? "Ready"
       : agent.fallbackUsed || agent.status === "degraded"
         ? "Fallback"
         : "AI",

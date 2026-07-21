@@ -85,7 +85,7 @@ export type AgentRunView = {
   status: string;
   lastRun: string;
   summary: string;
-  provenance: "Demo" | "AI" | "Fallback";
+  provenance: "Ready" | "AI" | "Fallback";
   model?: string;
   promptVersion?: string;
   latencyMs?: number;

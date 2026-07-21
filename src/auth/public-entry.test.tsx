@@ -7,6 +7,15 @@ describe("PublicEntry", () => {
   it("offers the two deterministic demo entries and a separate sign-in action", () => {
     render(<PublicEntry requestMagicLink={vi.fn()} />);
 
+    expect(screen.getByRole("heading", {
+      name: "Make every target in your life a game, and you will be the player who can level up without limitation. Ready to level up? Let's get it!",
+    })).toBeVisible();
+    expect(screen.getByText("Career path open: Machine Learning Engineer")).toBeVisible();
+    expect(screen.getByText("Adaptive missions")).toBeVisible();
+    expect(screen.getByText("Evidence before XP")).toBeVisible();
+    expect(screen.getByText("AI advice, policy control")).toBeVisible();
+    expect(screen.getByText("Portfolio-ready proof")).toBeVisible();
+
     expect(screen.getByRole("link", { name: "Watch the challenge" })).toHaveAttribute(
       "href", "/demo?guided=1&restart=1",
     );

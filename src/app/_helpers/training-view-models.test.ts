@@ -68,9 +68,9 @@ describe("training view-model mapping", () => {
     expect(mappedActivity.occurredAt).toBe(agent.lastRun);
   });
 
-  test("maps AI, fallback, and Demo provenance explicitly", () => {
+  test("maps AI, fallback, and Ready provenance explicitly", () => {
     const state = createTrainingSeed(now);
-    expect(mapAgent(state.agents[0], "UTC").provenance).toBe("Demo");
+    expect(mapAgent(state.agents[0], "UTC").provenance).toBe("Ready");
     expect(mapAgent({
       ...state.agents[0],
       isMock: false,

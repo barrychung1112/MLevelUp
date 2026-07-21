@@ -50,12 +50,12 @@ export function PublicEntry({ requestMagicLink, authError }: PublicEntryProps) {
 
         <div className="grid flex-1 items-center gap-12 py-12 lg:grid-cols-[1.15fr_0.85fr] lg:py-16">
           <section>
-            <p className="font-data text-xs uppercase tracking-[0.3em] text-command-danger">The hard path begins here</p>
-            <h1 className="mt-5 max-w-4xl font-display text-5xl font-semibold leading-[0.98] tracking-[-0.03em] sm:text-6xl lg:text-7xl">
-              Become the engineer your evidence can prove.
+            <p className="font-data text-xs uppercase tracking-[0.3em] text-command-danger">Career path open: Machine Learning Engineer</p>
+            <h1 className="mt-5 max-w-4xl font-display text-4xl font-semibold leading-[1.02] tracking-[-0.03em] sm:text-5xl lg:text-6xl">
+              Make every target in your life a game, and you will be the player who can level up without limitation. Ready to level up? Let&apos;s get it!
             </h1>
             <p className="mt-7 max-w-2xl text-lg leading-8 text-command-muted">
-              One failed mission. One focused recovery. One verified result. Follow a 90-second training run from consequence to public proof.
+              Turn ambition into measurable missions, verified growth, and career proof you can show.
             </p>
 
             <div className="mt-9 flex flex-col gap-3 sm:flex-row">
@@ -77,13 +77,13 @@ export function PublicEntry({ requestMagicLink, authError }: PublicEntryProps) {
 
           <aside className="command-panel relative border border-command-border bg-command-surface/85 p-6 shadow-command sm:p-8">
             <div className="absolute -left-px -top-px h-16 w-px bg-command-danger" />
-            <p className="font-data text-[0.65rem] uppercase tracking-[0.25em] text-command-danger">Judge route / 90 seconds</p>
+            <p className="font-data text-[0.65rem] uppercase tracking-[0.25em] text-command-danger">Why MLevelUp</p>
             <ol className="mt-7 space-y-5">
               {[
-                ["01", "Incomplete mission", "2 of 4 checkpoints before deadline"],
-                ["02", "Consequence", "Penalty recovered with zero XP"],
-                ["03", "Adjusted challenge", "A measurable daily mission"],
-                ["04", "Verified growth", "Policy-gated XP and portfolio proof"],
+                ["01", "Adaptive missions", "The hardest achievable next step, adjusted from your real progress."],
+                ["02", "Evidence before XP", "Growth requires measurable results, artifacts, and submitted proof."],
+                ["03", "AI advice, policy control", "AI personalizes feedback while deterministic rules protect every decision."],
+                ["04", "Portfolio-ready proof", "Verified work becomes public evidence of your engineering ability."],
               ].map(([number, title, detail]) => (
                 <li key={number} className="grid grid-cols-[2.5rem_1fr] gap-4 border-t border-command-border/65 pt-4">
                   <span className="font-data text-sm text-command-cyan">{number}</span>
@@ -92,7 +92,7 @@ export function PublicEntry({ requestMagicLink, authError }: PublicEntryProps) {
               ))}
             </ol>
             <p className="mt-7 border-l border-command-success pl-4 text-sm leading-6 text-command-muted">
-              No account. No API keys. No external service calls. The same evidence chain, every time.
+              Train through action. Prove the result. Carry every level into your career.
             </p>
           </aside>
         </div>
