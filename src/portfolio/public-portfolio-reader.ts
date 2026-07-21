@@ -31,9 +31,9 @@ export const demoPublicPortfolio: PublicPortfolio = {
     updatedAt: timestamp,
   },
   artifacts: [
-    { artifactId: "demo-1", artifactType: "modelEvaluationReport", publicTitle: "Churn model validation dossier", publicSummary: "A leakage-aware validation study comparing baselines, error slices, and product-facing tradeoffs.", artifactUrl: "https://github.com/", skillTags: ["dataHandling", "modeling", "evaluation", "productThinking"], qualityScore: 91, featured: true, displayOrder: 0, publishedAt: timestamp, updatedAt: timestamp },
-    { artifactId: "demo-2", artifactType: "deployedDemo", publicTitle: "Production inference gateway", publicSummary: "A deployable prediction API with health checks, structured logs, and documented operating constraints.", artifactUrl: "https://vercel.com/", skillTags: ["engineering", "communication"], qualityScore: 87, featured: true, displayOrder: 1, publishedAt: timestamp, updatedAt: timestamp },
-    { artifactId: "demo-3", artifactType: "technicalWriteup", publicTitle: "Paper-to-prototype field note", publicSummary: "A concise research comparison translated into an experiment plan and measurable implementation decision.", artifactUrl: null, skillTags: ["researchSense", "communication"], qualityScore: 84, featured: false, displayOrder: 2, publishedAt: timestamp, updatedAt: timestamp },
+    { artifactId: "demo-1", artifactType: "modelEvaluationReport", publicTitle: "Validation stability report", publicSummary: "A reproducible two-seed validation study that measures score stability and records the next engineering decision.", artifactUrl: "https://github.com/mlevelup-demo/validation-stability", skillTags: ["dataHandling", "modeling", "evaluation", "productThinking"], qualityScore: 91, featured: true, displayOrder: 0, publishedAt: timestamp, updatedAt: timestamp, keyAchievements: ["Recorded two reproducible validation scores.", "Measured an absolute score difference of 0.018."], linkVerification: { provider: "github", resourceType: "repository", verifiedAt: timestamp, staleAfter: "2099-07-19T00:00:00.000Z", ownershipVerified: false } },
+    { artifactId: "demo-2", artifactType: "deployedDemo", publicTitle: "Production inference gateway", publicSummary: "A deployable prediction API with health checks, structured logs, and documented operating constraints.", artifactUrl: "https://vercel.com/", skillTags: ["engineering", "communication"], qualityScore: 87, featured: true, displayOrder: 1, publishedAt: timestamp, updatedAt: timestamp, keyAchievements: ["Documented health checks and operating constraints."], linkVerification: { provider: "github", resourceType: "repository", verifiedAt: timestamp, staleAfter: "2099-07-19T00:00:00.000Z", ownershipVerified: false } },
+    { artifactId: "demo-3", artifactType: "technicalWriteup", publicTitle: "Paper-to-prototype field note", publicSummary: "A concise research comparison translated into an experiment plan and measurable implementation decision.", artifactUrl: null, skillTags: ["researchSense", "communication"], qualityScore: 84, featured: false, displayOrder: 2, publishedAt: timestamp, updatedAt: timestamp, keyAchievements: ["Converted research findings into a measurable experiment plan."] },
   ],
 };
 
@@ -77,7 +77,8 @@ export function createPublicPortfolioReader(client: PublicClient) {
 }
 
 export async function readPublicPortfolio(slug: string) {
-  if (isDemoMode()) return slug === demoPublicPortfolio.profile.slug ? demoPublicPortfolio : null;
+  if (slug === demoPublicPortfolio.profile.slug) return demoPublicPortfolio;
+  if (isDemoMode()) return null;
   const config = getSupabaseConfig();
   if (!config.available) throw new PublicPortfolioReadError("Public portfolio unavailable");
   const client = createClient(config.url, config.anonKey, { auth: { autoRefreshToken: false, detectSessionInUrl: false, persistSession: false } });

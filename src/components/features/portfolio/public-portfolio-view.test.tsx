@@ -10,6 +10,7 @@ describe("PublicPortfolioView", () => {
     expect(screen.getByText("3 artifacts")).toBeVisible();
     expect(screen.getByText("Modeling · 1")).toBeVisible();
     expect(screen.getByText("Communication · 2")).toBeVisible();
+    expect(screen.getByRole("link", { name: /Return to guided demo/ })).toHaveAttribute("href", "/demo");
   });
 
   it("filters artifacts by skill and artifact type", () => {
@@ -18,13 +19,13 @@ describe("PublicPortfolioView", () => {
     const archive = screen.getByRole("heading", { name: "All artifacts" }).closest("section");
     expect(archive).not.toBeNull();
     expect(within(archive!).getByText("Production inference gateway")).toBeVisible();
-    expect(within(archive!).queryByText("Churn model validation dossier")).not.toBeInTheDocument();
+    expect(within(archive!).queryByText("Validation stability report")).not.toBeInTheDocument();
   });
 
   it("renders only safe HTTPS links", () => {
     const unsafe = { ...demoPublicPortfolio, artifacts: demoPublicPortfolio.artifacts.map((item, index) => index === 0 ? { ...item, artifactUrl: "http://unsafe.example" } : item) };
     render(<PublicPortfolioView portfolio={unsafe} />);
-    expect(screen.queryByRole("link", { name: /Churn model validation dossier/ })).not.toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: /Validation stability report/ })).not.toBeInTheDocument();
     expect(screen.getAllByRole("link", { name: /Production inference gateway/ })[0]).toHaveAttribute("rel", "noopener noreferrer");
   });
 

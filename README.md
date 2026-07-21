@@ -15,7 +15,7 @@ Built as an OpenAI Hackathon project, it turns long-term ML engineering growth i
 5. Missed obligations create penalty missions. Seven consecutive failure days trigger a reset decision or a three-day recovery window.
 6. Valid evidence produces feedback, XP, seven skill-stat updates, history, and portfolio artifacts.
 
-## Current MVP — Phase 4
+## Current MVP — Phase 5
 
 - Email magic-link authentication through Supabase
 - Responsive dark command-center interface
@@ -48,6 +48,28 @@ See [Phase 4 operations](docs/phase-4-resource-collector-setup.md) for deploymen
 - Public responses exclude submissions, reflections, feedback, email, failure state, and recovery state.
 
 See [Phase 5 public portfolio deployment](docs/phase-5-public-portfolio-setup.md) for migration, RLS, privacy, and production smoke tests. Kaggle integrations, AI case-study writing, leaderboards, badges, and export remain future work.
+
+## 60-second guided demo
+
+The judge path is deterministic and requires no account, cookie, API key, Supabase project, OpenAI request, GitHub request, or Kaggle request.
+
+macOS / Linux:
+
+```bash
+npm install
+NEXT_PUBLIC_MLEVELUP_DEMO_MODE=1 npm run dev
+```
+
+Windows PowerShell:
+
+```powershell
+npm install
+$env:NEXT_PUBLIC_MLEVELUP_DEMO_MODE='1'; npm run dev
+```
+
+Open `http://localhost:3000/demo?restart=1`, complete the six guided actions, then open `/p/demo-ml-engineer`. Returning from the public portfolio restores the last guided step; entering from the home page always adds `restart=1` and starts from the beginning.
+
+For Vercel, create a separate project from this repository, set `NEXT_PUBLIC_MLEVELUP_DEMO_MODE=1`, and deploy. No other environment variable is required for the guided route or its demo portfolio.
 
 ## Seven skill dimensions
 

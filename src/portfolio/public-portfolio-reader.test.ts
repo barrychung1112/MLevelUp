@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { createPublicPortfolioReader, demoPublicPortfolio } from "./public-portfolio-reader";
+import { createPublicPortfolioReader, demoPublicPortfolio, readPublicPortfolio } from "./public-portfolio-reader";
 
 class Query implements PromiseLike<{ data: unknown; error: null }> {
   readonly calls: string[] = [];
@@ -37,5 +37,9 @@ describe("public portfolio reader", () => {
   it("provides a deterministic seven-skill demo fixture", () => {
     expect(demoPublicPortfolio.profile.slug).toBe("demo-ml-engineer");
     expect(new Set(demoPublicPortfolio.artifacts.flatMap((item) => item.skillTags))).toHaveLength(7);
+  });
+
+  it("reads the guided demo portfolio without database configuration", async () => {
+    await expect(readPublicPortfolio("demo-ml-engineer")).resolves.toEqual(demoPublicPortfolio);
   });
 });
