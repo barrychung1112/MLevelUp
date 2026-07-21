@@ -34,7 +34,7 @@ describe("auth callback page", () => {
 
     render(<CallbackPage />);
 
-    expect(await screen.findByRole("status")).toHaveTextContent("Signing you in");
+    expect(await screen.findByRole("status")).toHaveTextContent("Completing secure sign-in");
     await waitFor(() => expect(exchangeCodeForSession).toHaveBeenCalledWith("abc"));
     expect(mocks.replace).toHaveBeenCalledWith("/");
   });
@@ -56,7 +56,7 @@ describe("auth callback page", () => {
 
     await waitFor(() => expect(mocks.replace).toHaveBeenCalledWith("/"));
     expect(exchangeCodeForSession).not.toHaveBeenCalled();
-    expect(screen.queryByText("Missing authentication code")).not.toBeInTheDocument();
+    expect(screen.queryByText("Missing authentication credentials")).not.toBeInTheDocument();
   });
 
   it("shows a recovery message when Supabase is not configured", async () => {
@@ -66,5 +66,23 @@ describe("auth callback page", () => {
 
     expect(await screen.findByRole("alert")).toHaveTextContent("Supabase setup required");
     expect(mocks.replace).not.toHaveBeenCalled();
+  });
+
+  it("does not expose raw provider errors", async () => {
+    mocks.getBrowserSupabaseClient.mockReturnValue({
+      auth: {
+        getSession: vi.fn(async () => ({
+          data: { session: null },
+          error: new Error("provider secret detail"),
+        })),
+      },
+    });
+
+    render(<CallbackPage />);
+
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "We could not complete sign-in. Request a new access link.",
+    );
+    expect(screen.queryByText("provider secret detail")).not.toBeInTheDocument();
   });
 });

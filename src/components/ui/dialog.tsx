@@ -34,7 +34,7 @@ export function Dialog({
   children,
   footer,
   className,
-  closeLabel = "關閉對話框",
+  closeLabel = "Close dialog",
 }: DialogProps) {
   const titleId = useId();
   const descriptionId = useId();

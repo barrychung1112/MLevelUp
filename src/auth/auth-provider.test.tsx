@@ -86,7 +86,7 @@ describe("AuthProvider and AuthGate", () => {
     expect(screen.queryByRole("heading", { name: "Supabase setup required" })).not.toBeInTheDocument();
   });
 
-  it("shows a magic-link form and sends the request through Supabase", async () => {
+  it("shows a magic-link form and sends the request after confirmation", async () => {
     const client = createClient();
     mocks.getBrowserSupabaseClient.mockReturnValue(client);
 
@@ -96,11 +96,13 @@ describe("AuthProvider and AuthGate", () => {
       </AuthGate>,
     );
 
-    expect(await screen.findByRole("heading", { name: "進入訓練終端" })).toBeVisible();
+    expect(await screen.findByRole("heading", { name: /become anyone you want to be/i })).toBeVisible();
     fireEvent.change(screen.getByLabelText("Email"), {
       target: { value: "hunter@example.com" },
     });
-    fireEvent.click(screen.getByRole("button", { name: "寄送登入連結" }));
+    fireEvent.click(screen.getByRole("button", { name: "Enter Training" }));
+    expect(client.auth.signInWithOtp).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByRole("button", { name: "Accept the Challenge" }));
 
     await waitFor(() => expect(client.auth.signInWithOtp).toHaveBeenCalledOnce());
     expect(client.auth.signInWithOtp).toHaveBeenCalledWith({
@@ -109,7 +111,7 @@ describe("AuthProvider and AuthGate", () => {
         emailRedirectTo: "http://localhost:3000/auth/callback",
       },
     });
-    expect(await screen.findByRole("status")).toHaveTextContent("登入連結已寄出");
+    expect(await screen.findByRole("status")).toHaveTextContent("Check your inbox");
   });
 
   it("renders children when a session already exists", async () => {

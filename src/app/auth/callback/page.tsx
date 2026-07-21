@@ -23,7 +23,7 @@ export default function CallbackPage() {
       if (cancelled) return;
 
       if (sessionError) {
-        setError(sessionError.message);
+        setError("We could not complete sign-in. Request a new access link.");
         return;
       }
 
@@ -34,7 +34,7 @@ export default function CallbackPage() {
 
       const code = new URL(window.location.href).searchParams.get("code");
       if (!code) {
-        setError("Missing authentication code");
+        setError("Missing authentication credentials");
         return;
       }
 
@@ -42,7 +42,7 @@ export default function CallbackPage() {
       if (cancelled) return;
 
       if (exchangeError) {
-        setError(exchangeError.message);
+        setError("We could not complete sign-in. Request a new access link.");
         return;
       }
 
@@ -63,7 +63,7 @@ export default function CallbackPage() {
           {error}
         </p>
       ) : (
-        <p className="text-command-muted" role="status">Signing you in...</p>
+        <p className="text-command-muted" role="status">Completing secure sign-in…</p>
       )}
     </main>
   );
