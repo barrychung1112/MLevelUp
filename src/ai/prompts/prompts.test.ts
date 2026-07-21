@@ -2,7 +2,10 @@ import { describe, expect, it } from "vitest";
 
 import { adjusterInstructions } from "./adjuster";
 import { coordinatorInstructions } from "./coordinator";
-import { learningStrategistInstructions } from "./learning-strategist";
+import {
+  dailyQuestGenerationInstructions,
+  learningStrategistInstructions,
+} from "./learning-strategist";
 import { portfolioAchievementInstructions } from "./portfolio-achievements";
 import { resourceCuratorInstructions } from "./resource-curator";
 
@@ -34,6 +37,15 @@ describe("versioned Phase 3 prompts", () => {
     const instructions = learningStrategistInstructions("phase3-v1");
     expect(instructions).toContain("eligible quest ID");
     expect(instructions).toContain("available resource");
+  });
+
+  it("limits daily generation authority and requires evidence", () => {
+    const instructions = dailyQuestGenerationInstructions("daily-quest-v1");
+
+    expect(instructions).toContain("daily-quest-v1");
+    expect(instructions).toContain("required evidence");
+    expect(instructions).toContain("Do not decide XP");
+    expect(instructions).toContain("Resources are optional");
   });
 
   it.each([
