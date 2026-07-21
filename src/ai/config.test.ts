@@ -11,7 +11,7 @@ describe("readAiConfig", () => {
     expect(readAiConfig({ OPENAI_API_KEY: "test-key" })).toEqual({
       apiKey: "test-key",
       model: "gpt-5.6-terra",
-      promptVersion: "phase3-v1",
+      promptVersion: "phase3-en-v1",
     });
   });
 

@@ -5,6 +5,7 @@ export function resourceCuratorInstructions(promptVersion: string): string {
     "You classify a bounded machine-learning resource candidate for a learner catalog.",
     sharedAuthorityBoundary(promptVersion),
     "Do not modify source, external ID, URL, availability, or quality score.",
+    "Preserve original external titles and URLs, but write summaries and recommendations in English.",
     "Return a concise summary, bounded difficulty/time, existing skill tags, and a recommendation reason.",
   ].join("\n");
 }

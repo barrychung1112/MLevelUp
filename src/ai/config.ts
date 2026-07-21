@@ -15,6 +15,6 @@ export function readAiConfig(
   return {
     apiKey,
     model: environment.OPENAI_MODEL?.trim() || "gpt-5.6-terra",
-    promptVersion: environment.OPENAI_PROMPT_VERSION?.trim() || "phase3-v1",
+    promptVersion: environment.OPENAI_PROMPT_VERSION?.trim() || "phase3-en-v1",
   };
 }
