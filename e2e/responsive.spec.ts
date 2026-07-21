@@ -7,7 +7,7 @@ for (const viewport of [{ width: 375, height: 812 }, { width: 768, height: 900 }
     await page.setViewportSize(viewport);
     await completeStandardOnboarding(page);
     expect(await page.evaluate(() => document.documentElement.scrollWidth === document.documentElement.clientWidth)).toBe(true);
-    const action = page.getByRole("button", { name: "開啟主要任務" });
+    const action = page.getByRole("button", { name: "Open Mainline Mission" });
     await action.scrollIntoViewIfNeeded();
     await expect(action).toBeVisible();
   });

@@ -118,7 +118,7 @@ NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your-publishable-key
 OPENAI_API_KEY=your-server-only-openai-key
 OPENAI_MODEL=gpt-5.6-terra
-OPENAI_PROMPT_VERSION=phase3-v1
+OPENAI_PROMPT_VERSION=phase3-en-v1
 OPENAI_RESOURCE_PROMPT_VERSION=phase4-resource-v1
 ```
 
@@ -146,6 +146,13 @@ npm run test:e2e
 ```
 
 Automated tests use fake model transports and never call the live OpenAI API.
+
+## Product language
+
+MLevelUp is an English-only product. Application UI, system-authored missions,
+fallback feedback, resource summaries, and AI-generated prose use English.
+User-authored evidence and external resource titles are preserved exactly as
+submitted and are never silently translated.
 
 ## Repository structure
 
