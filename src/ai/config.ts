@@ -18,3 +18,15 @@ export function readAiConfig(
     promptVersion: environment.OPENAI_PROMPT_VERSION?.trim() || "phase3-en-v1",
   };
 }
+
+export function readDailyQuestAiConfig(
+  environment: AiEnvironment = process.env,
+): AiConfig | null {
+  const config = readAiConfig(environment);
+  if (!config) return null;
+  return {
+    ...config,
+    promptVersion:
+      environment.OPENAI_DAILY_QUEST_PROMPT_VERSION?.trim() || "daily-quest-v1",
+  };
+}

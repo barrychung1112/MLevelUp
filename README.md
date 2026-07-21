@@ -34,6 +34,8 @@ Built as an OpenAI Hackathon project, it turns long-term ML engineering growth i
 - Protected Vercel Cron routes for resource collection and daily assignment generation
 - Server-only Supabase catalog writes and per-user/day daily-assignment idempotency
 - Resource source, quality, availability metadata, and real collector telemetry in the dashboard
+- User-specific AI daily quest generation with strict evidence, duration, difficulty, safety, and duplication checks
+- Automatic catalog fallback when AI generation is unavailable or rejected
 
 See [Phase 4 operations](docs/phase-4-resource-collector-setup.md) for deployment settings and smoke tests.
 
@@ -120,11 +122,14 @@ OPENAI_API_KEY=your-server-only-openai-key
 OPENAI_MODEL=gpt-5.6-terra
 OPENAI_PROMPT_VERSION=phase3-en-v1
 OPENAI_RESOURCE_PROMPT_VERSION=phase4-resource-v1
+OPENAI_DAILY_QUEST_PROMPT_VERSION=daily-quest-v1
 ```
 
 `OPENAI_API_KEY` is optional at runtime. Without it, authenticated submissions remain usable and receive deterministic fallback feedback. Never add `NEXT_PUBLIC_` to this key and never use a Supabase secret or `service_role` key in browser variables.
 
 Apply all migrations in chronological order. Exact instructions and safety notes are in [docs/phase-3-supabase-setup.md](docs/phase-3-supabase-setup.md) and [docs/phase-4-resource-collector-setup.md](docs/phase-4-resource-collector-setup.md).
+
+AI daily quest deployment and smoke testing are documented in [docs/ai-daily-quest-generation-setup.md](docs/ai-daily-quest-generation-setup.md). Apply its migration before deploying code that reads private generated quests.
 
 ## Privacy and authority boundaries
 

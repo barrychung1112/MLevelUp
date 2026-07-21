@@ -11,6 +11,7 @@ export interface StructuredResponseRequest<T> {
   instructions: string;
   input: unknown;
   timeoutMs?: number;
+  maxAttempts?: 1 | 2;
 }
 
 export interface StructuredResponseResult<T> {
@@ -109,7 +110,8 @@ export class OpenAiStructuredResponseGateway
     request: StructuredResponseRequest<T>,
   ): Promise<StructuredResponseResult<T>> {
     let lastError: StructuredResponseError | null = null;
-    for (let attempt = 0; attempt < 2; attempt += 1) {
+    const maxAttempts = request.maxAttempts ?? 2;
+    for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
       try {
         const response = await withTimeout(
           (signal) =>
@@ -146,7 +148,7 @@ export class OpenAiStructuredResponseGateway
         };
       } catch (error) {
         lastError = classifyError(error);
-        if (!lastError.retryable || attempt === 1) throw lastError;
+        if (!lastError.retryable || attempt === maxAttempts - 1) throw lastError;
       }
     }
     throw lastError ?? new StructuredResponseError("openai_request_failed", false);

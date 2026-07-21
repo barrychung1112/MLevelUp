@@ -89,7 +89,7 @@ type SupabaseDatabaseClient = {
   auth: {
     getUser(): Promise<{ data: { user: { id: string } | null }; error: { message: string } | null }>;
   };
-  rpc(name: string): QueryResult<unknown[]>;
+  rpc(name: string, args?: Record<string, unknown>): QueryResult<unknown[]>;
   from<T>(table: string): TableClient<T>;
 };
 
@@ -248,6 +248,14 @@ export class SupabaseTrainingRepository implements DemoTrainingRepository {
     return data ?? [];
   }
 
+  private async selectVisibleQuests(userId: string): Promise<QuestRow[]> {
+    const { data, error } = await this.client.rpc("get_visible_quests", {
+      p_user_id: userId,
+    });
+    if (error) throw new Error(error.message);
+    return (data ?? []) as QuestRow[];
+  }
+
   private async maybeProfile(userId: string): Promise<ProfileRow | null> {
     const { data, error } = await this.client
       .from<ProfileRow>("profiles")
@@ -291,7 +299,7 @@ export class SupabaseTrainingRepository implements DemoTrainingRepository {
     ] = await Promise.all([
       this.maybeProfile(userId),
       this.maybeProgress(userId),
-      this.selectRows<QuestRow>("quests"),
+      this.selectVisibleQuests(userId),
       this.selectRows<ResourceRow>("resources"),
       this.selectRows<SkillStatRow>("skill_stats", userId, "updated_at"),
       this.selectRows<AssignmentRow>("quest_assignments", userId),

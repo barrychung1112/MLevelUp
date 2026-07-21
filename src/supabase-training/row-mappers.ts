@@ -39,6 +39,11 @@ export type QuestRow = {
   execution_steps?: string[];
   success_metrics?: string[];
   out_of_scope?: string[];
+  owner_user_id?: string | null;
+  source?: Quest["source"] | null;
+  generation_trace_id?: string | null;
+  generation_model?: string | null;
+  generation_prompt_version?: string | null;
 };
 
 export type ResourceRow = {
@@ -204,6 +209,11 @@ export function mapQuestRow(row: QuestRow): Quest {
     executionSteps: row.execution_steps ?? [row.instructions],
     successMetrics: row.success_metrics ?? row.acceptance_criteria,
     outOfScope: row.out_of_scope ?? [],
+    ownerUserId: row.owner_user_id ?? undefined,
+    source: row.source ?? "catalog",
+    generationTraceId: row.generation_trace_id ?? undefined,
+    generationModel: row.generation_model ?? undefined,
+    generationPromptVersion: row.generation_prompt_version ?? undefined,
   });
 }
 

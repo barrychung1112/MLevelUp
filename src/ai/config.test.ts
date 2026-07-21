@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { readAiConfig } from "./config";
+import { readAiConfig, readDailyQuestAiConfig } from "./config";
 
 describe("readAiConfig", () => {
   it("returns null when the server API key is missing", () => {
@@ -19,5 +19,19 @@ describe("readAiConfig", () => {
     expect(
       readAiConfig({ NEXT_PUBLIC_OPENAI_API_KEY: "public-key" }),
     ).toBeNull();
+  });
+});
+
+describe("readDailyQuestAiConfig", () => {
+  it("uses an independent generation prompt version", () => {
+    expect(readDailyQuestAiConfig({ OPENAI_API_KEY: "test-key" })).toEqual({
+      apiKey: "test-key",
+      model: "gpt-5.6-terra",
+      promptVersion: "daily-quest-v1",
+    });
+    expect(readDailyQuestAiConfig({
+      OPENAI_API_KEY: "test-key",
+      OPENAI_DAILY_QUEST_PROMPT_VERSION: "daily-quest-v2",
+    })?.promptVersion).toBe("daily-quest-v2");
   });
 });
