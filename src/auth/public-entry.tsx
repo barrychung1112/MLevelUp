@@ -7,7 +7,6 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 
 import { LoginTerminal } from "./login-terminal";
-import { ChallengerSilhouette } from "./challenger-silhouette";
 
 interface PublicEntryProps {
   requestMagicLink(email: string): Promise<void>;
@@ -39,7 +38,6 @@ export function PublicEntry({ requestMagicLink, authError }: PublicEntryProps) {
       <div aria-hidden className="command-grid pointer-events-none absolute inset-0 opacity-55" />
       <div aria-hidden className="command-glow pointer-events-none absolute inset-0" />
       <div aria-hidden className="pointer-events-none absolute -right-24 top-20 size-96 rotate-12 border border-command-cyan/15 bg-command-cyan/[0.025] [clip-path:polygon(50%_0,100%_30%,82%_100%,18%_100%,0_30%)]" />
-      <ChallengerSilhouette />
 
       <div className="relative mx-auto flex min-h-screen w-full max-w-7xl flex-col px-5 py-6 sm:px-8 lg:px-12">
         <header className="flex items-center justify-between border-b border-command-border/70 pb-5">
@@ -54,10 +52,10 @@ export function PublicEntry({ requestMagicLink, authError }: PublicEntryProps) {
           <section>
             <p className="font-data text-xs uppercase tracking-[0.3em] text-command-danger">Career path open: Machine Learning Engineer</p>
             <h1 className="mt-5 max-w-4xl font-display text-4xl font-semibold leading-[1.02] tracking-[-0.03em] sm:text-5xl lg:text-6xl">
-              Make every target in your life a game, and you will be the player who can level up without limitation. Ready to level up? Let&apos;s get it!
+              Ready to level up? Let&apos;s get it!
             </h1>
             <p className="mt-7 max-w-2xl text-lg leading-8 text-command-muted">
-              Turn ambition into measurable missions, verified growth, and career proof you can show.
+              Make every target in your life a game, and you will be the player who can level up without limitation.
             </p>
 
             <div className="mt-9 flex flex-col gap-3 sm:flex-row">

@@ -8,8 +8,10 @@ describe("PublicEntry", () => {
     render(<PublicEntry requestMagicLink={vi.fn()} />);
 
     expect(screen.getByRole("heading", {
-      name: "Make every target in your life a game, and you will be the player who can level up without limitation. Ready to level up? Let's get it!",
+      name: "Ready to level up? Let's get it!",
     })).toBeVisible();
+    expect(screen.getByText("Make every target in your life a game, and you will be the player who can level up without limitation.")).toBeVisible();
+    expect(screen.queryByTestId("challenger-silhouette")).not.toBeInTheDocument();
     expect(screen.getByText("Career path open: Machine Learning Engineer")).toBeVisible();
     expect(screen.getByText("Adaptive missions")).toBeVisible();
     expect(screen.getByText("Evidence before XP")).toBeVisible();
