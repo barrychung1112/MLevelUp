@@ -22,7 +22,7 @@ export function DesktopSidebar({ items, currentPath }: NavigationProps) {
         </div>
       </div>
       <nav
-        aria-label="桌面主要導覽"
+        aria-label="Desktop primary navigation"
         className="min-h-0 flex-1 space-y-2 overflow-y-auto overscroll-contain px-4 py-6"
       >
         <p className="px-3 pb-2 font-data text-[0.62rem] uppercase tracking-[0.2em] text-command-muted">

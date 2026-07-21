@@ -9,7 +9,7 @@ export function MobileBottomNav({ items, currentPath }: NavigationProps) {
 
   return (
     <nav
-      aria-label="主要行動導覽"
+      aria-label="Mobile primary navigation"
       className="fixed inset-x-0 bottom-0 z-40 grid min-h-[4.75rem] grid-cols-5 border-t border-command-border bg-command-surface/95 px-1 pb-[env(safe-area-inset-bottom)] backdrop-blur-xl md:hidden"
     >
       {visibleItems.map((item) => {

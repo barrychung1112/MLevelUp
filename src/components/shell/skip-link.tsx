@@ -5,7 +5,7 @@ type SkipLinkProps = {
 
 export function SkipLink({
   targetId = "main-content",
-  label = "跳至主要內容",
+  label = "Skip to main content",
 }: SkipLinkProps) {
   return (
     <a href={`#${targetId}`} className="skip-link">

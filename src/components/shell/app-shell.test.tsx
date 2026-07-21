@@ -19,23 +19,23 @@ import { MobileBottomNav } from "./mobile-bottom-nav";
 import type { NavigationItem } from "./navigation";
 
 const items: NavigationItem[] = [
-  { href: "/dashboard", label: "指揮中心", icon: House },
-  { href: "/quests", label: "今日任務", icon: Target },
-  { href: "/progress", label: "能力成長", icon: ChartNoAxesColumnIncreasing },
-  { href: "/archive", label: "訓練紀錄", icon: ScrollText },
-  { href: "/profile", label: "個人設定", icon: UserRound },
-  { href: "/agents", label: "Agent 狀態", icon: Bot },
+  { href: "/dashboard", label: "Command Center", icon: House },
+  { href: "/quests", label: "Missions", icon: Target },
+  { href: "/progress", label: "Progress", icon: ChartNoAxesColumnIncreasing },
+  { href: "/archive", label: "Training Archive", icon: ScrollText },
+  { href: "/profile", label: "Profile", icon: UserRound },
+  { href: "/agents", label: "Agent Status", icon: Bot },
 ];
 
 describe("AppShell", () => {
   test("provides a skip link to the main content", () => {
     render(
       <AppShell items={items} currentPath="/dashboard">
-        今日任務內容
+        Mission content
       </AppShell>,
     );
 
-    expect(screen.getByRole("link", { name: "跳至主要內容" })).toHaveAttribute(
+    expect(screen.getByRole("link", { name: "Skip to main content" })).toHaveAttribute(
       "href",
       "#main-content",
     );
@@ -46,13 +46,13 @@ describe("AppShell", () => {
     const user = userEvent.setup();
     render(
       <AppShell items={items} currentPath="/dashboard">
-        今日任務內容
+        Mission content
       </AppShell>,
     );
 
     await user.tab();
 
-    expect(screen.getByRole("link", { name: "跳至主要內容" })).toHaveFocus();
+    expect(screen.getByRole("link", { name: "Skip to main content" })).toHaveFocus();
   });
 });
 
@@ -60,8 +60,8 @@ describe("responsive navigation", () => {
   test("marks the current desktop destination", () => {
     render(<DesktopSidebar items={items} currentPath="/quests" />);
 
-    const navigation = screen.getByRole("navigation", { name: "桌面主要導覽" });
-    expect(screen.getByRole("link", { name: "今日任務" })).toHaveAttribute(
+    const navigation = screen.getByRole("navigation", { name: "Desktop primary navigation" });
+    expect(screen.getByRole("link", { name: "Missions" })).toHaveAttribute(
       "aria-current",
       "page",
     );
@@ -71,25 +71,25 @@ describe("responsive navigation", () => {
   test("keeps compact rail labels accessible and visible", () => {
     render(<CompactRail items={items} currentPath="/progress" />);
 
-    const navigation = screen.getByRole("navigation", { name: "平板主要導覽" });
-    expect(screen.getByText("能力成長")).toBeVisible();
-    expect(screen.getByRole("link", { name: "能力成長" })).toHaveAttribute(
+    const navigation = screen.getByRole("navigation", { name: "Tablet primary navigation" });
+    expect(screen.getByText("Progress")).toBeVisible();
+    expect(screen.getByRole("link", { name: "Progress" })).toHaveAttribute(
       "aria-current",
       "page",
     );
     expect(navigation).toHaveClass("overflow-y-auto", "overscroll-contain");
-    expect(screen.getByRole("link", { name: "能力成長" })).toHaveClass("text-xs");
+    expect(screen.getByRole("link", { name: "Progress" })).toHaveClass("text-xs");
   });
 
   test("renders at most five labeled mobile destinations", () => {
     render(<MobileBottomNav items={items} currentPath="/dashboard" />);
 
-    const navigation = screen.getByRole("navigation", { name: "主要行動導覽" });
+    const navigation = screen.getByRole("navigation", { name: "Mobile primary navigation" });
 
     expect(within(navigation).getAllByRole("link")).toHaveLength(5);
-    expect(within(navigation).getByText("指揮中心")).toBeVisible();
-    expect(within(navigation).getByText("個人設定")).toBeVisible();
-    expect(within(navigation).queryByText("Agent 狀態")).not.toBeInTheDocument();
+    expect(within(navigation).getByText("Command Center")).toBeVisible();
+    expect(within(navigation).getByText("Profile")).toBeVisible();
+    expect(within(navigation).queryByText("Agent Status")).not.toBeInTheDocument();
     for (const link of within(navigation).getAllByRole("link")) {
       expect(link).toHaveClass("min-h-11", "text-xs");
     }

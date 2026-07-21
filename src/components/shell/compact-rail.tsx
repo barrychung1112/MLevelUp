@@ -14,7 +14,7 @@ export function CompactRail({ items, currentPath }: NavigationProps) {
         </span>
       </div>
       <nav
-        aria-label="平板主要導覽"
+        aria-label="Tablet primary navigation"
         className="flex min-h-0 w-full flex-1 flex-col gap-2 overflow-y-auto overscroll-contain px-2 py-5"
       >
         {items.map((item) => {
