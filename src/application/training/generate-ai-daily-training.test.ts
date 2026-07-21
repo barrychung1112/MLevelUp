@@ -55,16 +55,20 @@ describe("generateAiDailyTraining", () => {
     expect(generator).not.toHaveBeenCalled();
   });
 
-  it("does not call AI while an open penalty exists", async () => {
+  it("generates today's AI daily quest while preserving an open penalty", async () => {
     const state = createTrainingSeed(NOW);
     state.assignments = {
       penalty: { id: "penalty", questId: "quest-penalty-daily", assignedDate: DATE, slot: "secondary", status: "assigned", assignedAt: NOW },
     };
-    const generator = vi.fn();
+    const generator = vi.fn().mockResolvedValue({
+      ok: true, proposal: validGeneratedProposal, diagnostic,
+    } satisfies DailyQuestGeneratorResult);
+    let id = 0;
 
-    const outcome = await generateAiDailyTraining({ state, now: NOW, localDate: DATE, nextId: () => "unused", generator });
+    const outcome = await generateAiDailyTraining({ state, now: NOW, localDate: DATE, nextId: () => `id-${++id}`, generator });
 
-    expect(outcome).toMatchObject({ source: "none", reason: "penalty_priority" });
-    expect(generator).not.toHaveBeenCalled();
+    expect(outcome).toMatchObject({ source: "ai_generated", reason: "assigned" });
+    expect(outcome.state.assignments.penalty).toEqual(state.assignments.penalty);
+    expect(generator).toHaveBeenCalledOnce();
   });
 });

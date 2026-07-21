@@ -30,9 +30,6 @@ function blockedReason(state: TrainingState, localDate: string): DailyGeneration
   if (assignments.some((assignment) =>
     assignment.assignedDate === localDate && state.quests[assignment.questId]?.scope === "daily",
   )) return "already_assigned";
-  if (assignments.some((assignment) =>
-    state.quests[assignment.questId]?.scope === "penalty" && assignment.status !== "completed",
-  )) return "penalty_priority";
   return null;
 }
 

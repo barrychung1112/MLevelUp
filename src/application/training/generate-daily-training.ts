@@ -2,7 +2,7 @@ import { selectHardestFeasibleQuest } from "@/domain/training/adaptive-selector"
 import { DAILY_QUEST_MAX_MINUTES } from "@/domain/training/constants";
 import type { QuestAssignment, TrainingState } from "@/domain/training/types";
 
-export type DailyGenerationReason = "assigned" | "already_assigned" | "penalty_priority" | "resource_gap";
+export type DailyGenerationReason = "assigned" | "already_assigned" | "resource_gap";
 
 export interface DailyGenerationOutcome {
   state: TrainingState;
@@ -22,11 +22,6 @@ export function generateDailyTraining(input: {
     assignment.assignedDate === input.localDate && state.quests[assignment.questId]?.scope === "daily",
   );
   if (dailyAssignments.length > 0) return { state, reason: "already_assigned" };
-
-  const hasOpenPenalty = assignments.some((assignment) =>
-    state.quests[assignment.questId]?.scope === "penalty" && assignment.status !== "completed",
-  );
-  if (hasOpenPenalty) return { state, reason: "penalty_priority" };
 
   const quest = selectHardestFeasibleQuest({
     quests: Object.values(state.quests).filter((candidate) =>

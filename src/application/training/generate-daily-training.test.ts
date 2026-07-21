@@ -26,14 +26,18 @@ describe("generateDailyTraining", () => {
     expect(result.state.assignments[mainline.id]).toEqual(mainline);
   });
 
-  test("does not add a daily quest while penalty debt is open", () => {
+  test("assigns today's daily quest while preserving open penalty debt", () => {
     const state = stateWithoutDaily();
     state.assignments["assignment-penalty"] = {
       id: "assignment-penalty", questId: "quest-penalty-daily", assignedDate: localDate,
       slot: "secondary", status: "assigned", assignedAt: now,
     };
 
-    expect(generateDailyTraining({ state, now, localDate, nextId: () => "unused" }).reason).toBe("penalty_priority");
+    const result = generateDailyTraining({ state, now, localDate, nextId: () => "assignment-daily" });
+
+    expect(result.reason).toBe("assigned");
+    expect(result.createdAssignment?.id).toBe("assignment-daily");
+    expect(result.state.assignments["assignment-penalty"]).toEqual(state.assignments["assignment-penalty"]);
   });
 
   test("does not duplicate a daily assignment when the scheduler retries", () => {
