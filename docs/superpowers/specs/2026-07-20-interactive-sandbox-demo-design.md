@@ -33,6 +33,12 @@ The sandbox must never send training, portfolio, evidence, or agent writes to Su
 
 The fake account uses the existing full application shell and seeded learner data. A persistent Sandbox badge and Exit control make it clear that activity is simulated and will not affect a real account.
 
+### Public entry atmosphere
+
+The public entry adds an original, identity-neutral Challenger silhouette as a decorative background figure. It uses layered CSS shapes rather than a copied character or external artwork. The figure has a functional jacket outline, restrained cyan rim light, and no weapon, magic circle, logo, costume detail, or recognizable franchise silhouette.
+
+Animation is limited to slow breathing, a soft vertical scanner, and subtle ambient light movement. The figure stays behind the hero and value panel, never blocks text or controls, uses reduced opacity on narrow screens, and stops nonessential animation when `prefers-reduced-motion` is enabled. The existing headline, career-path label, primary actions, and product strengths retain visual priority.
+
 ## Testing
 
 - Prove the two home buttons have distinct destinations.
@@ -40,3 +46,4 @@ The fake account uses the existing full application shell and seeded learner dat
 - Prove AuthGate bypasses authentication only for an active sandbox.
 - Prove repository factories select mock repositories during sandbox and Supabase repositories otherwise.
 - Prove entering the sandbox resets seeded state and reaches the dashboard.
+- Prove the decorative Challenger is hidden from assistive technology and does not change the page's accessible reading order.
