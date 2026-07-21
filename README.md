@@ -1,77 +1,133 @@
 # MLevelUp
 
-Phase 5.4 adds manual GitHub link-existence verification with an explicit ownership disclaimer and source-grounded AI resume achievements that remain private until the learner edits and approves them.
+**Ready to level up? Let's get it!**
 
-MLevelUp is a gamified training system for people who want to become machine learning engineers through execution, measurable evidence, feedback, and portfolio building—not passive course consumption.
+MLevelUp turns career growth into a game worth playing. It is an AI training system for aspiring machine learning engineers that assigns hard but achievable missions, reviews evidence of completed work, and converts measurable progress into portfolio-ready proof.
 
-Built as an OpenAI Hackathon project, it turns long-term ML engineering growth into a demanding daily loop: accept a mission, complete concrete checkpoints, submit evidence, receive evaluation, and build a public body of work.
+Instead of rewarding passive course consumption or self-reported checkboxes, MLevelUp asks the learner to do the work: run an experiment, submit evidence, receive structured feedback, and earn progression through verified results.
 
-## Core training loop
+Built for **OpenAI Build Week** with Codex, GPT-5.6, Next.js, Supabase, and Vercel.
 
-1. The learner commits to becoming a machine learning engineer with a fixed five-hour daily training capacity.
-2. The system assigns the hardest mission that is still achievable within the learner's current ability.
-3. A multi-day mainline mission runs alongside an independent 24-hour daily mission.
-4. Every mission defines measurable success criteria, required evidence, and supporting resources.
-5. Missed obligations create penalty missions. Seven consecutive failure days trigger a reset decision or a three-day recovery window.
-6. Valid evidence produces feedback, XP, seven skill-stat updates, history, and portfolio artifacts.
+## Try MLevelUp
 
-## Current MVP — Phase 5
+| Experience | Link | Best for |
+| --- | --- | --- |
+| Live product | [m-level-up.vercel.app](https://m-level-up.vercel.app/) | Product overview and real sign-in |
+| 90-second guided demo | [Start the guided demo](https://m-level-up.vercel.app/demo?guided=1&restart=1) | The fastest judge walkthrough |
+| Interactive sandbox | [Enter the sandbox](https://m-level-up.vercel.app/demo/sandbox?restart=1) | Exploring the full product with a fake learner account |
+| Demo portfolio | [View Alex's public proof](https://m-level-up.vercel.app/p/demo-ml-engineer) | Recruiter-facing evidence and skill coverage |
+| Source code | [github.com/barrychung1112/MLevelUp](https://github.com/barrychung1112/MLevelUp) | Architecture, tests, and implementation |
 
-- Email magic-link authentication through Supabase
-- Responsive dark command-center interface
-- Initial calibration mission: **The Courage to Challenge**
-- Multi-day mainline, daily, penalty, and recovery mission flows
-- Evidence submission for URLs, files, metrics, and written reflection
-- Server-side Learning Strategist, Adjuster, and Coordinator modules
-- Structured OpenAI Responses API outputs validated with Zod
-- A deterministic policy gate that retains authority over completion, XP, skill growth, deadlines, penalties, recovery, and reset
-- Deterministic feedback fallback when AI is unavailable or invalid
-- Auditable feedback provenance and agent-run diagnostics
-- Supabase persistence protected by row-level security
-- Deterministic local Demo mode that does not require external services
-- Resource collection from GitHub and arXiv with canonicalization, deduplication, quality scoring, and safe fallback
-- Bounded URL availability checks and AI Resource Curator enrichment with deterministic fallback
-- Protected Vercel Cron routes for resource collection and daily assignment generation
-- Server-only Supabase catalog writes and per-user/day daily-assignment idempotency
-- Resource source, quality, availability metadata, and real collector telemetry in the dashboard
-- User-specific AI daily quest generation with strict evidence, duration, difficulty, safety, and duplication checks
-- Automatic catalog fallback when AI generation is unavailable or rejected
+All links above are public. The guided demo and sandbox require no account, API key, or external service response.
 
-See [Phase 4 operations](docs/phase-4-resource-collector-setup.md) for deployment settings and smoke tests.
+## Judge Quickstart
 
-## Phase 5.1–5.3 public portfolio
+### Guided story
 
-- Public portfolio setup and artifact controls live at `/portfolio`.
-- Publication is opt-in, and only verified artifacts can be selected.
-- Ownership-checking Supabase RPCs copy canonical quality, skill, type, and safe URL fields into dedicated public projection tables.
-- Anonymous recruiter-facing portfolios render at `/p/{slug}` with evidence-backed skill coverage.
-- Public responses exclude submissions, reflections, feedback, email, failure state, and recovery state.
+Open the [90-second guided demo](https://m-level-up.vercel.app/demo?guided=1&restart=1) and follow its single action at each step:
 
-See [Phase 5 public portfolio deployment](docs/phase-5-public-portfolio-setup.md) for migration, RLS, privacy, and production smoke tests. Kaggle integrations, AI case-study writing, leaderboards, badges, and export remain future work.
+1. See how an incomplete mission creates a consequence.
+2. Review the penalty task and the adjusted daily mission.
+3. Submit deterministic sample evidence.
+4. Compare simulated AI advice with the deterministic policy decision.
+5. Apply XP and skill-stat changes.
+6. Open the public portfolio proof.
 
-## 60-second guided demo
+The result is deterministic and resets from the link above, so every reviewer sees the same evidence chain.
 
-The judge experience has two anonymous paths. `/demo` is a deterministic six-step story, while `/demo/sandbox` resets and opens a fake learner account for free exploration. Neither path requires an account, API key, Supabase project, OpenAI request, GitHub request, or Kaggle request.
+### Free exploration
 
-macOS / Linux:
+Open the [interactive sandbox](https://m-level-up.vercel.app/demo/sandbox?restart=1). Accept the challenger warning to sign in as the preloaded learner **Alex Pathfinder**, then explore the dashboard, missions, resources, progress, agents, archive, profile, and portfolio controls.
 
-```bash
-npm install
-NEXT_PUBLIC_MLEVELUP_DEMO_MODE=1 npm run dev
+The sandbox runs entirely in the browser. It does not send an email, create a real account, or call Supabase, OpenAI, GitHub, or Kaggle.
+
+## Inspiration
+
+Games are compelling not because they are easy, but because they provide clear goals, fast feedback, visible progress, and challenges just beyond the player's current ability.
+
+MLevelUp applies that loop to career development. A teacher explains knowledge; a coach understands the learner's current level, assigns the next hard but fair mission, and turns effort into measurable growth. MLevelUp begins with one career path: **Machine Learning Engineer**.
+
+## What It Does
+
+- Assigns one multi-day mainline mission and one independent 24-hour daily mission.
+- Breaks missions into concrete checkpoints, acceptance criteria, success metrics, and required evidence.
+- Accepts evidence such as GitHub commits, Kaggle notebooks, evaluation reports, deployed demos, metrics, and written reflections.
+- Uses structured AI agents to evaluate work, identify gaps, recommend the next action, and generate personalized daily missions.
+- Keeps completion, XP, deadlines, penalties, recovery, and resets under deterministic application rules.
+- Tracks seven ML engineering skill dimensions and converts verified work into portfolio artifacts.
+- Publishes an opt-in recruiter-facing portfolio without exposing private reflections, feedback, email, or failure state.
+- Collects and curates current GitHub and arXiv resources through protected scheduled jobs.
+- Falls back to deterministic feedback and the existing quest catalog when an AI request is unavailable or rejected.
+
+## Core Training Loop
+
+1. The learner commits to the Machine Learning Engineer path with a fixed five-hour daily training target.
+2. The system assigns the hardest mission that remains achievable for the learner's current ability and recent performance.
+3. The learner completes measurable checkpoints and submits required evidence.
+4. AI agents analyze the evidence, strengths, gaps, and next-step options.
+5. A deterministic policy layer decides completion, XP, skill growth, and consequences.
+6. Verified results update the learner's level, seven skill stats, battle log, and portfolio artifacts.
+7. The next daily mission adapts to the learner's result while the mainline mission continues until completion.
+
+Missed obligations can create penalty missions. Seven consecutive failure days trigger a choice between resetting immediately and entering a three-day recovery window. If the recovery debt is not cleared before its deadline, training progression resets while previously created portfolio evidence remains preserved.
+
+## AI and Policy Architecture
+
+MLevelUp is a Next.js modular monolith. The browser submits a bounded payload to an authenticated server route. The server prepares a minimized learner context, runs structured AI modules when configured, validates their output with Zod, applies deterministic domain policy, and persists one auditable result.
+
+```mermaid
+flowchart TD
+    U["Learner"] --> UI["Next.js Command Center"]
+    UI --> API["Authenticated Server Routes"]
+    API --> EC["Evidence and Context Builder"]
+
+    EC --> LS["Learning Strategist"]
+    EC --> AD["Adjuster"]
+    LS --> CO["Coordinator"]
+    AD --> CO
+
+    CO --> PG["Deterministic Policy Gate"]
+    PG --> XP["Completion, XP, Skills, Penalties"]
+    XP --> DB["Supabase PostgreSQL and RLS"]
+    DB --> UI
+    XP --> PF["Opt-in Public Portfolio"]
+
+    CRON["Vercel Cron"] --> RC["Resource Collector and Curator"]
+    RC --> DB
+    CRON --> DQ["Daily Quest Generator"]
+    DQ --> DB
+
+    DEMO["Deterministic Demo Repository"] --> UI
 ```
 
-Windows PowerShell:
+### Agent responsibilities
 
-```powershell
-npm install
-$env:NEXT_PUBLIC_MLEVELUP_DEMO_MODE='1'; npm run dev
-```
+| Module | Responsibility |
+| --- | --- |
+| Learning Strategist | Reviews the evidence and identifies demonstrated strengths, gaps, and portfolio outcomes. |
+| Adjuster | Recommends difficulty and next-focus changes from performance, skill gaps, and penalty state. |
+| Coordinator | Combines specialist recommendations into one bounded learner-facing feedback result. |
+| Daily Quest Generator | Produces a user-specific, measurable 24-hour mission that requires evidence. |
+| Resource Collector and Curator | Finds, deduplicates, categorizes, summarizes, and scores GitHub and arXiv resources. |
 
-Open `http://localhost:3000/demo?restart=1`, complete the six guided actions, then open `/p/demo-ml-engineer`. To explore the full application with local simulated data, open `/demo/sandbox?restart=1`; every new entry resets the fake account, while navigation and refreshes in the same tab preserve that sandbox run. Returning from the public portfolio restores the last guided step.
+AI is advisory. It cannot directly award XP, mark a mission complete, change a deadline, cancel a penalty, extend recovery, or reset an account.
 
-For Vercel, create a separate project from this repository, set `NEXT_PUBLIC_MLEVELUP_DEMO_MODE=1`, and deploy. No other environment variable is required for the guided route or its demo portfolio.
+## Evidence-Based Progression
 
-## Seven skill dimensions
+Every mission defines:
+
+- a clear action;
+- three to five checkpoints where appropriate;
+- measurable acceptance criteria;
+- a success metric;
+- required evidence;
+- an estimated duration;
+- relevant skill tags;
+- optional supporting resources.
+
+Evidence link verification confirms that a supported URL and resource exist. It does **not** prove account ownership, and the product states that limitation explicitly. AI-generated resume achievements remain private drafts until the learner edits and approves them.
+
+## Seven Skill Dimensions
 
 | Skill | What it measures |
 | --- | --- |
@@ -83,33 +139,16 @@ For Vercel, create a separate project from this repository, set `NEXT_PUBLIC_MLE
 | Product Thinking | Turning models into useful products under real constraints |
 | Communication | Technical writing, reports, interviews, and stakeholder communication |
 
-## Architecture
-
-MLevelUp is a Next.js modular monolith. The browser submits a bounded payload to an authenticated server route. The server runs deterministic evidence checks, optionally requests structured recommendations from three AI modules, applies a pure policy gate, and persists one auditable result through the user's Supabase session.
-
-```text
-Next.js App Router
-├── Feature UI and route composition
-├── Authenticated submission API
-├── Application use cases
-├── Deterministic domain rules and state machines
-├── Structured AI workflow and policy gate
-├── MockTrainingRepository for Demo mode
-└── SupabaseTrainingRepository
-    ├── PostgreSQL
-    ├── Row Level Security
-    └── Magic-link authentication
-```
-
-### Technology
+## Technology Stack
 
 - Next.js 16, React 19, and TypeScript
-- Supabase Auth and PostgreSQL
-- OpenAI Responses API with Zod structured outputs
+- Supabase Auth, PostgreSQL, and Row Level Security
+- OpenAI Responses API with GPT-5.6 and Zod structured outputs
 - Tailwind CSS
+- Vercel deployment and protected Cron routes
 - Vitest, Testing Library, and Playwright
 
-## Run locally
+## Run Locally
 
 Requirements: Node.js 20 or later and npm.
 
@@ -119,21 +158,27 @@ cd MLevelUp
 npm install
 ```
 
-For local evaluation without Supabase or OpenAI, create `.env.local`:
+For the deterministic judge experience, create `.env.local`:
 
 ```env
 NEXT_PUBLIC_MLEVELUP_DEMO_MODE=1
 ```
 
-Then run:
+Then start the app:
 
 ```bash
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000).
+Open one of these routes:
 
-## Connect Supabase and OpenAI
+- [http://localhost:3000/demo?guided=1&restart=1](http://localhost:3000/demo?guided=1&restart=1)
+- [http://localhost:3000/demo/sandbox?restart=1](http://localhost:3000/demo/sandbox?restart=1)
+- [http://localhost:3000/p/demo-ml-engineer](http://localhost:3000/p/demo-ml-engineer)
+
+No other environment variable is required for these deterministic routes.
+
+## Full Production Configuration
 
 Copy `.env.example` to `.env.local` and supply your own values:
 
@@ -145,22 +190,20 @@ OPENAI_MODEL=gpt-5.6-terra
 OPENAI_PROMPT_VERSION=phase3-en-v1
 OPENAI_RESOURCE_PROMPT_VERSION=phase4-resource-v1
 OPENAI_DAILY_QUEST_PROMPT_VERSION=daily-quest-v1
+PORTFOLIO_ACHIEVEMENTS_PROMPT_VERSION=phase5-4-v1
+GITHUB_TOKEN=your-optional-server-only-github-token
+SUPABASE_SERVICE_ROLE_KEY=your-server-only-supabase-service-role-key
+CRON_SECRET=your-long-random-server-only-cron-secret
 ```
 
-`OPENAI_API_KEY` is optional at runtime. Without it, authenticated submissions remain usable and receive deterministic fallback feedback. Never add `NEXT_PUBLIC_` to this key and never use a Supabase secret or `service_role` key in browser variables.
+Never expose `OPENAI_API_KEY`, `GITHUB_TOKEN`, `SUPABASE_SERVICE_ROLE_KEY`, or `CRON_SECRET` through a `NEXT_PUBLIC_` variable. `OPENAI_API_KEY` is optional for authenticated submission feedback because deterministic fallback remains available.
 
-Apply all migrations in chronological order. Exact instructions and safety notes are in [docs/phase-3-supabase-setup.md](docs/phase-3-supabase-setup.md) and [docs/phase-4-resource-collector-setup.md](docs/phase-4-resource-collector-setup.md).
+Deployment and migration instructions:
 
-AI daily quest deployment and smoke testing are documented in [docs/ai-daily-quest-generation-setup.md](docs/ai-daily-quest-generation-setup.md). Apply its migration before deploying code that reads private generated quests.
-
-## Privacy and authority boundaries
-
-- The browser sends only assignment ID, idempotency key, evidence, and reflection.
-- Authentication determines the user; the request cannot choose row ownership.
-- AI receives bounded mission context, summarized evidence, recent aggregate outcomes, skills, and eligible resource/quest identifiers.
-- Raw access tokens, API keys, email addresses, and full database rows are excluded from AI context.
-- Raw prompts are not persisted. Agent logs contain redacted summaries and sanitized failures.
-- AI cannot directly award XP, mark completion, change deadlines, cancel penalties, extend recovery, or reset an account.
+- [Supabase and AI feedback setup](docs/phase-3-supabase-setup.md)
+- [Resource collector and Cron setup](docs/phase-4-resource-collector-setup.md)
+- [AI daily quest generation setup](docs/ai-daily-quest-generation-setup.md)
+- [Public portfolio setup](docs/phase-5-public-portfolio-setup.md)
 
 ## Verification
 
@@ -172,42 +215,39 @@ npm run build
 npm run test:e2e
 ```
 
-Automated tests use fake model transports and never call the live OpenAI API.
+Automated tests use deterministic repositories and fake model transports. They do not call the live OpenAI API.
 
-## Product language
-
-MLevelUp is an English-only product. Application UI, system-authored missions,
-fallback feedback, resource summaries, and AI-generated prose use English.
-User-authored evidence and external resource titles are preserved exactly as
-submitted and are never silently translated.
-
-## Repository structure
+## Repository Structure
 
 ```text
-src/app/                  Next.js pages and authenticated API route
-src/ai/                   AI contracts, prompts, gateway, and orchestration
-src/domain/training/      Mission, reward, policy, deadline, and recovery rules
+src/app/                  Next.js pages, route handlers, and API endpoints
+src/ai/                   Agent contracts, prompts, context, and orchestration
 src/application/training/ Submission and training use cases
-src/supabase-training/    Supabase persistence and browser submission client
-src/mocks/training/       Deterministic Demo repository and seed data
+src/domain/training/      Mission, reward, deadline, penalty, and recovery policy
+src/mocks/training/       Deterministic demo repository and seed data
+src/resource-collector/   Resource ingestion, verification, scoring, and curation
+src/supabase-training/    Supabase-backed training persistence
+src/portfolio/            Private controls and public portfolio projection
 supabase/migrations/      Database schema and migration history
 e2e/                      Playwright user-flow tests
-docs/superpowers/         Approved designs and implementation plans
+docs/                     Deployment and operational guides
 ```
 
-## Roadmap
+## Privacy and Responsible Design
 
-- Phase 4: completed live resource collection, AI curation, URL verification, scheduled ingestion, and Agent telemetry
-- Phase 5: Kaggle/hackathon integrations, richer anti-cheat signals, leaderboards, badges, and public portfolio export
-- Production deployment: [m-level-up.vercel.app](https://m-level-up.vercel.app/)
-
-## Responsible design
-
-- Mission completion requires evidence rather than a self-reported checkbox.
-- Reset and recovery rules are explicit before training begins.
-- Model failure never blocks an otherwise valid submission.
+- Authentication determines data ownership; browser requests cannot select another user.
+- AI receives bounded mission context and summarized evidence rather than raw database rows.
+- Access tokens, API keys, email addresses, and service-role credentials are excluded from AI context.
+- Raw prompts are not persisted; agent diagnostics store sanitized summaries and failures.
+- Public portfolios are opt-in and expose only approved projection fields.
+- Model failure does not block an otherwise valid submission.
+- Recovery and reset rules are disclosed before training begins.
 - The visual language is original and does not reuse copyrighted characters, logos, dialogue, or game assets.
 
-## Project stage
+## Project Status and Roadmap
 
-Active OpenAI Hackathon MVP development. Feedback, issues, and contributions are welcome.
+MLevelUp is an active OpenAI Build Week MVP. The current release includes the complete ML engineering training loop, real authentication and persistence, structured AI feedback, AI-generated daily missions, resource collection, evidence verification, public portfolios, and deterministic judge demos.
+
+Next priorities include stronger ownership verification, Kaggle and hackathon result integrations, richer anti-cheat signals, portfolio export, badges, and leaderboards. Longer term, the same hard-but-fair coaching model can support additional career and life goals.
+
+Feedback, issues, and contributions are welcome through the [GitHub repository](https://github.com/barrychung1112/MLevelUp).
