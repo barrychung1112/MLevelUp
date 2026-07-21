@@ -57,6 +57,12 @@ const phase54MigrationPath = join(
   "migrations",
   "202607200001_phase5_4_achievements_verification.sql",
 );
+const englishSystemContentMigrationPath = join(
+  process.cwd(),
+  "supabase",
+  "migrations",
+  "202607200002_english_system_content.sql",
+);
 
 describe("phase 2 Supabase schema migration", () => {
   it("defines the compact training schema, RLS, and public-safe app credentials", () => {
@@ -326,5 +332,19 @@ describe("Phase 5.4 achievements and link verification migration", () => {
     expect(sql).not.toMatch(/alter table public\.published_artifacts[\s\S]+source_refs/iu);
     expect(sql).not.toMatch(/alter table public\.published_artifacts[\s\S]+prompt_version/iu);
     expect(sql).not.toMatch(/alter table public\.published_artifacts[\s\S]+reviewer_notes/iu);
+  });
+});
+
+describe("English system content migration", () => {
+  it("updates only safely identifiable system content", () => {
+    expect(existsSync(englishSystemContentMigrationPath)).toBe(true);
+    const sql = readFileSync(englishSystemContentMigrationPath, "utf8");
+
+    expect(sql).toContain("quest-courage-challenge");
+    expect(sql).toContain("The Courage to Begin");
+    expect(sql).toMatch(/where\s+id\s*=\s*'quest-courage-challenge'/iu);
+    expect(sql).not.toMatch(/update\s+public\.submissions/iu);
+    expect(sql).not.toMatch(/self_reflection\s*=/iu);
+    expect(sql).not.toMatch(/evidence_/iu);
   });
 });
