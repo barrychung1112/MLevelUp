@@ -117,4 +117,16 @@ describe("OpenAiStructuredResponseGateway", () => {
     expect((error as Error).message).not.toContain("secret upstream detail");
     expect(parse).toHaveBeenCalledTimes(2);
   });
+
+  it("supports a single-attempt request for scheduled generation", async () => {
+    const parse = vi.fn().mockRejectedValue(
+      Object.assign(new Error("rate limit"), { status: 429 }),
+    );
+    const gateway = new OpenAiStructuredResponseGateway({ responses: { parse } });
+
+    await expect(gateway.generate({ ...request(), maxAttempts: 1 })).rejects.toMatchObject({
+      code: "rate_limited",
+    });
+    expect(parse).toHaveBeenCalledTimes(1);
+  });
 });
