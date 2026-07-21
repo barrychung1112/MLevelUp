@@ -52,12 +52,16 @@ function createClient(
   singles: Record<string, unknown> = {},
   orders: Array<{ table: string; column: string }> = [],
   rpcRows: Record<string, unknown[]> = {},
+  rpcCalls: Array<{ name: string; args: unknown }> = [],
 ) {
   return {
     auth: {
       getUser: async () => ({ data: { user: { id: "user-1" } }, error: null }),
     },
-    rpc: async (name: string) => ({ data: rpcRows[name] ?? [], error: null }),
+    rpc: async (name: string, args?: unknown) => {
+      rpcCalls.push({ name, args });
+      return { data: name === "get_visible_quests" ? (rpcRows[name] ?? rows.quests ?? []) : (rpcRows[name] ?? []), error: null };
+    },
     from(table: string) {
       const tableRows = rows[table] ?? [];
       const single = singles[table] ?? null;
@@ -246,6 +250,22 @@ describe("SupabaseTrainingRepository", () => {
     await repository.getSnapshot();
 
     expect(orders).toContainEqual({ table: "skill_stats", column: "updated_at" });
+  });
+
+  it("loads quests through the user-scoped RPC even when the client is privileged", async () => {
+    const rpcCalls: Array<{ name: string; args: unknown }> = [];
+    const repository = new SupabaseTrainingRepository({
+      client: createClient({
+        quests: [questRow], resources: [resourceRow], skill_stats: [], quest_assignments: [],
+        submissions: [], feedback: [], portfolio_artifacts: [], agent_runs: [],
+      }, {}, [], {}, rpcCalls) as never,
+      clock: { now: () => "2026-07-18T06:00:00.000Z" },
+      ids: { next: () => "00000000-0000-4000-8000-000000000001" },
+    });
+
+    await repository.getSnapshot();
+
+    expect(rpcCalls).toContainEqual({ name: "get_visible_quests", args: { p_user_id: "user-1" } });
   });
 
   it("persists the courage oath timestamp", async () => {

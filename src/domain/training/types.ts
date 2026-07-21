@@ -89,6 +89,11 @@ export interface Quest {
   executionSteps: string[];
   successMetrics: string[];
   outOfScope: string[];
+  ownerUserId?: string;
+  source?: "catalog" | "ai_generated";
+  generationTraceId?: string;
+  generationModel?: string;
+  generationPromptVersion?: string;
 }
 
 export interface UserProfile {

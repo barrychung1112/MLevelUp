@@ -63,6 +63,12 @@ const englishSystemContentMigrationPath = join(
   "migrations",
   "202607200002_english_system_content.sql",
 );
+const aiDailyQuestMigrationPath = join(
+  process.cwd(),
+  "supabase",
+  "migrations",
+  "202607200003_ai_daily_quest_generation.sql",
+);
 
 describe("phase 2 Supabase schema migration", () => {
   it("defines the compact training schema, RLS, and public-safe app credentials", () => {
@@ -346,5 +352,26 @@ describe("English system content migration", () => {
     expect(sql).not.toMatch(/update\s+public\.submissions/iu);
     expect(sql).not.toMatch(/self_reflection\s*=/iu);
     expect(sql).not.toMatch(/evidence_/iu);
+  });
+});
+
+describe("AI daily quest generation migration", () => {
+  it("isolates private quests and persists quest plus assignment atomically", () => {
+    expect(existsSync(aiDailyQuestMigrationPath)).toBe(true);
+    const sql = readFileSync(aiDailyQuestMigrationPath, "utf8").toLowerCase();
+
+    for (const field of [
+      "owner_user_id", "source", "generation_trace_id", "generation_model",
+      "generation_prompt_version",
+    ]) expect(sql).toContain(field);
+    expect(sql).toContain("drop policy if exists \"authenticated catalog read quests\"");
+    expect(sql).toContain("owner_user_id = auth.uid()");
+    expect(sql).toContain("create_generated_daily_quest");
+    expect(sql).toContain("get_visible_quests");
+    expect(sql).toContain("security definer");
+    expect(sql).toContain("to service_role");
+    expect(sql).toContain("generation_key");
+    expect(sql).toContain("source = 'catalog'");
+    expect(sql).toContain("source = 'ai_generated'");
   });
 });

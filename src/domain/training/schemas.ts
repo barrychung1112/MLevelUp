@@ -119,6 +119,11 @@ export const QuestSchema = z.strictObject({
   executionSteps: z.array(z.string().min(1)).min(1),
   successMetrics: z.array(z.string().min(1)).min(1),
   outOfScope: z.array(z.string().min(1)),
+  ownerUserId: z.string().min(1).optional(),
+  source: z.enum(["catalog", "ai_generated"]).optional(),
+  generationTraceId: z.string().min(1).max(120).optional(),
+  generationModel: z.string().min(1).max(120).optional(),
+  generationPromptVersion: z.string().min(1).max(80).optional(),
 });
 
 function isValidTimeZone(value: string): boolean {

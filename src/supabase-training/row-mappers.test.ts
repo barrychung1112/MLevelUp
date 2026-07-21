@@ -140,6 +140,11 @@ describe("Supabase row mappers", () => {
         execution_steps: ["Run baseline"],
         success_metrics: ["Metric recorded"],
         out_of_scope: ["Deployment"],
+        owner_user_id: "user-1",
+        source: "ai_generated",
+        generation_trace_id: "trace-1",
+        generation_model: "gpt-test",
+        generation_prompt_version: "daily-v1",
       }),
     ).toMatchObject({
       id: "quest",
@@ -149,6 +154,9 @@ describe("Supabase row mappers", () => {
       expectedArtifactType: "githubRepository",
       scope: "main",
       durationDays: 5,
+      ownerUserId: "user-1",
+      source: "ai_generated",
+      generationTraceId: "trace-1",
     });
   });
 
