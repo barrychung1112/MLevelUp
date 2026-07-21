@@ -16,17 +16,17 @@ function statusTone(status: string): "idle" | "active" | "success" | "warning" |
   return "warning";
 }
 
-export function AgentStatusBoard({ agents, status = "ready", errorMessage = "無法載入 Agent 狀態。" }: AgentStatusBoardProps) {
-  if (status === "loading") return <p role="status" className="text-command-muted">正在讀取 Agent 狀態…</p>;
+export function AgentStatusBoard({ agents, status = "ready", errorMessage = "Unable to load Agent Status." }: AgentStatusBoardProps) {
+  if (status === "loading") return <p role="status" className="text-command-muted">Reading Agent Status…</p>;
   if (status === "error") return <p role="alert" className="text-command-danger">{errorMessage}</p>;
-  if (agents.length === 0) return <EmptyState title="目前沒有 Agent 執行紀錄。" description="提交第一個任務後會顯示 AI 或 fallback 診斷。" />;
+  if (agents.length === 0) return <EmptyState title="No Agent runs yet." description="Submit your first mission to see AI or deterministic fallback diagnostics." />;
 
   return (
     <section aria-labelledby="agents-heading" className="space-y-6">
       <header>
         <p className="text-sm uppercase tracking-[0.24em] text-command-warning">Agent telemetry</p>
-        <h1 id="agents-heading" className="text-3xl font-semibold text-command-text">Agent 狀態</h1>
-        <p className="mt-2 text-command-muted">顯示學習 Agent 與資源收集排程的最近執行狀態。</p>
+        <h1 id="agents-heading" className="text-3xl font-semibold text-command-text">Agent Status</h1>
+        <p className="mt-2 text-command-muted">Latest execution state for learning agents and the resource collection schedule.</p>
       </header>
       <ul className="grid gap-4 md:grid-cols-2">
         {agents.map((agent) => (
@@ -38,11 +38,11 @@ export function AgentStatusBoard({ agents, status = "ready", errorMessage = "無
               </Badge>
             </div>
             <p className="mt-4 flex gap-2 text-sm">
-              <span className="text-command-muted">狀態</span>
+              <span className="text-command-muted">Status</span>
               <StatusIndicator tone={statusTone(agent.status)}>{agent.status}</StatusIndicator>
             </p>
             <p className="mt-2 text-command-muted">{agent.summary}</p>
-            <p className="mt-3 text-sm text-command-muted">最後執行：{agent.lastRun}</p>
+            <p className="mt-3 text-sm text-command-muted">Last run: {agent.lastRun}</p>
             {agent.model || agent.promptVersion ? (
               <p className="mt-1 text-xs text-command-muted">
                 {[agent.model, agent.promptVersion, agent.latencyMs !== undefined ? `${agent.latencyMs} ms` : null]
@@ -50,7 +50,7 @@ export function AgentStatusBoard({ agents, status = "ready", errorMessage = "無
                   .join(" · ")}
               </p>
             ) : null}
-            {agent.errorCode ? <p className="mt-1 text-xs text-command-danger">錯誤：{agent.errorCode}</p> : null}
+            {agent.errorCode ? <p className="mt-1 text-xs text-command-danger">Error: {agent.errorCode}</p> : null}
           </li>
         ))}
       </ul>

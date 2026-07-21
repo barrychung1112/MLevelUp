@@ -32,7 +32,7 @@ export function TrainingArchive({
   filters,
   onFiltersChange,
   status = "ready",
-  errorMessage = "無法載入訓練紀錄。",
+  errorMessage = "Unable to load the Training Archive.",
 }: TrainingArchiveProps) {
   const [internalFilters, setInternalFilters] = useState<ArchiveFilters>(
     DEFAULT_ARCHIVE_FILTERS,
@@ -48,9 +48,9 @@ export function TrainingArchive({
     </header>
   );
 
-  if (status === "loading") return <p role="status" className="text-command-muted">正在讀取訓練檔案…</p>;
+  if (status === "loading") return <p role="status" className="text-command-muted">Loading the Training Archive…</p>;
   if (status === "error") return <p role="alert" className="text-command-danger">{errorMessage}</p>;
-  if (activities.length === 0) return <section aria-labelledby="archive-heading" className="space-y-6">{header}<EmptyState title="Training Archive 尚無紀錄" description="完成任務後，戰鬥紀錄會出現在這裡。" /></section>;
+  if (activities.length === 0) return <section aria-labelledby="archive-heading" className="space-y-6">{header}<EmptyState title="The Training Archive is empty" description="Complete a mission to create your first battle log entry." /></section>;
 
   function changeFilters(nextFilters: ArchiveFilters) {
     if (filters === undefined) setInternalFilters(nextFilters);
@@ -61,16 +61,16 @@ export function TrainingArchive({
     <section aria-labelledby="archive-heading" className="space-y-6">
       {header}
       <label className="grid max-w-sm gap-2 text-sm text-command-text">
-        紀錄類型
+        Activity type
         <select className={selectClass} value={activeFilters.eventType} onChange={(event) => changeFilters({ eventType: event.target.value })}>
-          <option value="all">全部紀錄</option>
+          <option value="all">All activity</option>
           {options.map((type) => <option key={type} value={type}>{type}</option>)}
         </select>
       </label>
       {visibleActivities.length === 0 ? (
         <EmptyState
-          title="沒有符合目前篩選條件的訓練紀錄"
-          action={<Button variant="secondary" type="button" onClick={() => changeFilters(DEFAULT_ARCHIVE_FILTERS)}>清除紀錄篩選</Button>}
+          title="No training activity matches these filters"
+          action={<Button variant="secondary" type="button" onClick={() => changeFilters(DEFAULT_ARCHIVE_FILTERS)}>Clear Archive Filters</Button>}
         />
       ) : (
         <ol className="relative space-y-4 border-l border-command-cyan/40 pl-6">

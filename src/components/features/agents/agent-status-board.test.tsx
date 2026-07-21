@@ -25,6 +25,6 @@ describe("AgentStatusBoard", () => {
 
   test("announces its loading state", () => {
     render(<AgentStatusBoard agents={[]} status="loading" />);
-    expect(screen.getByRole("status")).toHaveTextContent("正在讀取 Agent 狀態");
+    expect(screen.getByRole("status")).toHaveTextContent("Reading Agent Status");
   }, 15_000);
 });

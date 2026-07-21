@@ -12,16 +12,16 @@ function DialogHarness() {
   return (
     <>
       <button type="button" onClick={() => setOpen(true)}>
-        開啟任務詳情
+        Open mission details
       </button>
-      <Panel aria-label="任務卡片">
+      <Panel aria-label="Mission card">
         <Dialog
           open={open}
           onOpenChange={setOpen}
-          title="任務詳情"
-          description="檢查驗收條件後再提交。"
+          title="Mission Details"
+          description="Review the acceptance criteria before submitting."
         >
-          <button type="button">提交成果</button>
+          <button type="button">Submit Evidence</button>
         </Dialog>
       </Panel>
     </>
@@ -33,15 +33,15 @@ describe("Dialog", () => {
     const user = userEvent.setup();
     render(<DialogHarness />);
 
-    const trigger = screen.getByRole("button", { name: "開啟任務詳情" });
+    const trigger = screen.getByRole("button", { name: "Open mission details" });
     await user.click(trigger);
 
-    expect(screen.getByRole("dialog", { name: "任務詳情" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "關閉對話框" })).toHaveFocus();
+    expect(screen.getByRole("dialog", { name: "Mission Details" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Close dialog" })).toHaveFocus();
 
     await user.keyboard("{Escape}");
 
-    expect(screen.queryByRole("dialog", { name: "任務詳情" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("dialog", { name: "Mission Details" })).not.toBeInTheDocument();
     expect(trigger).toHaveFocus();
   });
 
@@ -49,13 +49,13 @@ describe("Dialog", () => {
     const user = userEvent.setup();
     render(<DialogHarness />);
 
-    await user.click(screen.getByRole("button", { name: "開啟任務詳情" }));
+    await user.click(screen.getByRole("button", { name: "Open mission details" }));
 
-    const dialog = screen.getByRole("dialog", { name: "任務詳情" });
+    const dialog = screen.getByRole("dialog", { name: "Mission Details" });
     expect(dialog.parentElement?.parentElement).toBe(document.body);
     expect(document.body).toHaveStyle({ overflow: "hidden" });
 
-    await user.click(screen.getByRole("button", { name: "關閉對話框" }));
+    await user.click(screen.getByRole("button", { name: "Close dialog" }));
 
     expect(document.body.style.overflow).toBe("");
   });
@@ -64,10 +64,10 @@ describe("Dialog", () => {
     const user = userEvent.setup();
     render(<DialogHarness />);
 
-    await user.click(screen.getByRole("button", { name: "開啟任務詳情" }));
+    await user.click(screen.getByRole("button", { name: "Open mission details" }));
 
-    const close = screen.getByRole("button", { name: "關閉對話框" });
-    const submit = screen.getByRole("button", { name: "提交成果" });
+    const close = screen.getByRole("button", { name: "Close dialog" });
+    const submit = screen.getByRole("button", { name: "Submit Evidence" });
 
     expect(close).toHaveFocus();
     await user.tab();

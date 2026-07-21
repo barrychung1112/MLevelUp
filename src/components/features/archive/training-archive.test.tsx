@@ -22,15 +22,15 @@ describe("TrainingArchive", () => {
       />,
     );
 
-    expect(screen.getByLabelText("紀錄類型")).toHaveValue("level-up");
-    expect(screen.getByText("沒有符合目前篩選條件的訓練紀錄")).toBeVisible();
+    expect(screen.getByLabelText("Activity type")).toHaveValue("level-up");
+    expect(screen.getByText("No training activity matches these filters")).toBeVisible();
 
-    fireEvent.change(screen.getByLabelText("紀錄類型"), {
+    fireEvent.change(screen.getByLabelText("Activity type"), {
       target: { value: "quest" },
     });
     expect(onFiltersChange).toHaveBeenLastCalledWith({ eventType: "quest" });
 
-    fireEvent.click(screen.getByRole("button", { name: "清除紀錄篩選" }));
+    fireEvent.click(screen.getByRole("button", { name: "Clear Archive Filters" }));
     expect(onFiltersChange).toHaveBeenLastCalledWith({ eventType: "all" });
   });
 
@@ -39,14 +39,14 @@ describe("TrainingArchive", () => {
 
     expect(screen.getByText("完成 validation baseline")).toBeVisible();
     expect(screen.getByText("新增模型評估報告")).toBeVisible();
-    fireEvent.change(screen.getByLabelText("紀錄類型"), { target: { value: "level-up" } });
-    expect(screen.getByText("沒有符合目前篩選條件的訓練紀錄")).toBeVisible();
-    fireEvent.click(screen.getByRole("button", { name: "清除紀錄篩選" }));
+    fireEvent.change(screen.getByLabelText("Activity type"), { target: { value: "level-up" } });
+    expect(screen.getByText("No training activity matches these filters")).toBeVisible();
+    fireEvent.click(screen.getByRole("button", { name: "Clear Archive Filters" }));
     expect(screen.getByText("完成 validation baseline")).toBeVisible();
   }, 15_000);
 
   test("shows a useful empty archive state", () => {
     render(<TrainingArchive activities={[]} />);
-    expect(screen.getByText("完成任務後，戰鬥紀錄會出現在這裡。")).toBeVisible();
+    expect(screen.getByText("Complete a mission to create your first battle log entry.")).toBeVisible();
   }, 15_000);
 });

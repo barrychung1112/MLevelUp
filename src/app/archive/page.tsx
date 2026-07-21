@@ -64,7 +64,7 @@ export default function ArchivePage() {
     <Suspense
       fallback={
         <p role="status" className="p-6 text-command-muted">
-          正在載入訓練檔案…
+          Loading the Training Archive…
         </p>
       }
     >

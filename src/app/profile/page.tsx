@@ -16,7 +16,7 @@ export default function ProfilePage() {
   return (
     <TrainingPageShell>
       <ProfileSettings
-        profile={profile ? { targetRoleLabel: "機器學習工程師", dailyMinutes: profile.dailyMinutes } : null}
+        profile={profile ? { targetRoleLabel: "Machine Learning Engineer", dailyMinutes: profile.dailyMinutes } : null}
         status={training.status === "ready" ? "ready" : training.status}
         errorMessage={training.loadError ?? undefined}
         isSubmitting={training.commandStatus === "submitting"}

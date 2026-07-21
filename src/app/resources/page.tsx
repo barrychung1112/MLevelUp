@@ -105,7 +105,7 @@ export default function ResourcesPage() {
     <Suspense
       fallback={
         <p role="status" className="p-6 text-command-muted">
-          正在載入資源情報…
+          Loading resource intelligence…
         </p>
       }
     >

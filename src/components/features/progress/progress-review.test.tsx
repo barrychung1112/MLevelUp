@@ -30,8 +30,8 @@ describe("ProgressReview", () => {
     expect(screen.getByText("29/100")).toBeVisible();
     expect(screen.getByText("能力雷達摘要：Evaluation 最高 63，Product Thinking 最低 29。")).toBeVisible();
     expect(screen.getByText("四週趨勢摘要：總能力值增加 18 點，本週增加 6 點。")).toBeVisible();
-    expect(screen.getByRole("img", { name: "七項能力雷達圖" })).toBeVisible();
-    expect(screen.getByRole("img", { name: "能力成長趨勢圖" })).toBeVisible();
+    expect(screen.getByRole("img", { name: "Seven-skill radar chart" })).toBeVisible();
+    expect(screen.getByRole("img", { name: "Skill growth trend chart" })).toBeVisible();
     expect(screen.getByRole("progressbar", { name: "Data Handling" })).toHaveAttribute("aria-valuenow", "42");
     expect(screen.getByRole("progressbar", { name: "Product Thinking" })).toHaveAttribute("aria-valuenow", "29");
   }, 15_000);

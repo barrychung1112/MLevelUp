@@ -85,11 +85,11 @@ describe("DashboardOverview", () => {
       />,
     );
 
-    expect(screen.getByRole("heading", { name: "大型主線任務" })).toBeVisible();
+    expect(screen.getByRole("heading", { name: "Mainline Mission" })).toBeVisible();
     expect(screen.getByText("建立可重現的模型基線")).toBeVisible();
-    expect(screen.getByRole("heading", { name: "每日任務（24 小時）" })).toBeVisible();
+    expect(screen.getByRole("heading", { name: "Daily Mission (24 hours)" })).toBeVisible();
     expect(screen.getByText("完成今日誤差分析")).toBeVisible();
-    expect(screen.getByRole("heading", { name: "懲罰任務" })).toBeVisible();
+    expect(screen.getByRole("heading", { name: "Penalty Missions" })).toBeVisible();
     expect(screen.getByText("補回逾期檢查點")).toBeVisible();
   });
 
@@ -109,9 +109,9 @@ describe("DashboardOverview", () => {
       />,
     );
 
-    expect(screen.getByRole("dialog", { name: "是否放棄挑戰？" })).toBeVisible();
-    fireEvent.click(screen.getByRole("button", { name: "繼續挑戰" }));
-    fireEvent.click(screen.getByRole("button", { name: "放棄並清零" }));
+    expect(screen.getByRole("dialog", { name: "Abandon the challenge?" })).toBeVisible();
+    fireEvent.click(screen.getByRole("button", { name: "Continue Challenge" }));
+    fireEvent.click(screen.getByRole("button", { name: "Abandon and Reset" }));
     expect(onContinue).toHaveBeenCalledOnce();
     expect(onAbandon).toHaveBeenCalledOnce();
   });
@@ -128,8 +128,8 @@ describe("DashboardOverview", () => {
       />,
     );
 
-    expect(screen.getByRole("heading", { name: "三日追回期" })).toBeVisible();
+    expect(screen.getByRole("heading", { name: "Three-Day Recovery Window" })).toBeVisible();
     expect(screen.getByText(/2026-07-21 01:00/)).toBeVisible();
-    expect(screen.getByText("待追回 1 項")).toBeVisible();
+    expect(screen.getByText("1 recovery missions remaining")).toBeVisible();
   });
 });

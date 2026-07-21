@@ -3,31 +3,31 @@ import { describe, expect, test, vi } from "vitest";
 
 import { ProfileSettings } from "./profile-settings";
 
-const profile = { targetRoleLabel: "機器學習工程師", dailyMinutes: 300 };
+const profile = { targetRoleLabel: "Machine Learning Engineer", dailyMinutes: 300 };
 
 describe("ProfileSettings", () => {
   test("shows the fixed target and five-hour commitment as read-only", () => {
     render(<ProfileSettings profile={profile} onReset={vi.fn()} />);
 
-    expect(screen.getByText("機器學習工程師")).toBeVisible();
-    expect(screen.getByText("每日固定 5 小時")).toBeVisible();
+    expect(screen.getByText("Machine Learning Engineer")).toBeVisible();
+    expect(screen.getByText("5 hours every day")).toBeVisible();
     expect(screen.queryByRole("combobox")).not.toBeInTheDocument();
     expect(screen.queryByRole("spinbutton")).not.toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: "儲存設定" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Save Settings" })).not.toBeInTheDocument();
   });
 
   test("requires confirmation before resetting progress", () => {
     const onReset = vi.fn();
     render(<ProfileSettings profile={profile} onReset={onReset} />);
-    fireEvent.click(screen.getByRole("button", { name: "重設訓練資料" }));
-    fireEvent.click(screen.getByRole("button", { name: "確認重設" }));
+    fireEvent.click(screen.getByRole("button", { name: "Reset Training Data" }));
+    fireEvent.click(screen.getByRole("button", { name: "Confirm Reset" }));
     expect(onReset).toHaveBeenCalledOnce();
   });
 
   test("offers an explicit account sign out action", () => {
     const onSignOut = vi.fn();
     render(<ProfileSettings profile={profile} onReset={vi.fn()} onSignOut={onSignOut} />);
-    fireEvent.click(screen.getByRole("button", { name: "登出帳號" }));
+    fireEvent.click(screen.getByRole("button", { name: "Sign Out" }));
     expect(onSignOut).toHaveBeenCalledOnce();
   });
 });

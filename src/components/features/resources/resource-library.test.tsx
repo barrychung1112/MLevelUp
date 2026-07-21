@@ -53,16 +53,16 @@ describe("ResourceLibrary", () => {
       />,
     );
 
-    expect(screen.getByLabelText("資源類型")).toHaveValue("repo");
-    expect(screen.getByLabelText("能力標籤")).toHaveValue("Evaluation");
-    expect(screen.getByLabelText("最低相關性")).toHaveValue("80");
-    expect(screen.getByLabelText("資源難度")).toHaveValue("4");
-    expect(screen.getByLabelText("最低新鮮度")).toHaveValue("90");
-    expect(screen.getByLabelText("最低可信度")).toHaveValue("80");
-    expect(screen.getByLabelText("最長預估時間")).toHaveValue("60");
-    expect(screen.getByText("沒有符合目前篩選條件的資源")).toBeVisible();
+    expect(screen.getByLabelText("Resource type")).toHaveValue("repo");
+    expect(screen.getByLabelText("Skill tag")).toHaveValue("Evaluation");
+    expect(screen.getByLabelText("Minimum relevance")).toHaveValue("80");
+    expect(screen.getByLabelText("Difficulty")).toHaveValue("4");
+    expect(screen.getByLabelText("Minimum freshness")).toHaveValue("90");
+    expect(screen.getByLabelText("Minimum credibility")).toHaveValue("80");
+    expect(screen.getByLabelText("Maximum time")).toHaveValue("60");
+    expect(screen.getByText("No resources match these filters")).toBeVisible();
 
-    fireEvent.change(screen.getByLabelText("最低可信度"), {
+    fireEvent.change(screen.getByLabelText("Minimum credibility"), {
       target: { value: "90" },
     });
     expect(onFiltersChange).toHaveBeenLastCalledWith({
@@ -70,7 +70,7 @@ describe("ResourceLibrary", () => {
       minimumCredibility: 90,
     });
 
-    fireEvent.click(screen.getByRole("button", { name: "清除資源篩選" }));
+    fireEvent.click(screen.getByRole("button", { name: "Clear Resource Filters" }));
     expect(onFiltersChange).toHaveBeenLastCalledWith({
       resourceType: "all",
       skill: "all",
@@ -92,21 +92,21 @@ describe("ResourceLibrary", () => {
     expect(screen.getByText("Quality 86")).toBeVisible();
     expect(screen.getByText("GitHub")).toBeVisible();
     expect(screen.getByText("Available")).toBeVisible();
-    expect(screen.getByText("20 分鐘")).toBeVisible();
+    expect(screen.getByText("20 minutes")).toBeVisible();
     expect(screen.getByText("article", { selector: "span" })).toBeVisible();
-    expect(within(screen.getAllByRole("list", { name: "資源能力標籤" })[0]).getByText("Evaluation")).toBeVisible();
-    expect(screen.getByRole("group", { name: "資源篩選" })).toBeVisible();
-    expect(screen.getByLabelText("最低相關性")).toBeVisible();
-    expect(screen.getByLabelText("資源難度")).toBeVisible();
-    expect(screen.getByLabelText("最低新鮮度")).toBeVisible();
-    expect(screen.getByLabelText("最低可信度")).toBeVisible();
-    expect(screen.getByLabelText("最長預估時間")).toBeVisible();
+    expect(within(screen.getAllByRole("list", { name: "Resource skill tags" })[0]).getByText("Evaluation")).toBeVisible();
+    expect(screen.getByRole("group", { name: "Resource Filters" })).toBeVisible();
+    expect(screen.getByLabelText("Minimum relevance")).toBeVisible();
+    expect(screen.getByLabelText("Difficulty")).toBeVisible();
+    expect(screen.getByLabelText("Minimum freshness")).toBeVisible();
+    expect(screen.getByLabelText("Minimum credibility")).toBeVisible();
+    expect(screen.getByLabelText("Maximum time")).toBeVisible();
 
-    fireEvent.change(screen.getByLabelText("資源類型"), { target: { value: "repo" } });
-    fireEvent.change(screen.getByLabelText("能力標籤"), { target: { value: "Evaluation" } });
-    expect(screen.getByText("沒有符合目前篩選條件的資源")).toBeVisible();
+    fireEvent.change(screen.getByLabelText("Resource type"), { target: { value: "repo" } });
+    fireEvent.change(screen.getByLabelText("Skill tag"), { target: { value: "Evaluation" } });
+    expect(screen.getByText("No resources match these filters")).toBeVisible();
 
-    fireEvent.click(screen.getByRole("button", { name: "清除資源篩選" }));
+    fireEvent.click(screen.getByRole("button", { name: "Clear Resource Filters" }));
     expect(screen.getByText("Validation strategy field guide")).toBeVisible();
     expect(screen.getByText("FastAPI model service starter")).toBeVisible();
   }, 15_000);
@@ -115,7 +115,7 @@ describe("ResourceLibrary", () => {
     render(<ResourceLibrary resources={resources} />);
 
     const link = screen.getByRole("link", {
-      name: "開啟來源：Validation strategy field guide",
+      name: "Open source: Validation strategy field guide",
     });
     expect(link).toHaveAttribute("href", "https://example.com/resources/validation");
     expect(link).toHaveAttribute("target", "_blank");
@@ -125,11 +125,11 @@ describe("ResourceLibrary", () => {
   }, 15_000);
 
   test.each([
-    { label: "最低相關性", value: "90", hidden: "Lower relevance workshop" },
-    { label: "資源難度", value: "4", hidden: "Validation strategy field guide" },
-    { label: "最低新鮮度", value: "90", hidden: "Validation strategy field guide" },
-    { label: "最低可信度", value: "90", hidden: "FastAPI model service starter" },
-    { label: "最長預估時間", value: "30", hidden: "FastAPI model service starter" },
+    { label: "Minimum relevance", value: "90", hidden: "Lower relevance workshop" },
+    { label: "Difficulty", value: "4", hidden: "Validation strategy field guide" },
+    { label: "Minimum freshness", value: "90", hidden: "Validation strategy field guide" },
+    { label: "Minimum credibility", value: "90", hidden: "FastAPI model service starter" },
+    { label: "Maximum time", value: "30", hidden: "FastAPI model service starter" },
   ])("applies the $label filter behavior", ({ label, value, hidden }) => {
     const extendedResources = [
       ...resources,
@@ -155,11 +155,11 @@ describe("ResourceLibrary", () => {
 
   test("renders representative error and empty states", () => {
     const { rerender } = render(
-      <ResourceLibrary resources={resources} status="error" errorMessage="資源服務中斷" />,
+      <ResourceLibrary resources={resources} status="error" errorMessage="Resource service interrupted" />,
     );
-    expect(screen.getByRole("alert")).toHaveTextContent("資源服務中斷");
+    expect(screen.getByRole("alert")).toHaveTextContent("Resource service interrupted");
 
     rerender(<ResourceLibrary resources={[]} />);
-    expect(screen.getByText("目前沒有可用資源。")).toBeVisible();
+    expect(screen.getByText("No resources are available.")).toBeVisible();
   }, 15_000);
 });

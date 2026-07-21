@@ -61,9 +61,9 @@ describe("adaptive courage route integration", () => {
     const repository = createRepository();
     navigation.pathname = "/onboarding";
     renderRoute(<OnboardingPage />, repository);
-    fireEvent.click(await screen.findByRole("button", { name: "接受挑戰" }));
-    await waitFor(() => expect(screen.queryByRole("dialog", { name: "挑戰者警告" })).not.toBeInTheDocument());
-    fireEvent.click(screen.getByRole("button", { name: "開始訓練" }));
+    fireEvent.click(await screen.findByRole("button", { name: "Accept the Challenge" }));
+    await waitFor(() => expect(screen.queryByRole("dialog", { name: "Challenger Warning" })).not.toBeInTheDocument());
+    fireEvent.click(screen.getByRole("button", { name: "Start Training" }));
     await waitFor(() => expect(navigation.replace).toHaveBeenCalledWith(expect.stringMatching(/^\/quests\/assignment-/)));
     const state = await repository.getSnapshot();
     expect(state.profile.challengeAcceptedAt).not.toBeNull();
@@ -75,9 +75,9 @@ describe("adaptive courage route integration", () => {
     navigation.pathname = "/onboarding";
     vi.spyOn(repository, "completeOnboarding").mockRejectedValueOnce(new Error("storage unavailable"));
     renderRoute(<OnboardingPage />, repository);
-    fireEvent.click(await screen.findByRole("button", { name: "接受挑戰" }));
-    await waitFor(() => expect(screen.queryByRole("dialog", { name: "挑戰者警告" })).not.toBeInTheDocument());
-    fireEvent.click(screen.getByRole("button", { name: "開始訓練" }));
+    fireEvent.click(await screen.findByRole("button", { name: "Accept the Challenge" }));
+    await waitFor(() => expect(screen.queryByRole("dialog", { name: "Challenger Warning" })).not.toBeInTheDocument());
+    fireEvent.click(screen.getByRole("button", { name: "Start Training" }));
     expect(await screen.findByRole("alert")).toHaveTextContent("storage unavailable");
   });
 
@@ -94,7 +94,7 @@ describe("adaptive courage route integration", () => {
     const state = await completeOnboarding(repository);
     const primary = Object.values(state.assignments).find((item) => item.slot === "primary")!;
     renderRoute(<DashboardPage />, repository);
-    fireEvent.click(await screen.findByRole("button", { name: "開啟主要任務" }));
+    fireEvent.click(await screen.findByRole("button", { name: "Open Mainline Mission" }));
     await waitFor(() => expect(navigation.push).toHaveBeenCalledWith(`/quests/${primary.id}`));
   });
 
@@ -126,9 +126,9 @@ describe("adaptive courage route integration", () => {
     const repository = createRepository();
     await completeOnboarding(repository);
     renderRoute(<ProfilePage />, repository);
-    expect(await screen.findByText("每日固定 5 小時")).toBeVisible();
-    fireEvent.click(screen.getByRole("button", { name: "重設訓練資料" }));
-    fireEvent.click(await screen.findByRole("button", { name: "確認重設" }));
+    expect(await screen.findByText("5 hours every day")).toBeVisible();
+    fireEvent.click(screen.getByRole("button", { name: "Reset Training Data" }));
+    fireEvent.click(await screen.findByRole("button", { name: "Confirm Reset" }));
     await waitFor(() => expect(navigation.replace).toHaveBeenCalledWith("/onboarding"));
   });
 });

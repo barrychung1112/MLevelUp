@@ -69,7 +69,7 @@ export default function QuestAssignmentPage() {
     try {
       await training.startQuest(assignment.id);
     } catch (error) {
-      setLocalError(error instanceof Error ? error.message : "無法開始任務，請再試一次。");
+      setLocalError(error instanceof Error ? error.message : "Unable to start the mission. Try again.");
     }
   }
 
@@ -103,9 +103,9 @@ export default function QuestAssignmentPage() {
         selfReflection: submission.selfReflection,
       });
       if (outcome.evaluation.verificationStatus === "verified") setResult(outcome);
-      else setLocalError(outcome.evaluation.hardFailures.join(" · ") || "成果需要修訂後再提交。" );
+      else setLocalError(outcome.evaluation.hardFailures.join(" · ") || "Revise the evidence before submitting again." );
     } catch (error) {
-      setLocalError(error instanceof Error ? error.message : "提交失敗，請再試一次。" );
+      setLocalError(error instanceof Error ? error.message : "Submission failed. Try again." );
     }
   }
 
@@ -120,18 +120,18 @@ export default function QuestAssignmentPage() {
           </header>
           <Panel>
             {localError || training.commandError ? <p role="alert" className="mb-4 text-sm text-command-danger">{localError ?? training.commandError}</p> : null}
-            <p className="mb-4 text-command-muted">確認任務簡報後，啟動計時並進入成果提交。</p>
+            <p className="mb-4 text-command-muted">Review the mission brief, then start the timer and begin producing evidence.</p>
             <Button
               type="button"
               loading={training.commandStatus === "submitting"}
               onClick={() => { void handleStart(); }}
             >
-              開始任務
+              Start Mission
             </Button>
           </Panel>
         </section>
       ) : result || assignment?.status === "completed" ? (
-        <section className="space-y-6" aria-labelledby="verified-heading"><header><p className="text-sm uppercase tracking-[0.24em] text-command-success">Quest cleared</p><h1 id="verified-heading" className="text-3xl font-semibold">任務驗證完成</h1></header><Panel><div className="flex flex-wrap items-center justify-between gap-2"><p className="text-command-success">證據驗證已通過。</p><Badge tone={feedbackView?.provenance === "AI" ? "cyan" : feedbackView?.provenance === "Deterministic fallback" ? "warning" : "neutral"}>{feedbackView?.provenance ?? "Deterministic"}</Badge></div><p className="mt-2 text-command-muted">品質 {result?.evaluation.qualityScore ?? state?.submissions[latestSubmissionId ?? ""]?.qualityScore ?? 0} / 100 · 獲得 {submissionFeedback?.xpAwarded ?? 0} XP</p>{feedbackView ? <p className="mt-3 text-sm text-command-muted">{feedbackView.summary}</p> : null}</Panel></section>
+        <section className="space-y-6" aria-labelledby="verified-heading"><header><p className="text-sm uppercase tracking-[0.24em] text-command-success">Mission cleared</p><h1 id="verified-heading" className="text-3xl font-semibold">Mission Verification Complete</h1></header><Panel><div className="flex flex-wrap items-center justify-between gap-2"><p className="text-command-success">Evidence verification passed.</p><Badge tone={feedbackView?.provenance === "AI" ? "cyan" : feedbackView?.provenance === "Deterministic fallback" ? "warning" : "neutral"}>{feedbackView?.provenance ?? "Deterministic"}</Badge></div><p className="mt-2 text-command-muted">Quality {result?.evaluation.qualityScore ?? state?.submissions[latestSubmissionId ?? ""]?.qualityScore ?? 0} / 100 · Awarded {submissionFeedback?.xpAwarded ?? 0} XP</p>{feedbackView ? <p className="mt-3 text-sm text-command-muted">{feedbackView.summary}</p> : null}</Panel></section>
       ) : (
         <QuestDetail
           quest={assignment && quest ? mapQuest(assignment, quest, state?.resources ?? []) : null}

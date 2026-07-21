@@ -22,50 +22,50 @@ export function ProfileSettings({
   onReset,
   onSignOut,
   status = "ready",
-  errorMessage = "無法載入訓練設定。",
+  errorMessage = "Unable to load training settings.",
   submitError,
   successMessage,
 }: Props) {
   const id = useId();
   const [confirmingReset, setConfirmingReset] = useState(false);
-  if (status === "loading") return <p role="status">正在載入訓練設定…</p>;
+  if (status === "loading") return <p role="status">Loading training settings…</p>;
   if (status === "error") return <p role="alert">{errorMessage}</p>;
-  if (!profile) return <EmptyState title="找不到訓練設定" description="請先完成註冊流程。" />;
+  if (!profile) return <EmptyState title="Training settings not found" description="Complete registration before opening your profile." />;
 
   return (
     <section aria-labelledby={`${id}-heading`} className="space-y-8">
       <header>
         <p className="font-data text-xs uppercase tracking-[0.24em] text-command-cyan">Training profile</p>
-        <h1 id={`${id}-heading`} className="font-display text-3xl font-semibold text-command-text">訓練設定</h1>
+        <h1 id={`${id}-heading`} className="font-display text-3xl font-semibold text-command-text">Training Profile</h1>
       </header>
       {submitError ? <p role="alert" className="text-command-danger">{submitError}</p> : null}
       {successMessage ? <p role="status" className="text-command-success">{successMessage}</p> : null}
       <Panel className="max-w-2xl border-command-cyan/40 bg-command-cyan/5">
-        <p className="text-sm text-command-muted">目標職業</p>
+        <p className="text-sm text-command-muted">Target Role</p>
         <p className="mt-1 font-display text-xl font-semibold text-command-text">{profile.targetRoleLabel}</p>
-        <p className="mt-4 text-sm text-command-muted">訓練投入</p>
-        <p className="mt-1 font-semibold text-command-cyan">每日固定 5 小時</p>
+        <p className="mt-4 text-sm text-command-muted">Training Commitment</p>
+        <p className="mt-1 font-semibold text-command-cyan">5 hours every day</p>
       </Panel>
       {onSignOut ? (
         <Panel className="max-w-2xl">
-          <h2 className="font-display text-lg font-semibold text-command-text">帳號</h2>
-          <Button className="mt-4" variant="secondary" type="button" onClick={onSignOut}>登出帳號</Button>
+          <h2 className="font-display text-lg font-semibold text-command-text">Account</h2>
+          <Button className="mt-4" variant="secondary" type="button" onClick={onSignOut}>Sign Out</Button>
         </Panel>
       ) : null}
       <Panel className="max-w-2xl border-command-danger/40 bg-command-danger/5">
-        <h2 className="font-display text-lg font-semibold text-command-text">危險區域</h2>
+        <h2 className="font-display text-lg font-semibold text-command-text">Danger Zone</h2>
         <Button className="mt-4" variant="danger" type="button" onClick={() => setConfirmingReset(true)}>
-          重設訓練資料
+          Reset Training Data
         </Button>
       </Panel>
       <Dialog
         open={confirmingReset}
         onOpenChange={setConfirmingReset}
-        title="確認重設訓練資料？"
-        closeLabel="關閉重設視窗"
-        footer={<><Button variant="secondary" type="button" onClick={() => setConfirmingReset(false)}>取消</Button><Button variant="danger" type="button" onClick={() => { onReset(); setConfirmingReset(false); }}>確認重設</Button></>}
+        title="Reset all training data?"
+        closeLabel="Close reset dialog"
+        footer={<><Button variant="secondary" type="button" onClick={() => setConfirmingReset(false)}>Cancel</Button><Button variant="danger" type="button" onClick={() => { onReset(); setConfirmingReset(false); }}>Confirm Reset</Button></>}
       >
-        <p className="text-sm text-command-muted">等級、XP、能力值與進行中的任務將重新開始。</p>
+        <p className="text-sm text-command-muted">Your level, XP, skill scores, and active missions will restart from zero.</p>
       </Dialog>
     </section>
   );

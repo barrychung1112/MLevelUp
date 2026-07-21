@@ -38,13 +38,13 @@ describe("QuestDetail", () => {
   test("shows executable steps, measurable success, boundaries, deadline, and resources", () => {
     render(<QuestDetail quest={quest} onSubmit={vi.fn()} />);
 
-    expect(screen.getByRole("heading", { name: "執行步驟" })).toBeVisible();
+    expect(screen.getByRole("heading", { name: "Execution Steps" })).toBeVisible();
     expect(screen.getByText("建立固定資料切分")).toBeVisible();
-    expect(screen.getByRole("heading", { name: "成功衡量標準" })).toBeVisible();
+    expect(screen.getByRole("heading", { name: "Success Criteria" })).toBeVisible();
     expect(screen.getByText("重跑後的驗證分數誤差小於 0.01")).toBeVisible();
-    expect(screen.getByRole("heading", { name: "本次不做" })).toBeVisible();
+    expect(screen.getByRole("heading", { name: "Out of Scope" })).toBeVisible();
     expect(screen.getByText("正式環境部署")).toBeVisible();
-    expect(screen.getByText(/截止：2026-07-20 23:59/)).toBeVisible();
+    expect(screen.getByText(/Due: 2026-07-20 23:59/)).toBeVisible();
     expect(screen.getByRole("link", { name: "Scikit-learn 模型評估指南" })).toHaveAttribute(
       "href",
       "https://example.com/evaluation",
@@ -55,15 +55,15 @@ describe("QuestDetail", () => {
     const onSubmit = vi.fn();
     render(<QuestDetail quest={{ ...quest, evidenceTypes: ["url"] }} onSubmit={onSubmit} />);
 
-    fireEvent.change(screen.getByLabelText("成果連結"), { target: { value: "not-a-url" } });
-    fireEvent.click(screen.getByRole("button", { name: "提交成果" }));
-    expect(screen.getByText("請輸入以 http:// 或 https:// 開頭的有效網址")).toBeVisible();
-    expect(screen.getByText("請填寫自我反思")).toBeVisible();
+    fireEvent.change(screen.getByLabelText("Evidence URL"), { target: { value: "not-a-url" } });
+    fireEvent.click(screen.getByRole("button", { name: "Submit Evidence" }));
+    expect(screen.getByText("Enter a valid URL beginning with http:// or https://")).toBeVisible();
+    expect(screen.getByText("Write a self-reflection")).toBeVisible();
     expect(onSubmit).not.toHaveBeenCalled();
 
-    fireEvent.change(screen.getByLabelText("成果連結"), { target: { value: "https://github.com/example/commit" } });
-    fireEvent.change(screen.getByLabelText("自我反思"), { target: { value: "我固定了資料切分，並確認實驗可以重跑。" } });
-    fireEvent.click(screen.getByRole("button", { name: "提交成果" }));
+    fireEvent.change(screen.getByLabelText("Evidence URL"), { target: { value: "https://github.com/example/commit" } });
+    fireEvent.change(screen.getByLabelText("Self-reflection"), { target: { value: "I fixed the data split and confirmed the experiment is reproducible." } });
+    fireEvent.click(screen.getByRole("button", { name: "Submit Evidence" }));
     expect(onSubmit).toHaveBeenCalledWith(expect.objectContaining({
       evidenceType: "url",
       evidenceUrl: "https://github.com/example/commit",
@@ -73,11 +73,11 @@ describe("QuestDetail", () => {
   test("converts a browser file to serializable metadata", () => {
     const onSubmit = vi.fn();
     render(<QuestDetail quest={{ ...quest, evidenceTypes: ["file"] }} onSubmit={onSubmit} />);
-    fireEvent.change(screen.getByLabelText("證據類型"), { target: { value: "file" } });
+    fireEvent.change(screen.getByLabelText("Evidence type"), { target: { value: "file" } });
     const file = new File(["metric,score\nauc,0.91"], "report.csv", { type: "text/csv" });
-    fireEvent.change(screen.getByLabelText("成果檔案"), { target: { files: [file] } });
-    fireEvent.change(screen.getByLabelText("自我反思"), { target: { value: "我記錄了評估結果與下一步。" } });
-    fireEvent.click(screen.getByRole("button", { name: "提交成果" }));
+    fireEvent.change(screen.getByLabelText("Evidence file"), { target: { files: [file] } });
+    fireEvent.change(screen.getByLabelText("Self-reflection"), { target: { value: "I recorded the evaluation result and next step." } });
+    fireEvent.click(screen.getByRole("button", { name: "Submit Evidence" }));
 
     expect(onSubmit).toHaveBeenCalledWith(expect.objectContaining({
       evidenceType: "file",
@@ -94,18 +94,18 @@ describe("QuestDetail", () => {
       />,
     );
 
-    const url = screen.getByRole("textbox", { name: /成果連結/u });
-    const metric = screen.getByRole("textbox", { name: /指標結果/u });
-    const reflection = screen.getByRole("textbox", { name: /自我反思/u });
+    const url = screen.getByRole("textbox", { name: /Evidence URL/u });
+    const metric = screen.getByRole("textbox", { name: /Metric result/u });
+    const reflection = screen.getByRole("textbox", { name: /Self-reflection/u });
     fireEvent.change(url, { target: { value: "https://github.com/example/commit/abc" } });
     fireEvent.change(reflection, {
       target: { value: "I compared the validation result and documented why this baseline is reproducible." },
     });
-    fireEvent.click(screen.getByRole("button", { name: /提交成果/u }));
+    fireEvent.click(screen.getByRole("button", { name: /Submit Evidence/u }));
     expect(onSubmit).not.toHaveBeenCalled();
 
     fireEvent.change(metric, { target: { value: "validation_accuracy: 0.82" } });
-    fireEvent.click(screen.getByRole("button", { name: /提交成果/u }));
+    fireEvent.click(screen.getByRole("button", { name: /Submit Evidence/u }));
     expect(onSubmit).toHaveBeenCalledWith(expect.objectContaining({
       evidenceUrl: "https://github.com/example/commit/abc",
       metricResult: "validation_accuracy: 0.82",

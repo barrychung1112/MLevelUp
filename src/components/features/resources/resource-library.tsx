@@ -42,7 +42,7 @@ export function ResourceLibrary({
   filters,
   onFiltersChange,
   status = "ready",
-  errorMessage = "無法載入學習資源。",
+  errorMessage = "Unable to load resources.",
 }: ResourceLibraryProps) {
   const [internalFilters, setInternalFilters] = useState<ResourceFilters>(
     DEFAULT_RESOURCE_FILTERS,
@@ -60,9 +60,9 @@ export function ResourceLibrary({
     (activeFilters.maximumMinutes === 0 || resource.estimatedMinutes <= activeFilters.maximumMinutes),
   );
 
-  if (status === "loading") return <p role="status" className="text-command-muted">正在載入資源情報…</p>;
+  if (status === "loading") return <p role="status" className="text-command-muted">Loading resource intelligence…</p>;
   if (status === "error") return <p role="alert" className="text-command-danger">{errorMessage}</p>;
-  if (resources.length === 0) return <EmptyState title="目前沒有可用資源。" description="資源情報更新後會顯示在這裡。" />;
+  if (resources.length === 0) return <EmptyState title="No resources are available." description="New resource intelligence will appear after the next collector update." />;
 
   function changeFilters(nextFilters: ResourceFilters) {
     if (filters === undefined) setInternalFilters(nextFilters);
@@ -81,24 +81,24 @@ export function ResourceLibrary({
     <section aria-labelledby="resources-heading" className="space-y-6">
       <header>
         <p className="text-sm uppercase tracking-[0.24em] text-command-violet">Resource intelligence</p>
-        <h1 id="resources-heading" className="text-3xl font-semibold text-command-text">學習資源</h1>
+        <h1 id="resources-heading" className="text-3xl font-semibold text-command-text">Resources</h1>
       </header>
 
       <fieldset className="command-panel grid gap-4 border border-command-border bg-command-surface/92 p-4 sm:grid-cols-2 xl:grid-cols-4">
-        <legend className="px-2 font-data text-xs uppercase tracking-[0.14em] text-command-muted">資源篩選</legend>
-        <label className="grid gap-2 text-sm text-command-text">資源類型<select className={selectClass} value={activeFilters.resourceType} onChange={(event) => updateFilters({ resourceType: event.target.value })}><option value="all">全部類型</option>{types.map((type) => <option key={type} value={type}>{type}</option>)}</select></label>
-        <label className="grid gap-2 text-sm text-command-text">能力標籤<select className={selectClass} value={activeFilters.skill} onChange={(event) => updateFilters({ skill: event.target.value })}><option value="all">全部能力</option>{skills.map((skill) => <option key={skill} value={skill}>{skill}</option>)}</select></label>
-        <label className="grid gap-2 text-sm text-command-text">最低相關性<select className={selectClass} value={activeFilters.minimumRelevance} onChange={(event) => updateFilters({ minimumRelevance: Number(event.target.value) })}><option value={0}>不限</option><option value={80}>80+</option><option value={90}>90+</option></select></label>
-        <label className="grid gap-2 text-sm text-command-text">資源難度<select className={selectClass} value={activeFilters.difficulty} onChange={(event) => updateFilters({ difficulty: event.target.value })}><option value="all">全部難度</option>{[1, 2, 3, 4, 5].map((difficulty) => <option key={difficulty} value={difficulty}>{difficulty} / 5</option>)}</select></label>
-        <label className="grid gap-2 text-sm text-command-text">最低新鮮度<select className={selectClass} value={activeFilters.minimumFreshness} onChange={(event) => updateFilters({ minimumFreshness: Number(event.target.value) })}><option value={0}>不限</option><option value={80}>80+</option><option value={90}>90+</option></select></label>
-        <label className="grid gap-2 text-sm text-command-text">最低可信度<select className={selectClass} value={activeFilters.minimumCredibility} onChange={(event) => updateFilters({ minimumCredibility: Number(event.target.value) })}><option value={0}>不限</option><option value={80}>80+</option><option value={90}>90+</option></select></label>
-        <label className="grid gap-2 text-sm text-command-text">最長預估時間<select className={selectClass} value={activeFilters.maximumMinutes} onChange={(event) => updateFilters({ maximumMinutes: Number(event.target.value) })}><option value={0}>不限</option><option value={30}>30 分鐘內</option><option value={60}>60 分鐘內</option><option value={120}>120 分鐘內</option></select></label>
+        <legend className="px-2 font-data text-xs uppercase tracking-[0.14em] text-command-muted">Resource Filters</legend>
+        <label className="grid gap-2 text-sm text-command-text">Resource type<select className={selectClass} value={activeFilters.resourceType} onChange={(event) => updateFilters({ resourceType: event.target.value })}><option value="all">All types</option>{types.map((type) => <option key={type} value={type}>{type}</option>)}</select></label>
+        <label className="grid gap-2 text-sm text-command-text">Skill tag<select className={selectClass} value={activeFilters.skill} onChange={(event) => updateFilters({ skill: event.target.value })}><option value="all">All skills</option>{skills.map((skill) => <option key={skill} value={skill}>{skill}</option>)}</select></label>
+        <label className="grid gap-2 text-sm text-command-text">Minimum relevance<select className={selectClass} value={activeFilters.minimumRelevance} onChange={(event) => updateFilters({ minimumRelevance: Number(event.target.value) })}><option value={0}>Any</option><option value={80}>80+</option><option value={90}>90+</option></select></label>
+        <label className="grid gap-2 text-sm text-command-text">Difficulty<select className={selectClass} value={activeFilters.difficulty} onChange={(event) => updateFilters({ difficulty: event.target.value })}><option value="all">All levels</option>{[1, 2, 3, 4, 5].map((difficulty) => <option key={difficulty} value={difficulty}>{difficulty} / 5</option>)}</select></label>
+        <label className="grid gap-2 text-sm text-command-text">Minimum freshness<select className={selectClass} value={activeFilters.minimumFreshness} onChange={(event) => updateFilters({ minimumFreshness: Number(event.target.value) })}><option value={0}>Any</option><option value={80}>80+</option><option value={90}>90+</option></select></label>
+        <label className="grid gap-2 text-sm text-command-text">Minimum credibility<select className={selectClass} value={activeFilters.minimumCredibility} onChange={(event) => updateFilters({ minimumCredibility: Number(event.target.value) })}><option value={0}>Any</option><option value={80}>80+</option><option value={90}>90+</option></select></label>
+        <label className="grid gap-2 text-sm text-command-text">Maximum time<select className={selectClass} value={activeFilters.maximumMinutes} onChange={(event) => updateFilters({ maximumMinutes: Number(event.target.value) })}><option value={0}>Any</option><option value={30}>Within 30 minutes</option><option value={60}>Within 60 minutes</option><option value={120}>Within 120 minutes</option></select></label>
       </fieldset>
 
       {visibleResources.length === 0 ? (
         <EmptyState
-          title="沒有符合目前篩選條件的資源"
-          action={<Button variant="secondary" type="button" onClick={clearFilters}>清除資源篩選</Button>}
+          title="No resources match these filters"
+          action={<Button variant="secondary" type="button" onClick={clearFilters}>Clear Resource Filters</Button>}
         />
       ) : (
         <ul className="grid gap-4 lg:grid-cols-2">
@@ -110,16 +110,16 @@ export function ResourceLibrary({
               </div>
               {resource.summary ? <p className="mt-2 text-command-muted">{resource.summary}</p> : null}
               <dl className="mt-4 grid grid-cols-2 gap-3 text-sm sm:grid-cols-3">
-                <div><dt className="text-command-muted">相關性</dt><dd className="font-data text-command-text">Relevance {resource.relevance}</dd></div>
-                <div><dt className="text-command-muted">難度</dt><dd className="font-data text-command-text">Difficulty {resource.difficulty} / 5</dd></div>
-                <div><dt className="text-command-muted">新鮮度</dt><dd className="font-data text-command-text">Freshness {resource.freshness}</dd></div>
-                <div><dt className="text-command-muted">可信度</dt><dd className="font-data text-command-text">Credibility {resource.credibility}</dd></div>
-                <div><dt className="text-command-muted">預估時間</dt><dd className="font-data text-command-text">{resource.estimatedMinutes} 分鐘</dd></div>
+                <div><dt className="text-command-muted">Relevance</dt><dd className="font-data text-command-text">Relevance {resource.relevance}</dd></div>
+                <div><dt className="text-command-muted">Difficulty</dt><dd className="font-data text-command-text">Difficulty {resource.difficulty} / 5</dd></div>
+                <div><dt className="text-command-muted">Freshness</dt><dd className="font-data text-command-text">Freshness {resource.freshness}</dd></div>
+                <div><dt className="text-command-muted">Credibility</dt><dd className="font-data text-command-text">Credibility {resource.credibility}</dd></div>
+                <div><dt className="text-command-muted">Estimated time</dt><dd className="font-data text-command-text">{resource.estimatedMinutes} minutes</dd></div>
                 {resource.qualityScore !== undefined ? <div><dt className="text-command-muted">Quality</dt><dd className="font-data text-command-cyan">Quality {resource.qualityScore}</dd></div> : null}
                 {resource.source ? <div><dt className="text-command-muted">Source</dt><dd className="font-data text-command-text">{resource.source === "github" ? "GitHub" : resource.source}</dd></div> : null}
                 {resource.availabilityStatus ? <div><dt className="text-command-muted">Availability</dt><dd className="font-data text-command-text">{resource.availabilityStatus === "available" ? "Available" : resource.availabilityStatus}</dd></div> : null}
               </dl>
-              <ul aria-label="資源能力標籤" className="mt-4 flex flex-wrap gap-2">
+              <ul aria-label="Resource skill tags" className="mt-4 flex flex-wrap gap-2">
                 {resource.skillTags.map((skill) => <li key={skill}><Badge>{skill}</Badge></li>)}
               </ul>
               {resource.url ? (
@@ -128,9 +128,9 @@ export function ResourceLibrary({
                   href={resource.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  aria-label={`開啟來源：${resource.title}`}
+                  aria-label={`Open source: ${resource.title}`}
                 >
-                  開啟來源
+                  Open Source
                 </a>
               ) : null}
             </li>

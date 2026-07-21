@@ -49,7 +49,7 @@ export default function DashboardPage() {
   const feedback = latestFeedback
     ? mapFeedback(latestFeedback)
     : {
-        summary: "完成今日任務後，協調員 Agent 會在這裡整理回饋。",
+        summary: "Complete a mission and the Coordinator will summarize your feedback here.",
         provenance: "Demo" as const,
       };
   const recentArtifact = state ? latestBy(state.artifacts, (item) => item.createdAt) : null;

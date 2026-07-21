@@ -69,10 +69,10 @@ function MissionCard({
       </div>
       <p className="mt-2 text-command-muted">{mission.summary}</p>
       <dl className="mt-4 flex flex-wrap gap-x-6 gap-y-2 text-sm">
-        <div><dt className="text-command-muted">預估投入</dt><dd>{mission.estimatedMinutes} 分鐘</dd></div>
-        <div><dt className="text-command-muted">任務難度</dt><dd>{mission.difficulty} / 5</dd></div>
-        <div><dt className="text-command-muted">期間</dt><dd>{mission.durationDays} 天</dd></div>
-        {mission.dueAt ? <div><dt className="text-command-muted">截止時間</dt><dd>{mission.dueAt}</dd></div> : null}
+        <div><dt className="text-command-muted">Estimated effort</dt><dd>{mission.estimatedMinutes} minutes</dd></div>
+        <div><dt className="text-command-muted">Difficulty</dt><dd>{mission.difficulty} / 5</dd></div>
+        <div><dt className="text-command-muted">Duration</dt><dd>{mission.durationDays} days</dd></div>
+        {mission.dueAt ? <div><dt className="text-command-muted">Due</dt><dd>{mission.dueAt}</dd></div> : null}
       </dl>
       <Button className="mt-5" type="button" variant={tone === "danger" ? "danger" : "primary"} onClick={onOpen}>
         {actionLabel}
@@ -102,9 +102,9 @@ export function DashboardOverview({
   onContinueChallenge,
   onAbandonChallenge,
   status = "ready",
-  errorMessage = "無法載入任務終端。",
+  errorMessage = "Unable to load the Command Center.",
 }: DashboardOverviewProps) {
-  if (status === "loading") return <p role="status" className="text-command-muted">正在載入任務終端…</p>;
+  if (status === "loading") return <p role="status" className="text-command-muted">Loading the Command Center…</p>;
   if (status === "error") return <p role="alert" className="text-command-danger">{errorMessage}</p>;
 
   return (
@@ -112,64 +112,64 @@ export function DashboardOverview({
       <header className="grid gap-4 border-b border-command-border pb-5 md:grid-cols-[1fr_auto] md:items-end">
         <div>
           <p className="text-sm uppercase tracking-[0.24em] text-command-cyan">Command center</p>
-          <h1 id="dashboard-title" className="text-3xl font-semibold text-command-text">今日訓練終端</h1>
-          <p className="mt-2 text-command-muted">目標：機器學習工程師 · 每日固定 5 小時</p>
+          <h1 id="dashboard-title" className="text-3xl font-semibold text-command-text">Training Command Center</h1>
+          <p className="mt-2 text-command-muted">Target: Machine Learning Engineer · 5 hours every day</p>
         </div>
         <dl className="grid grid-cols-3 gap-x-6 gap-y-2 text-sm">
-          <div><dt className="text-command-muted">等級</dt><dd className="font-data">Level {level}</dd></div>
-          <div><dt className="text-command-muted">經驗值</dt><dd className="font-data">{currentXp} / {nextLevelXp} XP</dd></div>
-          <div><dt className="text-command-muted">連續完成</dt><dd className="font-data">{streakDays} 天</dd></div>
+          <div><dt className="text-command-muted">Level</dt><dd className="font-data">Level {level}</dd></div>
+          <div><dt className="text-command-muted">Experience</dt><dd className="font-data">{currentXp} / {nextLevelXp} XP</dd></div>
+          <div><dt className="text-command-muted">Completion streak</dt><dd className="font-data">{streakDays} days</dd></div>
         </dl>
       </header>
 
       {trainingStatus === "failure_review" ? (
         <div role="dialog" aria-modal="true" aria-labelledby="failure-review-title" className="command-panel border border-command-danger/60 bg-command-danger/10 p-6">
-          <h2 id="failure-review-title" className="text-2xl font-semibold text-command-danger">是否放棄挑戰？</h2>
-          <p className="mt-3 text-command-muted">你已連續 {failureDays} 天未完成預定義務。放棄會立刻清零等級、XP、能力值與任務進度；繼續則進入三日追回期。</p>
+          <h2 id="failure-review-title" className="text-2xl font-semibold text-command-danger">Abandon the challenge?</h2>
+          <p className="mt-3 text-command-muted">You have missed required progress for {failureDays} consecutive days. Abandoning immediately resets your level, XP, skills, and mission progress. Continuing begins a three-day recovery window.</p>
           <div className="mt-5 flex flex-wrap gap-3">
-            <Button type="button" onClick={onContinueChallenge}>繼續挑戰</Button>
-            <Button type="button" variant="danger" onClick={onAbandonChallenge}>放棄並清零</Button>
+            <Button type="button" onClick={onContinueChallenge}>Continue Challenge</Button>
+            <Button type="button" variant="danger" onClick={onAbandonChallenge}>Abandon and Reset</Button>
           </div>
         </div>
       ) : null}
 
       {trainingStatus === "recovery" ? (
         <Panel aria-labelledby="recovery-title" className="border-command-warning/60 bg-command-warning/5">
-          <h2 id="recovery-title" className="text-xl font-semibold text-command-warning">三日追回期</h2>
-          <p className="mt-2 text-command-muted">截止：{recoveryDeadline ?? "計算中"}</p>
-          <p className="mt-1 font-semibold text-command-text">待追回 {penalties.length} 項</p>
-          <p className="mt-2 text-sm text-command-danger">期限內未清除所有懲罰任務，訓練進度會自動清零。</p>
+          <h2 id="recovery-title" className="text-xl font-semibold text-command-warning">Three-Day Recovery Window</h2>
+          <p className="mt-2 text-command-muted">Deadline: {recoveryDeadline ?? "Calculating"}</p>
+          <p className="mt-1 font-semibold text-command-text">{penalties.length} recovery missions remaining</p>
+          <p className="mt-2 text-sm text-command-danger">If every penalty mission is not cleared before the deadline, all training progress resets automatically.</p>
         </Panel>
       ) : null}
 
       <div className="grid gap-6 xl:grid-cols-[minmax(0,2fr)_minmax(18rem,1fr)]">
         <div className="space-y-6">
-          {mainMission ? <MissionCard heading="大型主線任務" mission={mainMission} actionLabel="開啟主要任務" onOpen={() => onOpenQuest(mainMission.id)} /> : null}
-          {dailyMission ? <MissionCard heading="每日任務（24 小時）" mission={dailyMission} actionLabel="開啟每日任務" onOpen={() => onOpenQuest(dailyMission.id)} /> : null}
+          {mainMission ? <MissionCard heading="Mainline Mission" mission={mainMission} actionLabel="Open Mainline Mission" onOpen={() => onOpenQuest(mainMission.id)} /> : null}
+          {dailyMission ? <MissionCard heading="Daily Mission (24 hours)" mission={dailyMission} actionLabel="Open Daily Mission" onOpen={() => onOpenQuest(dailyMission.id)} /> : null}
           {penalties.length > 0 ? (
             <section aria-labelledby="penalties-title" className="space-y-3">
-              <h2 id="penalties-title" className="text-xl font-semibold text-command-danger">懲罰任務</h2>
-              {penalties.map((penalty) => <MissionCard key={penalty.id} heading="額外訓練" mission={penalty} actionLabel="開始追回" tone="danger" onOpen={() => onOpenQuest(penalty.id)} />)}
+              <h2 id="penalties-title" className="text-xl font-semibold text-command-danger">Penalty Missions</h2>
+              {penalties.map((penalty) => <MissionCard key={penalty.id} heading="Additional Training" mission={penalty} actionLabel="Begin Recovery" tone="danger" onOpen={() => onOpenQuest(penalty.id)} />)}
             </section>
           ) : null}
           {!mainMission && !dailyMission && penalties.length === 0 && trainingStatus === "normal" ? (
-            <EmptyState title="目前沒有可執行任務" description="系統正在準備下一項可衡量的挑戰。" />
+            <EmptyState title="No executable missions" description="The system is preparing your next measurable challenge." />
           ) : null}
 
           <Panel aria-labelledby="skills-title">
-            <h2 id="skills-title" className="text-lg font-semibold">七項能力值</h2>
+            <h2 id="skills-title" className="text-lg font-semibold">Seven Skill Scores</h2>
             <ul className="mt-4 grid gap-3 md:grid-cols-2">{skills.map((skill) => <li key={skill.key} className="flex justify-between border-b border-command-border pb-2"><span className="text-command-muted">{skill.label}</span><span className="font-data">{skill.value} / 100</span></li>)}</ul>
           </Panel>
           <Panel aria-labelledby="resources-title">
-            <h2 id="resources-title" className="text-lg font-semibold">可用資源</h2>
-            {resources.length ? <ul className="mt-3 space-y-2">{resources.map((resource) => <li key={resource.id}><a className="text-command-cyan underline-offset-4 hover:underline" href={resource.url} target="_blank" rel="noreferrer">{resource.title}</a></li>)}</ul> : <p className="mt-2 text-command-muted">目前沒有額外資源。</p>}
+            <h2 id="resources-title" className="text-lg font-semibold">Available Resources</h2>
+            {resources.length ? <ul className="mt-3 space-y-2">{resources.map((resource) => <li key={resource.id}><a className="text-command-cyan underline-offset-4 hover:underline" href={resource.url} target="_blank" rel="noreferrer">{resource.title}</a></li>)}</ul> : <p className="mt-2 text-command-muted">No additional resources are available.</p>}
           </Panel>
         </div>
 
         <aside className="space-y-6">
           <Panel>
             <div className="flex flex-wrap justify-between gap-2">
-              <h2 className="text-lg font-semibold">AI 每日回饋</h2>
+              <h2 className="text-lg font-semibold">Daily AI Feedback</h2>
               <Badge tone={feedback.provenance === "AI" ? "cyan" : feedback.provenance === "Deterministic fallback" ? "warning" : "neutral"}>
                 {feedback.provenance}
               </Badge>
@@ -177,16 +177,16 @@ export function DashboardOverview({
             <p className="mt-3 text-command-muted">{feedback.summary}</p>
             {feedback.adjustmentExplanation ? (
               <p className="mt-3 border-l border-command-cyan/50 pl-3 text-sm text-command-muted">
-                調整原因：{feedback.adjustmentExplanation}
+                Adjustment reason: {feedback.adjustmentExplanation}
               </p>
             ) : null}
             {feedback.confidence !== undefined ? (
-              <p className="mt-2 text-xs text-command-muted">AI 信心 {Math.round(feedback.confidence * 100)}%</p>
+              <p className="mt-2 text-xs text-command-muted">AI confidence {Math.round(feedback.confidence * 100)}%</p>
             ) : null}
           </Panel>
-          <Panel><h2 className="text-lg font-semibold">Agent 狀態</h2><ul className="mt-3 space-y-3">{agents.map((agent) => <li key={agent.id}><strong>{agent.name}</strong><StatusIndicator className="mt-1" tone={agentTone(agent.status)}>{agent.status} · {agent.summary}</StatusIndicator></li>)}</ul></Panel>
-          <Panel><h2 className="text-lg font-semibold">最新作品</h2><p className="mt-2 text-command-muted">{recentArtifact ? `${recentArtifact.title} · Quality ${recentArtifact.qualityScore}` : "尚未建立作品集成果。"}</p></Panel>
-          <Panel><h2 className="text-lg font-semibold">最新紀錄</h2><p className="mt-2 text-command-muted">{recentActivity ? `${recentActivity.title} · ${recentActivity.summary}` : "尚無訓練紀錄。"}</p></Panel>
+          <Panel><h2 className="text-lg font-semibold">Agent Status</h2><ul className="mt-3 space-y-3">{agents.map((agent) => <li key={agent.id}><strong>{agent.name}</strong><StatusIndicator className="mt-1" tone={agentTone(agent.status)}>{agent.status} · {agent.summary}</StatusIndicator></li>)}</ul></Panel>
+          <Panel><h2 className="text-lg font-semibold">Latest Artifact</h2><p className="mt-2 text-command-muted">{recentArtifact ? `${recentArtifact.title} · Quality ${recentArtifact.qualityScore}` : "No portfolio artifacts yet."}</p></Panel>
+          <Panel><h2 className="text-lg font-semibold">Latest Activity</h2><p className="mt-2 text-command-muted">{recentActivity ? `${recentActivity.title} · ${recentActivity.summary}` : "No training activity yet."}</p></Panel>
         </aside>
       </div>
     </section>
