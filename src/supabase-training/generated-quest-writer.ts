@@ -1,7 +1,7 @@
 import type { Quest, QuestAssignment } from "@/domain/training/types";
 
 type RpcClient = {
-  rpc(name: string, args: Record<string, unknown>): Promise<{
+  rpc(name: string, args: Record<string, unknown>): PromiseLike<{
     data: unknown;
     error: { code?: string; message: string } | null;
   }>;
